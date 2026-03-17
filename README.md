@@ -1,5 +1,40 @@
 "# ProyectoArcanStudios" 
+MINI EXPLICACION:
+El proyecto esta dividido en backend y frontend.
+El front se esta trabajando con next.js, y el back con NestJS.
+El front seria toda la parte visual(claramente) y la llamada a la api ; el back seria la creacion de la API, la logica para hacer en crud en la BBDD, 
+la logica de las reservas(crud BD) y creo que ya.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+COMO EMPEZAR:
+-Asegurarse que se tiene node.js
+    -hacer en cmd node -v
+-Hacer el clone de este repo
+-meterse en la carpeta repo/frontend y hacer npm install
+-meterse en la carpeta repo/backend y hacer npm install
+-SI QUIEREN HACER BACKEND, tambien se tiene que instalar otra cosa (por ahora no), [ npm install -g @nestjs/cli ] copian esto en la terminar y ya esta.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+COMANDOS IMPORTANTES:
+-npm install                             → En ambas carpetas, mas que todo para actualizar/instalar las dependencias, cuando alguien instale una más.
+-npm run dev                             → Solo para frontend, pone en marcha el frontend(lo visual claro, y la llamada a la api).
+-npm run start:dev                       → Solo para backend, cuando se esta desarrollando, pone en marcha el backend(la api).
+-npm run lint                            → Solo para backend, ESLINT es como un debbuger; formatea, busca bugs etc, antes de un commit por ejm
 
+-npm update                              → En ambas carpetas, para actualizar las dependencias, solo se usa cuando quieras la version mas nueva.
+-npm run build                           → En ambas carpetas, para hacer la build(para subir a Ionos, casi siempre).
+-npm run start                           → Solo para backend, despues de hacer la build usa lo que hay en .next. Pone en marcha el backend(la api).
+-npm cache clean --force                 → En ambas carpetas, para limpiar la cache por si hay problemas no se :p.
+
+CLI-BACKEND
+-despues los pongo
+NEST-BACKENBD
+-tambien despues :p
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+COSAS A TENER EN CUENTA:
+-Hay que crear unos .env para acceder a las BBDD y eso, todavia no lo he hecho, les voy comentando
+-
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
 ORGANIZACION DE CARPETAS:
 Como una mini explicacion de las carpetas pa que estemos organizados :p
 La explicacion esta, muchas cosas son necesarias pero no se tocan, las cosas importantes las pongo () antes
@@ -55,7 +90,7 @@ La explicacion esta, muchas cosas son necesarias pero no se tocan, las cosas imp
             └── Curso.ts                                       → Tipo Curso
     
 
------------------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
     /BACKEND:                                                  → PS EL BACKEND
     │
     ├── dist                                                   → DONDE SE CREA EL PROYECTO CUANDO LO COMPILAS
