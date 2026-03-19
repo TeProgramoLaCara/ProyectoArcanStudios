@@ -1,0 +1,65 @@
+Notas sobre Next.js:
+        - Sólo puede haber un page.tsx por carpeta. No se debería poner más de una página por carpeta, 
+          en caso de que se quiera hacer eso se deberá crear una subcarpeta y dentro colocar el nuevo page.tsx
+
+
+------------- LIBRERIAS ------------
+
+🌟 fullcalendar
+        web : https://fullcalendar.io/
+        utilidad : librería de calendario interactivo para mostrar y gestionar reservas
+        comando instalación : npm install @fullcalendar/react @fullcalendar/core @fullcalendar/daygrid @fullcalendar/timegrid @fullcalendar/interaction
+        import : import FullCalendar from "@fullcalendar/react";
+                 import dayGridPlugin from "@fullcalendar/daygrid";
+                 import timeGridPlugin from "@fullcalendar/timegrid";
+                 import interactionPlugin from "@fullcalendar/interaction";
+
+🌟 zustand
+        web : https://zustand.site/en
+        utilidad : gestión de estado global
+        comando instalación : npm install zustand 
+        import : import { create } from "zustand"
+
+🌟 tailwindcss
+        web : https://tailwindcss.com/
+        utilidad : framework CSS para diseñar interfaces responsive
+        comando instalación : npm install -D tailwindcss postcss autoprefixer
+        import : @import "tailwindcss";  (en archivo css)
+
+🌟 shadcn ui 
+        web : https://ui.shadcn.com/
+        utilidad : colección de componentes UI 
+        comando instalación : npx shadcn-ui@latest init
+        import : import { componente } from "@/components/ui/(componente)";
+
+🌟 tanstack react-query
+        web : https://tanstack.com/
+        utilidad : gestión de datos asíncronos como llamadas a la API, caché o sincronización de datos
+        comando instalación : npm i @tanstack/react-query
+        import : import {
+                    useQuery,
+                    useMutation,
+                    useQueryClient,
+                    QueryClient,
+                    QueryClientProvider,
+                    } from '@tanstack/react-query'    (por ejemplo)
+
+🌟 react hooks con zod
+        web : https://react.dev/reference/react/hooks
+        utilidad : gestión de formularios y validación de datos
+        comando instalación :  npm install react-hook-form zod @hookform/resolvers
+        import : import { useForm } from "react-hook-form";
+                import { z } from "zod";
+                import { zodResolver } from "@hookform/resolvers/zod";
+
+🌟 motion
+        web : https://motion.dev/
+        utilidad : implementar animaciones fluidas a componentes
+        comando instalación : npm install motion
+        import : import { motion } from "motion/react"
+
+🌟 react-icons
+        web : https://react-icons.github.io/react-icons/
+        utilidad : librería de iconos
+        comando instalación : npm install react-icons
+        import : import { FaUser, FaCalendar, FaHome (por ejemplo) } from "react-icons/fa";
