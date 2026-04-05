@@ -24,3 +24,110 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.calendar-modern-wrapper .fc {
+  font-family: inherit;
+  color: #ffffff;
+  height: 100%;
+}
+
+.calendar-modern-wrapper .fc-toolbar {
+  padding: 1rem 1rem 0.9rem 1rem;
+  background: #121212;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.calendar-modern-wrapper .fc-toolbar-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #f8f8f8;
+}
+
+.calendar-modern-wrapper .fc-button {
+  background: #1a1a1a !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+  padding: 0.45rem 0.8rem !important;
+  border-radius: 0.9rem !important;
+  font-size: 0.875rem !important;
+}
+
+.calendar-modern-wrapper .fc-button:hover {
+  background: #222222 !important;
+}
+
+.calendar-modern-wrapper .fc-button:focus {
+  box-shadow: none !important;
+}
+
+.calendar-modern-wrapper .fc-scrollgrid {
+  border: none !important;
+}
+
+.calendar-modern-wrapper .fc-theme-standard td,
+.calendar-modern-wrapper .fc-theme-standard th {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.calendar-modern-wrapper .fc-col-header-cell {
+  background: #151515;
+  padding: 0.5rem 0;
+}
+
+.calendar-modern-wrapper .fc-col-header-cell-cushion {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-decoration: none !important;
+}
+
+.calendar-modern-wrapper .fc-daygrid-day {
+  background: #111111;
+}
+
+.calendar-modern-wrapper .fc-daygrid-day-number {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.82rem;
+  padding: 0.55rem;
+  text-decoration: none !important;
+}
+
+.calendar-modern-wrapper .fc-day-today {
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+.calendar-modern-wrapper .fc-event {
+  border: none !important;
+  border-radius: 0.75rem !important;
+  padding: 0.2rem 0.45rem !important;
+  font-size: 0.74rem !important;
+  font-weight: 700;
+}
+
+.calendar-modern-wrapper .fc-event-main {
+  color: #0a0a0a !important;
+}
+
+.calendar-modern-wrapper .fc-daygrid-more-link {
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+
+.calendar-modern-wrapper .fc-scroller {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+
+.calendar-modern-wrapper .fc-scroller::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.calendar-modern-wrapper .fc-scroller::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+}
+
+.calendar-modern-wrapper .fc-scroller::-webkit-scrollbar-track {
+  background: transparent;
+}

@@ -56,7 +56,7 @@ export default function Page() {
             ].map((item) => (
               <div
                 key={item}
-                className="rounded-xl border border-white/5 bg-white/[0.03] px-4 py-3 text-sm text-white/75"
+                className="rounded-xl border border-white/5 bg-white/3 px-4 py-3 text-sm text-white/75"
               >
                 {item}
               </div>
@@ -74,7 +74,7 @@ export default function Page() {
             ].map((item) => (
               <div
                 key={item}
-                className="rounded-xl border border-white/5 bg-white/[0.03] px-4 py-3 text-sm text-white/75"
+                className="rounded-xl border border-white/5 bg-white/3 px-4 py-3 text-sm text-white/75"
               >
                 {item}
               </div>
@@ -83,13 +83,13 @@ export default function Page() {
         </div>
       </div>
 
-      <div className="min-h-[360px] rounded-2xl border border-white/10 bg-[#111111] p-5">
+      <div className="min-h-90 rounded-2xl border border-white/10 bg-[#111111] p-5">
         <h2 className="text-lg font-semibold text-white">Panel principal</h2>
         <p className="mt-2 text-sm text-white/45">
           Aquí puedes colocar una tabla de reservas, un calendario o estadísticas.
         </p>
 
-        <div className="mt-6 flex h-[260px] items-center justify-center rounded-2xl border border-dashed border-white/10 bg-black/20 text-sm text-white/30">
+        <div className="mt-6 flex h-65 items-center justify-center rounded-2xl border border-dashed border-white/10 bg-black/20 text-sm text-white/30">
           Espacio para tabla, gráfico o calendario
         </div>
       </div>
