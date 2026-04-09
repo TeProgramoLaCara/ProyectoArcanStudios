@@ -131,3 +131,27 @@ body {
 .calendar-modern-wrapper .fc-scroller::-webkit-scrollbar-track {
   background: transparent;
 }
+
+/* ── Reduce calendar cell height ── */
+.calendar-modern-wrapper .fc-daygrid-day {
+  height: 60px !important;
+  min-height: 60px !important;
+}
+
+.calendar-modern-wrapper .fc-daygrid-day-frame {
+  min-height: 60px !important;
+}   
+
+/* ── Occupancy background tints ── */
+/* Alternativa: colorear directamente el td */
+.calendar-modern-wrapper td.fc-daygrid-day.occupancy-free {
+  background-color: rgba(43, 208, 147, 0.204);
+}
+
+.calendar-modern-wrapper td.fc-daygrid-day.occupancy-partial {
+  background-color: rgba(255, 194, 53, 0.253);
+}
+
+.calendar-modern-wrapper td.fc-daygrid-day.occupancy-full {
+  background-color: rgba(236, 83, 83, 0.319);
+}
