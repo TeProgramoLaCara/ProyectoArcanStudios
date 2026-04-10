@@ -11,7 +11,9 @@ COMO EMPEZAR:
 -Hacer el clone de este repo
 -meterse en la carpeta repo/frontend y hacer npm install
 -meterse en la carpeta repo/backend y hacer npm install
--SI QUIEREN HACER BACKEND, tambien se tiene que instalar otra cosa (por ahora no), [ npm install -g @nestjs/cli ] copian esto en la terminar y ya esta.
+-Por si no tienen la BD y quieren trabajar en local, aqui esta el comando para instalarla en el wsl, 
+    -sudo docker run --name LAMP --restart=always -p "80:80" -p "3306:3306" -v /home/usuario/app:/app mattrayner/lamp:latest-1804
+-Hay que cambiar la contraseña en app.module.ts para acceder a las BBDD y eso
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 COMANDOS IMPORTANTES:
 -npm install                             → En ambas carpetas, mas que todo para actualizar/instalar las dependencias, cuando alguien instale una más.
@@ -23,17 +25,119 @@ COMANDOS IMPORTANTES:
 -npm run build                           → En ambas carpetas, para hacer la build(para subir a Ionos, casi siempre).
 -npm run start                           → Solo para backend, despues de hacer la build usa lo que hay en .next. Pone en marcha el backend(la api).
 -npm cache clean --force                 → En ambas carpetas, para limpiar la cache por si hay problemas no se :p.
-
-CLI-BACKEND
--despues los pongo
-NEST-BACKENBD
--tambien despues :p
-
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
-COSAS A TENER EN CUENTA:
--Hay que crear unos .env para acceder a las BBDD y eso, todavia no lo he hecho, les voy comentando
--
+ENDPOINTS DE LA API:
+**IMPORTANTE: Algunos endpoints de DELETE no funcionan ya que la BBDD, tiene el on DELETE CASCADE, tengo que todavia ver como lo arreglaria
 
+1. Aula
+CRUD
+GET /aula                                                       Devuelve una lista con todas las aulas.
+GET /aula/:id                                                   Devuelve un aula específica.
+POST /aula                                                      Crea un aula nueva.
+PUT /aula/:id                                                   Actualiza un aula existente.
+DELETE /aula/:id                                                Elimina un aula.
+
+Relaciones
+GET /aula/:id/sesiones                                          Devuelve todas las sesiones que se dictan en un aula.
+
+2. Capacitacion
+CRUD
+GET /capacitacion                                               Devuelve una lista con todas las capacitaciones.
+GET /capacitacion/:id                                           Devuelve una capacitación específica.
+POST /capacitacion                                              Crea una nueva capacitación y devuelve el objeto creado.
+PUT /capacitacion/:id                                           Actualiza una capacitación existente.
+DELETE /capacitacion/:id                                        Elimina una capacitación.
+
+Relaciones
+GET /capacitacion/:id/perfiles                                  Devuelve los perfiles asociados a una capacitación.
+GET /capacitacion/:id/sesiones                                  Devuelve el las sesiones asignadas a una capacitación.
+GET /capacitacion/:id/cursos                                    Devuelve los cursos pertenecientes a una capacitación.
+GET /capacitacion/:id/profesores                                Devuelve el profesor asignado a una capacitación.
+
+3. Curso
+CRUD
+GET /curso                                                      Devuelve una lista con todos los cursos.
+GET /curso/:id                                                  Devuelve un curso específico.
+POST /curso                                                     Crea un nuevo curso.
+PUT /curso/:id                                                  Actualiza un curso existente.
+DELETE /curso/:id                                               Elimina un curso.
+
+Relaciones
+GET /curso/:id/capacitaciones                                   Devuelve la capacitación a la que pertenece un curso.
+GET /curso/:id/reservas                                         Devuelve todas las sesiones asociadas a un curso.
+
+4. Empresa                                      
+CRUD                                        
+GET /empresa                                                    Devuelve una lista con todas las empresas.
+GET /empresa/:id                                                Devuelve una empresa específica.
+POST /empresa                                                   Crea una nueva empresa.
+PUT /empresa/:id                                                Actualiza una empresa existente.
+DELETE /empresa/:id                                             Elimina una empresa.
+
+Relaciones                                      
+GET /empresa/:id/usuarios                                       Devuelve todos los usuarios pertenecientes a una empresa.
+
+5. Perfil
+CRUD
+GET /perfil                                                     Devuelve una lista con todos los perfiles registrados.
+GET /perfil/:id                                                 Devuelve un perfil específico según su ID.
+POST /perfil                                                    Crea un nuevo perfil y devuelve el objeto creado.
+PUT /perfil/:id                                                 Actualiza un perfil existente y devuelve el objeto actualizado.
+DELETE /perfil/:id                                              Elimina un perfil y devuelve el objeto eliminado.
+
+Relaciones
+GET /perfil/:id/capacitaciones                                  Devuelve todas las capacitaciones asociadas a un perfil.
+POST /perfil/:id/capacitaciones/:capacitacionId                 Asocia una capacitación a un perfil.
+DELETE /perfil/:id/capacitaciones/:capacitacionId               Elimina la asociación entre un perfil y una capacitación.
+
+6. Profesor
+CRUD
+GET /profesor                                                   Devuelve una lista con todos los profesores.
+GET /profesor/:id                                               Devuelve un profesor específico.
+POST /profesor                                                  Crea un nuevo profesor.
+PUT /profesor/:id                                               Actualiza un profesor existente.
+DELETE /profesor/:id                                            Elimina un profesor.
+
+Relaciones                      
+GET /profesor/:id/capacitaciones                                Devuelve las capacitaciones impartidas por un profesor.
+GET /profesor/:id/sesiones                                      Devuelve las sesiones asignadas a un profesor.
+
+7. Reserva                                      
+CRUD                                        
+GET /reserva                                                    Devuelve una lista con todas las reservas.
+GET /reserva/:id                                                Devuelve una reserva específica.
+POST /reserva                                                   Crea una nueva reserva.
+PUT /reserva/:id                                                Actualiza una reserva existente.
+DELETE /reserva/:id                                             Elimina una reserva.
+
+Relaciones                                      
+GET /reserva/:id/sesiones                                       Devuelve la sesión asociada a una reserva.
+
+8. Sesion
+CRUD
+GET /sesion                                                     Devuelve una lista con todas las sesiones.
+GET /sesion/:id                                                 Devuelve una sesión específica.
+POST /sesion                                                    Crea una nueva sesión.
+PUT /sesion/:id                                                 Actualiza una sesión existente.
+DELETE /sesion/:id                                              Elimina una sesión.
+
+Relaciones                                      
+GET /sesion/:id/cursos                                          Devuelve el curso al que pertenece la sesión.
+GET /sesion/:id/profesores                                      Devuelve el profesor asignado a la sesión.
+GET /sesion/:id/aulas                                           Devuelve el aula donde se dicta la sesión.
+GET /sesion/:id/reservas                                        Devuelve todas las reservas asociadas a una sesión.
+
+9. Usuario                                      
+CRUD                                        
+GET /usuario                                                    Devuelve una lista con todos los usuarios.
+GET /usuario/:id                                                Devuelve un usuario específico.
+POST /usuario                                                   Crea un nuevo usuario.
+PUT /usuario/:id                                                Actualiza un usuario existente.
+DELETE /usuario/:id                                             Elimina un usuario.
+
+Relaciones                                      
+GET /usuario/:id/empresa                                        Devuelve la empresa a la que pertenece un usuario.
+GET /usuario/:id/reservas                                       Devuelve todas las reservas realizadas por un usuario.
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 ORGANIZACION DE CARPETAS:
 Como una mini explicacion de las carpetas pa que estemos organizados :p
@@ -88,8 +192,6 @@ La explicacion esta, muchas cosas son necesarias pero no se tocan, las cosas imp
         └── types/                                             → Tipos e interfaces TS
             ├── Usuario.ts                                     → Tipo Usuario (id, nombre, email…)
             └── Curso.ts                                       → Tipo Curso
-    
-
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
     /BACKEND:                                                  → PS EL BACKEND
     │
