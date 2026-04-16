@@ -6,7 +6,7 @@ export default function AdminShell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="h-screen overflow-hidden bg-[#050505]">
+    <div className="h-screen overflow-hidden bg-[var(--bg)]">
       <div className="flex h-full">
         <AdminSidebar />
 

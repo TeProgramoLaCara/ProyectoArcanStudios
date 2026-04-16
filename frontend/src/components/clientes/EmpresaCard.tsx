@@ -1,5 +1,6 @@
 'use client';
 
+import { useTheme } from '@/context/ThemeContext';
 import type { Empresa } from '@/resources/data';
 import UsuarioRow from './UsuarioRow';
 
@@ -24,38 +25,49 @@ export default function EmpresaCard({
   onDelete,
   onRemoveUser,
 }: Props) {
+  const { isDark } = useTheme();
   const isFull = empresa.usuarios.length >= 5;
 
+  const iconBtnClass = `flex h-7 w-7 items-center justify-center rounded-full border text-sm transition ${
+    isDark
+      ? 'border-white/10 bg-white/5 text-white/30'
+      : 'border-black/[0.08] bg-black/[0.04] text-[#94a3b8]'
+  }`;
+
   return (
-    <div
-      className={`rounded-[18px] border bg-[#0f0f0f] transition-colors duration-200 ${/* colors.ts: surface */
-        isExpanded
-          ? 'border-[#267F6B]/30' /* colors.ts: accent */
-          : 'border-[rgba(255,255,255,0.08)] hover:border-[#267F6B]/20' /* colors.ts: border, accent */
-      }`}
-    >
+    <div className={`rounded-[18px] border transition-colors duration-200 ${
+      isDark ? 'bg-[#0d0d0d]' : 'bg-[#f1f5f9]'
+    } ${
+      isExpanded
+        ? 'border-[#267F6B]/30'
+        : isDark
+          ? 'border-white/[0.08] hover:border-[#267F6B]/20'
+          : 'border-black/[0.08] hover:border-[#267F6B]/30'
+    }`}>
       {/* ── Fila principal (siempre visible) ── */}
       <div className="flex items-center gap-3 px-5 py-4">
 
         {/* Ícono empresa */}
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-base">
+        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border text-base ${
+          isDark ? 'border-white/10 bg-white/5' : 'border-black/[0.08] bg-black/[0.04]'
+        }`}>
           🏢
         </div>
 
         {/* Nombre + teléfono */}
         <div className="min-w-0 flex-1">
-          <p className="truncate font-semibold text-white">{empresa.name}</p>
-          <p className="mt-0.5 text-xs text-white/40">{empresa.phone}</p>
+          <p className={`truncate font-semibold ${isDark ? 'text-white' : 'text-[#0f172a]'}`}>{empresa.name}</p>
+          <p className={`mt-0.5 text-xs ${isDark ? 'text-white/40' : 'text-[#475569]'}`}>{empresa.phone}</p>
         </div>
 
         {/* Badge de usuarios */}
-        <span
-          className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold ${
-            isFull
-              ? 'border-[#267F6B]/40 bg-[#267F6B]/10 text-[#2fa58a]' /* colors.ts: accent, accentLight */
-              : 'border-white/10 bg-white/5 text-white/40'
-          }`}
-        >
+        <span className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold ${
+          isFull
+            ? 'border-[#267F6B]/40 bg-[#267F6B]/10 text-[#2fa58a]'
+            : isDark
+              ? 'border-white/10 bg-white/5 text-white/40'
+              : 'border-black/[0.08] bg-black/[0.04] text-[#475569]'
+        }`}>
           {empresa.usuarios.length}/5
         </span>
 
@@ -63,14 +75,14 @@ export default function EmpresaCard({
         <div className="flex shrink-0 items-center gap-1.5">
           <button
             onClick={() => onEdit(empresa)}
-            className="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/5 text-sm text-white/30 transition hover:border-[#267F6B]/40 hover:text-[#2fa58a]" /* colors.ts: accent, accentLight */
+            className={`${iconBtnClass} hover:border-[#267F6B]/40 hover:text-[#2fa58a]`}
             title="Editar empresa"
           >
             ✎
           </button>
           <button
             onClick={() => onDelete(empresa.id)}
-            className="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/5 text-sm text-white/30 transition hover:border-red-500/30 hover:text-red-400"
+            className={`${iconBtnClass} hover:border-red-500/30 hover:text-red-400`}
             title="Eliminar empresa"
           >
             ✕
@@ -80,7 +92,7 @@ export default function EmpresaCard({
         {/* Chevron expand/collapse */}
         <button
           onClick={onToggle}
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/30 transition hover:text-white/70"
+          className={`${iconBtnClass} ${isDark ? 'hover:text-white/70' : 'hover:text-[#0f172a]'}`}
           aria-label={isExpanded ? 'Colapsar' : 'Expandir'}
         >
           <svg
@@ -103,9 +115,9 @@ export default function EmpresaCard({
           opacity: isExpanded ? 1 : 0,
         }}
       >
-        <div className="border-t border-white/[0.06] px-5 pb-4 pt-3">
+        <div className={`border-t px-5 pb-4 pt-3 ${isDark ? 'border-white/[0.06]' : 'border-black/[0.05]'}`}>
           {empresa.usuarios.length === 0 ? (
-            <p className="py-2 text-center text-xs text-white/25">
+            <p className={`py-2 text-center text-xs ${isDark ? 'text-white/25' : 'text-[#94a3b8]'}`}>
               Sin usuarios registrados
             </p>
           ) : (

@@ -28,12 +28,25 @@ export type CalendarEvent = {
   start: string;
   end: string;
   aula: "aula1" | "aula2" | "aula3";
+  turno: "manana" | "tarde";
+  color: string;
   professorId: string;
   professorName: string;
   companyId: string;
   companyName: string;
   capacitaciones: string[];
 };
+
+export const EVENT_COLORS = [
+  "#60a5fa", // blue-400
+  "#a78bfa", // violet-400
+  "#34d399", // emerald-400
+  "#fb923c", // orange-400
+  "#f472b6", // pink-400
+  "#facc15", // yellow-400
+  "#2dd4bf", // teal-400
+  "#f87171", // red-400
+];
 
 export type ReservaStatus =
   | "Pendiente"
@@ -143,8 +156,10 @@ export const allEvents: CalendarEvent[] = [
     id: "1",
     title: "React Course - Nova",
     start: "2026-03-02",
-    end: "2026-03-16",
+    end: "2026-03-17",
     aula: "aula1",
+    turno: "manana",
+    color: EVENT_COLORS[0],
     professorId: "p1",
     professorName: "Carlos Martínez",
     companyId: "e1",
@@ -155,8 +170,10 @@ export const allEvents: CalendarEvent[] = [
     id: "2",
     title: "UX Design - Acme",
     start: "2026-03-09",
-    end: "2026-03-23",
+    end: "2026-03-24",
     aula: "aula2",
+    turno: "manana",
+    color: EVENT_COLORS[1],
     professorId: "p2",
     professorName: "Laura Sánchez",
     companyId: "e2",
@@ -167,8 +184,10 @@ export const allEvents: CalendarEvent[] = [
     id: "3",
     title: "Figma Course - Nova",
     start: "2026-03-12",
-    end: "2026-03-26",
+    end: "2026-03-27",
     aula: "aula3",
+    turno: "manana",
+    color: EVENT_COLORS[2],
     professorId: "p1",
     professorName: "Carlos Martínez",
     companyId: "e1",
@@ -179,8 +198,10 @@ export const allEvents: CalendarEvent[] = [
     id: "4",
     title: "Marketing Basics - Acme",
     start: "2026-03-17",
-    end: "2026-03-31",
+    end: "2026-04-01",
     aula: "aula1",
+    turno: "tarde",
+    color: EVENT_COLORS[3],
     professorId: "p2",
     professorName: "Laura Sánchez",
     companyId: "e2",
@@ -191,8 +212,10 @@ export const allEvents: CalendarEvent[] = [
     id: "5",
     title: "Advanced Excel - Nova",
     start: "2026-03-20",
-    end: "2026-04-03",
+    end: "2026-04-04",
     aula: "aula2",
+    turno: "tarde",
+    color: EVENT_COLORS[4],
     professorId: "p1",
     professorName: "Carlos Martínez",
     companyId: "e1",
@@ -203,8 +226,10 @@ export const allEvents: CalendarEvent[] = [
     id: "6",
     title: "Brand Strategy - Nova",
     start: "2026-03-11",
-    end: "2026-03-25",
+    end: "2026-03-26",
     aula: "aula3",
+    turno: "tarde",
+    color: EVENT_COLORS[5],
     professorId: "p2",
     professorName: "Laura Sánchez",
     companyId: "e1",
@@ -215,8 +240,10 @@ export const allEvents: CalendarEvent[] = [
     id: "7",
     title: "Python Basics - Acme",
     start: "2026-03-02",
-    end: "2026-03-16",
+    end: "2026-03-17",
     aula: "aula1",
+    turno: "tarde",
+    color: EVENT_COLORS[6],
     professorId: "p2",
     professorName: "Laura Sánchez",
     companyId: "e2",

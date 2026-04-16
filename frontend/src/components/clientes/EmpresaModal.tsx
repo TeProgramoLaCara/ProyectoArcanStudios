@@ -2,18 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useTheme } from '@/context/ThemeContext';
 import type { Empresa, Usuario } from '@/resources/data';
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 
 const MAX_USUARIOS = 5;
-
-// ─── Shared styles ────────────────────────────────────────────────────────────
-
-const inputClass =
-  'w-full rounded-xl border border-white/10 bg-[#1a1a1a] px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none transition focus:border-[#267F6B]/60 focus:ring-1 focus:ring-[#267F6B]/30'; /* colors.ts: surfaceInput, accent */
-
-const labelClass = 'text-xs font-medium uppercase tracking-wider text-white/40';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -31,6 +25,7 @@ export default function EmpresaModal({ mode, empresa, onClose, onSave }: Props) 
   const [phone, setPhone] = useState('');
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [newUsername, setNewUsername] = useState('');
+  const { isDark } = useTheme();
 
   // Sincronizar formulario al abrirse
   useEffect(() => {
@@ -80,32 +75,46 @@ export default function EmpresaModal({ mode, empresa, onClose, onSave }: Props) 
 
   const isFull = usuarios.length >= MAX_USUARIOS;
 
+  const inputClass = isDark
+    ? 'w-full rounded-xl border border-white/10 bg-[#1a1a1a] px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none transition focus:border-[#267F6B]/60 focus:ring-1 focus:ring-[#267F6B]/30'
+    : 'w-full rounded-xl border border-black/[0.08] bg-[#e8edf2] px-4 py-2.5 text-sm text-[#0f172a] placeholder-[#94a3b8] outline-none transition focus:border-[#267F6B]/60 focus:ring-1 focus:ring-[#267F6B]/30';
+
+  const labelClass = isDark
+    ? 'text-xs font-medium uppercase tracking-wider text-white/40'
+    : 'text-xs font-medium uppercase tracking-wider text-[#94a3b8]';
+
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Overlay */}
       <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        className={`absolute inset-0 backdrop-blur-sm ${isDark ? 'bg-black/70' : 'bg-black/40'}`}
         onClick={onClose}
       />
 
       {/* Modal box */}
-      <div className="relative z-10 w-full max-w-lg overflow-hidden rounded-2xl border border-white/10 bg-[#111111] shadow-[0_32px_80px_rgba(0,0,0,0.7)]"> {/* colors.ts: surfaceElevated */}
+      <div className={`relative z-10 w-full max-w-lg overflow-hidden rounded-2xl border shadow-[0_32px_80px_rgba(0,0,0,0.7)] ${
+        isDark ? 'border-white/10 bg-[#111111]' : 'border-black/[0.08] bg-[#ffffff]'
+      }`}>
         {/* Barra de acento superior */}
-        <div className="h-[3px] w-full bg-gradient-to-r from-[#267F6B]/0 via-[#267F6B] to-[#267F6B]/0" /> {/* colors.ts: accent */}
+        <div className="h-[3px] w-full bg-gradient-to-r from-[#267F6B]/0 via-[#267F6B] to-[#267F6B]/0" />
 
         {/* Cabecera */}
         <div className="flex items-center justify-between px-6 pt-5 pb-4">
-          <h3 className="text-base font-semibold text-white">
+          <h3 className={`text-base font-semibold ${isDark ? 'text-white' : 'text-[#0f172a]'}`}>
             {mode === 'edit' ? 'Editar empresa' : 'Nueva empresa'}
           </h3>
           <button
             onClick={onClose}
-            className="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xs text-white/40 transition hover:text-white/80"
+            className={`flex h-7 w-7 items-center justify-center rounded-full border text-xs transition ${
+              isDark
+                ? 'border-white/10 bg-white/5 text-white/40 hover:text-white/80'
+                : 'border-black/[0.08] bg-black/[0.04] text-[#94a3b8] hover:text-[#0f172a]'
+            }`}
           >
             ✕
           </button>
         </div>
-        <div className="h-px bg-white/[0.06]" />
+        <div className={`h-px ${isDark ? 'bg-white/[0.06]' : 'bg-black/[0.05]'}`} />
 
         {/* Formulario */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 px-6 py-5">
@@ -137,7 +146,7 @@ export default function EmpresaModal({ mode, empresa, onClose, onSave }: Props) 
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
               <label className={labelClass}>Usuarios</label>
-              <span className="text-[10px] text-white/30">
+              <span className={`text-[10px] ${isDark ? 'text-white/30' : 'text-[#94a3b8]'}`}>
                 {usuarios.length}/{MAX_USUARIOS}
               </span>
             </div>
@@ -148,15 +157,17 @@ export default function EmpresaModal({ mode, empresa, onClose, onSave }: Props) 
                 {usuarios.map((u) => (
                   <div
                     key={u.id}
-                    className="flex items-center justify-between gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2"
+                    className={`flex items-center justify-between gap-2 rounded-xl border px-3 py-2 ${
+                      isDark ? 'border-white/[0.06] bg-white/[0.02]' : 'border-black/[0.05] bg-black/[0.03]'
+                    }`}
                   >
-                    <span className="truncate text-sm text-white/70">
+                    <span className={`truncate text-sm ${isDark ? 'text-white/70' : 'text-[#475569]'}`}>
                       {u.username}
                     </span>
                     <button
                       type="button"
                       onClick={() => removeUser(u.id)}
-                      className="shrink-0 text-xs text-white/25 transition hover:text-red-400"
+                      className={`shrink-0 text-xs transition hover:text-red-400 ${isDark ? 'text-white/25' : 'text-[#94a3b8]'}`}
                       title="Eliminar usuario"
                     >
                       ✕
@@ -181,14 +192,18 @@ export default function EmpresaModal({ mode, empresa, onClose, onSave }: Props) 
                 type="button"
                 onClick={addUser}
                 disabled={isFull || !newUsername.trim()}
-                className="shrink-0 rounded-xl border border-[#267F6B]/40 bg-[#267F6B]/15 px-3 py-2 text-sm font-semibold text-[#2fa58a] transition hover:bg-[#267F6B]/25 disabled:cursor-not-allowed disabled:opacity-30" /* colors.ts: accent, accentLight */
+                className={`shrink-0 rounded-xl border px-3 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-30 ${
+                  isDark
+                    ? 'border-[#267F6B]/40 bg-[#267F6B]/15 text-[#2fa58a] hover:bg-[#267F6B]/25'
+                    : 'border-[#267F6B]/50 bg-[#267F6B]/10 text-[#267F6B] hover:bg-[#267F6B]/20'
+                }`}
               >
                 + Añadir
               </button>
             </div>
 
             {isFull && (
-              <p className="text-[11px] text-white/30">
+              <p className={`text-[11px] ${isDark ? 'text-white/30' : 'text-[#94a3b8]'}`}>
                 Máximo {MAX_USUARIOS} usuarios por empresa.
               </p>
             )}
@@ -199,13 +214,15 @@ export default function EmpresaModal({ mode, empresa, onClose, onSave }: Props) 
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-white/10 px-4 py-2 text-sm text-white/50 transition hover:text-white/80"
+              className={`rounded-xl border px-4 py-2 text-sm transition ${
+                isDark ? 'border-white/10 text-white/50 hover:text-white/80' : 'border-black/[0.08] text-[#475569] hover:text-[#0f172a]'
+              }`}
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="rounded-xl bg-[#267F6B] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#2fa58a]" /* colors.ts: accent, accentLight */
+              className="rounded-xl bg-[#267F6B] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#2fa58a]"
             >
               Guardar
             </button>

@@ -58,3 +58,39 @@ export const COLORS = {
 } as const;
 
 export default COLORS;
+
+/**
+ * Paleta de colores para el tema claro.
+ * El acento es idéntico en ambos temas.
+ */
+export const LIGHT_COLORS = {
+  // ─── Acento principal ──────────────────────────────────────────────────────
+  accent:          "#267F6B",
+  accentLight:     "#2fa58a",
+
+  // ─── Fondos y superficies ──────────────────────────────────────────────────
+  background:      "#f8fafc",
+  surface:         "#f1f5f9",
+  surfaceElevated: "#e2e8f0",
+  surfaceInput:    "#e8edf2",
+
+  // ─── Bordes ────────────────────────────────────────────────────────────────
+  border:          "rgba(0,0,0,0.08)",
+  borderSubtle:    "rgba(0,0,0,0.05)",
+
+  // ─── Texto ────────────────────────────────────────────────────────────────
+  textPrimary:     "#0f172a",
+  textSecondary:   "#475569",
+  textMuted:       "#94a3b8",
+
+  // ─── Categorías de cursos ─────────────────────────────────────────────────
+  categoryBlender: "#ea580c",
+  categoryUnity:   "#0284c7",
+
+  // ─── Estados de reserva ───────────────────────────────────────────────────
+  statusPendiente:  "#b45309",
+  statusConfirmada: "#267F6B",
+  statusEnCurso:    "#0284c7",
+  statusCompletada: "#64748b",
+  statusCancelada:  "#dc2626",
+} as const;

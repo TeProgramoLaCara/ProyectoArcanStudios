@@ -59,11 +59,17 @@ export default function EventDetailCard({ event, position, onClose }: Props) {
       <div className="flex items-start justify-between gap-3 px-5 pt-4 pb-3">
         <div className="flex flex-col gap-1">
           <span className="text-[10px] font-semibold uppercase tracking-widest text-white/30">
-            {AULA_LABELS[event.aula]}
+            {AULA_LABELS[event.aula]} · {event.turno === "manana" ? "Mañana" : "Tarde"}
           </span>
-          <h3 className="text-base font-semibold leading-snug text-white">
-            {event.title}
-          </h3>
+          <div className="flex items-center gap-2">
+            <span
+              className="h-2.5 w-2.5 shrink-0 rounded-sm"
+              style={{ backgroundColor: event.color }}
+            />
+            <h3 className="text-base font-semibold leading-snug text-white">
+              {event.title}
+            </h3>
+          </div>
         </div>
         <button
           onClick={onClose}

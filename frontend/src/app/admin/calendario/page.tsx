@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import CalendarFilters from "@/components/calendar/CalendarFilters";
 import ClassroomCalendar from "@/components/calendar/ClassroomCalendar";
+import MonthNavigator from "@/components/calendar/MonthNavigator";
 import { allEvents, type CalendarEvent } from "@/resources/data";
 
 // Re-exportado para compatibilidad con importaciones existentes
@@ -11,6 +12,7 @@ export type { CalendarEvent };
 export default function Page() {
   const [professor, setProfessor] = useState("all");
   const [company, setCompany] = useState("all");
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   const filteredEvents = useMemo(() => {
     return allEvents.filter((event) => {
@@ -22,12 +24,37 @@ export default function Page() {
     });
   }, [professor, company]);
 
-  const aula1Events = filteredEvents.filter((e) => e.aula === "aula1");
-  const aula2Events = filteredEvents.filter((e) => e.aula === "aula2");
-  const aula3Events = filteredEvents.filter((e) => e.aula === "aula3");
+  const aula1Events = useMemo(
+    () => filteredEvents.filter((e) => e.aula === "aula1"),
+    [filteredEvents],
+  );
+  const aula2Events = useMemo(
+    () => filteredEvents.filter((e) => e.aula === "aula2"),
+    [filteredEvents],
+  );
+  const aula3Events = useMemo(
+    () => filteredEvents.filter((e) => e.aula === "aula3"),
+    [filteredEvents],
+  );
+
+  function handlePrev() {
+    setCurrentDate((d) => {
+      const nd = new Date(d);
+      nd.setMonth(nd.getMonth() - 1);
+      return nd;
+    });
+  }
+
+  function handleNext() {
+    setCurrentDate((d) => {
+      const nd = new Date(d);
+      nd.setMonth(nd.getMonth() + 1);
+      return nd;
+    });
+  }
 
   return (
-    <section className="bg-[#050505] p-6"> {/* TODO: migrate to COLORS.background */}
+    <section className="bg-[#050505] p-6">
       <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
         <CalendarFilters
           professor={professor}
@@ -39,10 +66,32 @@ export default function Page() {
             setCompany("all");
           }}
         />
+
+        <MonthNavigator
+          currentDate={currentDate}
+          onPrev={handlePrev}
+          onNext={handleNext}
+        />
+
         <div className="grid grid-cols-1 gap-6 2xl:grid-cols-3">
-          <ClassroomCalendar title="Aula 1" events={aula1Events} />
-          <ClassroomCalendar title="Aula 2" events={aula2Events} />
-          <ClassroomCalendar title="Aula 3" events={aula3Events} />
+          <ClassroomCalendar
+            title="Aula 1"
+            aulaId="aula1"
+            events={aula1Events}
+            currentDate={currentDate}
+          />
+          <ClassroomCalendar
+            title="Aula 2"
+            aulaId="aula2"
+            events={aula2Events}
+            currentDate={currentDate}
+          />
+          <ClassroomCalendar
+            title="Aula 3"
+            aulaId="aula3"
+            events={aula3Events}
+            currentDate={currentDate}
+          />
         </div>
       </div>
     </section>

@@ -9,9 +9,8 @@ type CalendarFiltersProps = {
 };
 
 const legend = [
-  { color: "bg-emerald-500", label: "Libre" },
-  { color: "bg-orange-500", label: "Parcial" },
-  { color: "bg-red-500", label: "Completo" },
+  { label: "Mañana", bg: "#60a5fa" },
+  { label: "Tarde",  bg: "#fb923c" },
 ];
 
 export default function CalendarFilters({
@@ -31,9 +30,12 @@ export default function CalendarFilters({
           </p>
           {/* Leyenda */}
           <div className="mt-3 flex items-center gap-4">
-            {legend.map(({ color, label }) => (
+            {legend.map(({ bg, label }) => (
               <div key={label} className="flex items-center gap-1.5">
-                <span className={`h-2 w-2 rounded-full ${color}`} />
+                <span
+                  className="h-2.5 w-8 rounded-sm"
+                  style={{ backgroundColor: bg }}
+                />
                 <span className="text-xs text-white/40">{label}</span>
               </div>
             ))}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { useTheme } from '@/context/ThemeContext';
 import MetricCard from '@/components/reservations/MetriCard';
 import ClientesFilters from '@/components/clientes/ClientesFilters';
 import EmpresaCard from '@/components/clientes/EmpresaCard';
@@ -20,6 +21,7 @@ export default function ClientesPage() {
   const [search, setSearch] = useState('');
   const [modalState, setModalState] = useState<ModalState>(null);
   const [deleteTarget, setDeleteTarget] = useState<Empresa | null>(null);
+  const { isDark } = useTheme();
 
   // ── Métricas ──
   const totalEmpresas = empresas.length;
@@ -66,30 +68,38 @@ export default function ClientesPage() {
     );
   }
 
+  const cardClass = isDark
+    ? 'border-white/10 bg-[#0d0d0d] shadow-[0_10px_40px_rgba(0,0,0,0.25)]'
+    : 'border-black/[0.08] bg-[#f1f5f9] shadow-[0_4px_24px_rgba(15,23,42,0.08)]';
+
   // ─── Render ───────────────────────────────────────────────────────────────
 
   return (
     <>
-      <section className="bg-[#050505] p-6"> {/* colors.ts: background */}
+      <section className={`p-6 ${isDark ? 'bg-[#050505]' : 'bg-[#f8fafc]'}`}>
         <div className="mx-auto flex max-w-[1600px] flex-col gap-8">
 
           {/* ── Cabecera de página ── */}
-          <div className="relative overflow-hidden rounded-[26px] border border-white/10 bg-[#0d0d0d] p-6 shadow-[0_10px_40px_rgba(0,0,0,0.25)]"> {/* colors.ts: surface */}
-            {/* Degradado lateral derecho */}
-            <div className="pointer-events-none absolute right-0 top-0 h-full w-64 bg-gradient-to-l from-[#267F6B]/10 to-transparent" /> {/* colors.ts: accent */}
-            {/* Línea inferior de acento */}
-            <div className="pointer-events-none absolute bottom-0 left-0 h-[2px] w-full bg-gradient-to-r from-[#267F6B]/0 via-[#267F6B]/60 to-[#267F6B]/0" /> {/* colors.ts: accent */}
+          <div className={`relative overflow-hidden rounded-[26px] border p-6 ${cardClass}`}>
+            <div className={`pointer-events-none absolute right-0 top-0 h-full w-64 bg-gradient-to-l to-transparent ${
+              isDark ? 'from-[#267F6B]/10' : 'from-[#267F6B]/[0.08]'
+            }`} />
+            <div className="pointer-events-none absolute bottom-0 left-0 h-[2px] w-full bg-gradient-to-r from-[#267F6B]/0 via-[#267F6B]/60 to-[#267F6B]/0" />
 
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold text-white">Clientes</h1>
-                <p className="mt-1 text-sm text-white/55">
+                <h1 className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-[#0f172a]'}`}>Clientes</h1>
+                <p className={`mt-1 text-sm ${isDark ? 'text-white/55' : 'text-[#475569]'}`}>
                   Gestión de empresas cliente y sus usuarios.
                 </p>
               </div>
               <button
                 onClick={() => setModalState({ mode: 'create' })}
-                className="flex shrink-0 items-center gap-2 rounded-xl border border-[#267F6B]/40 bg-[#267F6B]/15 px-4 py-2 text-sm font-semibold text-[#2fa58a] transition hover:border-[#267F6B]/60 hover:bg-[#267F6B]/25" /* colors.ts: accent, accentLight */
+                className={`flex shrink-0 items-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold transition ${
+                  isDark
+                    ? 'border-[#267F6B]/40 bg-[#267F6B]/15 text-[#2fa58a] hover:border-[#267F6B]/60 hover:bg-[#267F6B]/25'
+                    : 'border-[#267F6B]/50 bg-[#267F6B]/10 text-[#267F6B] hover:border-[#267F6B]/70 hover:bg-[#267F6B]/20'
+                }`}
               >
                 <span className="text-base leading-none">+</span>
                 Nueva empresa
@@ -107,19 +117,19 @@ export default function ClientesPage() {
 
           {/* ── Separador degradado ── */}
           <div className="relative h-px">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#267F6B]/40 to-transparent" /> {/* colors.ts: accent */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#267F6B]/40 to-transparent" />
           </div>
 
           {/* ── Filtros + lista ── */}
-          <div className="flex flex-col gap-5 rounded-[26px] border border-white/10 bg-[#0d0d0d] p-6 shadow-[0_10px_40px_rgba(0,0,0,0.25)]"> {/* colors.ts: surface */}
+          <div className={`flex flex-col gap-5 rounded-[26px] border p-6 ${cardClass}`}>
 
             {/* Cabecera del panel */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <h2 className="text-lg font-semibold text-white">
+                <h2 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-[#0f172a]'}`}>
                   Lista de empresas
                 </h2>
-                <p className="mt-0.5 text-sm text-white/40">
+                <p className={`mt-0.5 text-sm ${isDark ? 'text-white/40' : 'text-[#475569]'}`}>
                   {filtered.length} empresa{filtered.length !== 1 ? 's' : ''}{' '}
                   encontrada{filtered.length !== 1 ? 's' : ''}
                 </p>
@@ -133,7 +143,7 @@ export default function ClientesPage() {
 
             {/* Cards de empresas */}
             {filtered.length === 0 ? (
-              <div className="py-12 text-center text-sm text-white/30">
+              <div className={`py-12 text-center text-sm ${isDark ? 'text-white/30' : 'text-[#94a3b8]'}`}>
                 No se encontraron empresas con los filtros aplicados.
               </div>
             ) : (
