@@ -3,7 +3,7 @@
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import type { CalendarEvent } from "@/app/admin/calendario/page";
 import EventDetailCard from "./EventDetailCard";
 
@@ -20,20 +20,12 @@ export default function ClassroomCalendar({
   events,
   currentDate,
 }: ClassroomCalendarProps) {
-  const calendarRef = useRef<FullCalendar>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [cardPosition, setCardPosition] = useState({
     x: 0,
     y: 0,
     openUpward: false,
   });
-
-  useEffect(() => {
-    const api = calendarRef.current?.getApi();
-    if (api) {
-      api.gotoDate(currentDate);
-    }
-  }, [currentDate]);
 
   const fcEvents = useMemo(
     () =>
@@ -72,7 +64,7 @@ export default function ClassroomCalendar({
         style={{ height: "600px" }}
       >
         <FullCalendar
-          ref={calendarRef}
+          key={currentDate.toISOString().slice(0, 7)}
           plugins={[dayGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
           headerToolbar={false}
