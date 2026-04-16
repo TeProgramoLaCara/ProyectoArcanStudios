@@ -1,19 +1,8 @@
 import CategoryBadge from "./CategoryBadge";
+import type { Capacitacion, Curso } from "@/resources/data";
 
-export type Capacitacion = {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-};
-
-export type Curso = {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  capacitaciones: string[];
-};
+// Re-exportados para compatibilidad con importaciones existentes
+export type { Capacitacion, Curso };
 
 type Props = {
   course: Curso;
@@ -26,7 +15,7 @@ export default function CourseCard({ course, capacitaciones }: Props) {
   );
 
   return (
-    <div className="flex flex-col gap-4 rounded-[24px] border border-white/10 bg-[#0d0d0d] p-5 shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition hover:border-[#267F6B]/30">
+    <div className="flex flex-col gap-4 rounded-[24px] border border-white/10 bg-[#0d0d0d] p-5 shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition hover:border-[#267F6B]/30"> {/* TODO: migrate to COLORS.surface, COLORS.accent */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-lg">
           🎮
@@ -42,7 +31,7 @@ export default function CourseCard({ course, capacitaciones }: Props) {
       <div className="h-px bg-white/[0.06]" />
 
       <div className="flex flex-col gap-2">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-[#267F6B]">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-[#267F6B]"> {/* TODO: migrate to COLORS.accent */}
           Capacitaciones incluidas
         </span>
         <div className="flex flex-col gap-2">
@@ -51,6 +40,7 @@ export default function CourseCard({ course, capacitaciones }: Props) {
               key={cap.id}
               className="flex items-center gap-2.5 rounded-xl border border-white/[0.07] bg-white/[0.03] px-3 py-2"
             >
+              {/* TODO: migrate to COLORS.accent, COLORS.accentLight */}
               <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[#267F6B]/70 bg-[#267F6B]/10 text-[10px] font-bold text-[#2fa58a]">
                 {i + 1}
               </span>

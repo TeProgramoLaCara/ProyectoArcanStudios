@@ -1,93 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import CourseCard, { type Curso, type Capacitacion } from "@/components/courses/CourseCard";
+import CourseCard from "@/components/courses/CourseCard";
 import CapacitacionCard from "@/components/courses/CapacitacionCard";
-
-// ─── Data ────────────────────────────────────────────────────────────────────
-
-const capacitaciones: Capacitacion[] = [
-  {
-    id: "c1",
-    title: "Modelado 3D en Blender",
-    description:
-      "Aprende a crear objetos tridimensionales desde cero usando las herramientas de modelado de Blender. Cubre desde primitivas hasta técnicas de sculpting básico.",
-    category: "Blender",
-  },
-  {
-    id: "c2",
-    title: "Texturizado y UV Mapping",
-    description:
-      "Domina el proceso de UV unwrapping y aprende a aplicar materiales PBR realistas a tus modelos para uso en motores de videojuegos.",
-    category: "Blender",
-  },
-  {
-    id: "c3",
-    title: "Introducción a Unity",
-    description:
-      "Configuración del entorno, navegación por el editor e importación de assets. Fundamentos del ciclo de desarrollo en Unity.",
-    category: "Unity",
-  },
-  {
-    id: "c4",
-    title: "Scripting con C# en Unity",
-    description:
-      "Fundamentos de programación orientada a objetos aplicados al desarrollo de videojuegos. Movimiento, colisiones y lógica de juego.",
-    category: "Unity",
-  },
-  {
-    id: "c5",
-    title: "Rigging y Animación",
-    description:
-      "Creación de armaduras y skinning de personajes en Blender. Exportación de animaciones optimizadas para Unity.",
-    category: "Blender",
-  },
-  {
-    id: "c6",
-    title: "Diseño de Niveles",
-    description:
-      "Principios de level design aplicados en Unity. Uso de ProBuilder y técnicas de composición espacial para crear entornos jugables.",
-    category: "Unity",
-  },
-];
-
-const cursos: Curso[] = [
-  {
-    id: "k1",
-    title: "Creación de Assets para Videojuegos",
-    description:
-      "Flujo de trabajo completo para crear y exportar assets 3D listos para producción, desde el concepto en Blender hasta su implementación en Unity.",
-    capacitaciones: ["c1", "c2"],
-    category: "Blender",
-  },
-  {
-    id: "k2",
-    title: "Desarrollo de Videojuegos con Unity",
-    description:
-      "Introducción práctica al desarrollo de videojuegos. Aprenderás a construir escenas interactivas y programar mecánicas básicas con C#.",
-    capacitaciones: ["c3", "c4"],
-    category: "Unity",
-  },
-  {
-    id: "k3",
-    title: "Personajes Animados para Unity",
-    description:
-      "Pipeline completo de personaje: modelado, rigging, animación en Blender e integración con el Animator Controller de Unity.",
-    capacitaciones: ["c5", "c4"],
-    category: "Blender",
-  },
-  {
-    id: "k4",
-    title: "Entornos y Niveles Interactivos",
-    description:
-      "Diseña entornos 3D completos con Blender y constrúyelos como niveles jugables en Unity utilizando técnicas profesionales de level design.",
-    capacitaciones: ["c2", "c6"],
-    category: "Unity",
-  },
-];
+import { cursos, capacitaciones } from "@/resources/data";
 
 // ─── Shared styles ────────────────────────────────────────────────────────────
 
+// TODO: migrate bg-[#1a1a1a] → COLORS.surfaceInput, focus:border-[#267F6B] → COLORS.accent
 const inputClass =
   "w-full rounded-xl border border-white/10 bg-[#1a1a1a] px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none transition focus:border-[#267F6B]/60 focus:ring-1 focus:ring-[#267F6B]/30";
 
@@ -110,8 +30,8 @@ function Modal({
         className="absolute inset-0 bg-black/70 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="relative z-10 w-full max-w-lg overflow-hidden rounded-2xl border border-white/10 bg-[#111111] shadow-[0_32px_80px_rgba(0,0,0,0.7)]">
-        <div className="h-[3px] w-full bg-gradient-to-r from-[#267F6B]/0 via-[#267F6B] to-[#267F6B]/0" />
+      <div className="relative z-10 w-full max-w-lg overflow-hidden rounded-2xl border border-white/10 bg-[#111111] shadow-[0_32px_80px_rgba(0,0,0,0.7)]"> {/* TODO: migrate to COLORS.surfaceElevated */}
+        <div className="h-[3px] w-full bg-gradient-to-r from-[#267F6B]/0 via-[#267F6B] to-[#267F6B]/0" /> {/* TODO: migrate to COLORS.accent */}
         <div className="flex items-center justify-between px-6 pt-5 pb-4">
           <h3 className="text-base font-semibold text-white">{title}</h3>
           <button
@@ -183,7 +103,7 @@ function CreateCursoModal({ onClose }: { onClose: () => void }) {
           >
             Cancelar
           </button>
-          <button className="rounded-xl bg-[#267F6B] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#2fa58a]">
+          <button className="rounded-xl bg-[#267F6B] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#2fa58a]"> {/* TODO: migrate to COLORS.accent, COLORS.accentLight */}
             Crear curso
           </button>
         </div>
@@ -229,7 +149,7 @@ function CreateCapacitacionModal({ onClose }: { onClose: () => void }) {
           >
             Cancelar
           </button>
-          <button className="rounded-xl bg-[#267F6B] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#2fa58a]">
+          <button className="rounded-xl bg-[#267F6B] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#2fa58a]"> {/* TODO: migrate to COLORS.accent, COLORS.accentLight */}
             Crear capacitación
           </button>
         </div>
@@ -265,7 +185,7 @@ function SectionHeader({
         </span>
         <button
           onClick={onAdd}
-          className="flex items-center gap-2 rounded-xl border border-[#267F6B]/40 bg-[#267F6B]/15 px-4 py-2 text-sm font-semibold text-[#2fa58a] transition hover:bg-[#267F6B]/25 hover:border-[#267F6B]/60"
+          className="flex items-center gap-2 rounded-xl border border-[#267F6B]/40 bg-[#267F6B]/15 px-4 py-2 text-sm font-semibold text-[#2fa58a] transition hover:bg-[#267F6B]/25 hover:border-[#267F6B]/60" // TODO: migrate to COLORS.accent, COLORS.accentLight
         >
           <span className="text-base leading-none">+</span>
           {addLabel}
@@ -283,11 +203,11 @@ export default function CursosPage() {
 
   return (
     <>
-      <section className="bg-[#050505] p-6">
+      <section className="bg-[#050505] p-6"> {/* TODO: migrate to COLORS.background */}
         <div className="mx-auto flex max-w-[1600px] flex-col gap-10">
 
           {/* Page header */}
-          <div className="rounded-[26px] border border-white/10 bg-[#0d0d0d] p-6 shadow-[0_10px_40px_rgba(0,0,0,0.25)]">
+          <div className="rounded-[26px] border border-white/10 bg-[#0d0d0d] p-6 shadow-[0_10px_40px_rgba(0,0,0,0.25)]"> {/* TODO: migrate to COLORS.surface */}
             <h1 className="text-3xl font-bold text-white">Cursos y Capacitaciones</h1>
             <p className="mt-1 text-sm text-white/55">
               Catálogo completo de formaciones disponibles. Cada curso incluye dos capacitaciones especializadas.

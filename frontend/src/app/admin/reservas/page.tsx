@@ -3,85 +3,8 @@
 import { useMemo, useState } from "react";
 import MetricCard from "@/components/reservations/MetriCard";
 import ReservaFilters from "@/components/reservations/ReservaFilters";
-import ReservaRow, { type Reserva } from "@/components/reservations/ReservaRow";
-import type { ReservaStatus } from "@/components/reservations/ReservaBadge";
-
-// ─── Mock data ────────────────────────────────────────────────────────────────
-
-const allReservas: Reserva[] = [
-  {
-    id: "r1",
-    clientName: "Alejandro Vega",
-    company: "Nova",
-    curso: "Creación de Assets para Videojuegos",
-    capacitaciones: ["Modelado 3D en Blender", "Texturizado y UV Mapping"],
-    status: "Confirmada",
-    fecha: "02 abr 2026",
-  },
-  {
-    id: "r2",
-    clientName: "María Torres",
-    company: "Acme",
-    curso: "Desarrollo de Videojuegos con Unity",
-    capacitaciones: ["Introducción a Unity", "Scripting con C# en Unity"],
-    status: "Pendiente",
-    fecha: "03 abr 2026",
-  },
-  {
-    id: "r3",
-    clientName: "Carlos Ruiz",
-    company: "Nova",
-    curso: "Personajes Animados para Unity",
-    capacitaciones: ["Rigging y Animación", "Scripting con C# en Unity"],
-    status: "En curso",
-    fecha: "28 mar 2026",
-  },
-  {
-    id: "r4",
-    clientName: "Laura Méndez",
-    company: "Pixel Corp",
-    curso: "Entornos y Niveles Interactivos",
-    capacitaciones: ["Texturizado y UV Mapping", "Diseño de Niveles"],
-    status: "Completada",
-    fecha: "15 mar 2026",
-  },
-  {
-    id: "r5",
-    clientName: "Javier Ibáñez",
-    company: "Acme",
-    curso: "Creación de Assets para Videojuegos",
-    capacitaciones: ["Modelado 3D en Blender", "Texturizado y UV Mapping"],
-    status: "Cancelada",
-    fecha: "10 mar 2026",
-  },
-  {
-    id: "r6",
-    clientName: "Sofía Navarro",
-    company: "Pixel Corp",
-    curso: "Desarrollo de Videojuegos con Unity",
-    capacitaciones: ["Introducción a Unity", "Scripting con C# en Unity"],
-    status: "Confirmada",
-    fecha: "05 abr 2026",
-  },
-  {
-    id: "r7",
-    clientName: "Pablo Guerrero",
-    company: "Nova",
-    curso: "Entornos y Niveles Interactivos",
-    capacitaciones: ["Texturizado y UV Mapping", "Diseño de Niveles"],
-    status: "Pendiente",
-    fecha: "07 abr 2026",
-  },
-  {
-    id: "r8",
-    clientName: "Elena Castillo",
-    company: "Acme",
-    curso: "Personajes Animados para Unity",
-    capacitaciones: ["Rigging y Animación", "Scripting con C# en Unity"],
-    status: "En curso",
-    fecha: "01 abr 2026",
-  },
-];
+import ReservaRow from "@/components/reservations/ReservaRow";
+import { allReservas } from "@/resources/data";
 
 const companies = [...new Set(allReservas.map((r) => r.company))];
 
@@ -108,14 +31,14 @@ export default function ReservasPage() {
   const canceladas = allReservas.filter((r) => r.status === "Cancelada").length;
 
   return (
-    <section className="bg-[#050505] p-6">
+    <section className="bg-[#050505] p-6"> {/* TODO: migrate to COLORS.background */}
       <div className="mx-auto flex max-w-[1600px] flex-col gap-8">
 
         {/* ── Page header ── */}
-        <div className="relative overflow-hidden rounded-[26px] border border-white/10 bg-[#0d0d0d] p-6 shadow-[0_10px_40px_rgba(0,0,0,0.25)]">
+        <div className="relative overflow-hidden rounded-[26px] border border-white/10 bg-[#0d0d0d] p-6 shadow-[0_10px_40px_rgba(0,0,0,0.25)]"> {/* TODO: migrate to COLORS.surface */}
           {/* Gradient accent */}
-          <div className="pointer-events-none absolute right-0 top-0 h-full w-64 bg-gradient-to-l from-[#267F6B]/10 to-transparent" />
-          <div className="pointer-events-none absolute bottom-0 left-0 h-[2px] w-full bg-gradient-to-r from-[#267F6B]/0 via-[#267F6B]/60 to-[#267F6B]/0" />
+          <div className="pointer-events-none absolute right-0 top-0 h-full w-64 bg-gradient-to-l from-[#267F6B]/10 to-transparent" /> {/* TODO: migrate to COLORS.accent */}
+          <div className="pointer-events-none absolute bottom-0 left-0 h-[2px] w-full bg-gradient-to-r from-[#267F6B]/0 via-[#267F6B]/60 to-[#267F6B]/0" /> {/* TODO: migrate to COLORS.accent */}
           <h1 className="text-3xl font-bold text-white">Reservas</h1>
           <p className="mt-1 text-sm text-white/55">
             Gestión y seguimiento de todas las reservas de cursos.
@@ -134,11 +57,11 @@ export default function ReservasPage() {
 
         {/* ── Separator ── */}
         <div className="relative h-px">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#267F6B]/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#267F6B]/40 to-transparent" /> {/* TODO: migrate to COLORS.accent */}
         </div>
 
         {/* ── Filters + list ── */}
-        <div className="flex flex-col gap-5 rounded-[26px] border border-white/10 bg-[#0d0d0d] p-6 shadow-[0_10px_40px_rgba(0,0,0,0.25)]">
+        <div className="flex flex-col gap-5 rounded-[26px] border border-white/10 bg-[#0d0d0d] p-6 shadow-[0_10px_40px_rgba(0,0,0,0.25)]"> {/* TODO: migrate to COLORS.surface */}
           {/* Header row */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>

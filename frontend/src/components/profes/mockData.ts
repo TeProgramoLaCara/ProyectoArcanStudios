@@ -1,0 +1,58 @@
+import type { Profesor } from './types';
+
+export const mockProfesores: Profesor[] = [
+  {
+    id: 1,
+    nombre: 'Carlos',
+    apellidos: 'Martínez',
+    email: 'carlos.martinez@arcanstudios.com',
+    tel: '+34 612 345 678',
+    status: 'active',
+    caps: ['Blender', 'Unity'],
+  },
+  {
+    id: 2,
+    nombre: 'Laura',
+    apellidos: 'Sánchez',
+    email: 'laura.sanchez@arcanstudios.com',
+    tel: '+34 623 456 789',
+    status: 'active',
+    caps: ['Unreal Engine', 'Maya 3D'],
+  },
+  {
+    id: 3,
+    nombre: 'Miguel',
+    apellidos: 'Fernández',
+    email: 'miguel.fernandez@arcanstudios.com',
+    tel: '+34 634 567 890',
+    status: 'active',
+    caps: ['ZBrush', 'Blender', 'Maya 3D'],
+  },
+  {
+    id: 4,
+    nombre: 'Ana',
+    apellidos: 'López',
+    email: 'ana.lopez@arcanstudios.com',
+    tel: '+34 645 678 901',
+    status: 'inactive',
+    caps: ['Unity', 'Unreal Engine'],
+  },
+  {
+    id: 5,
+    nombre: 'Javier',
+    apellidos: 'García',
+    email: 'javier.garcia@arcanstudios.com',
+    tel: '+34 656 789 012',
+    status: 'active',
+    caps: ['Blender'],
+  },
+  {
+    id: 6,
+    nombre: 'Sofía',
+    apellidos: 'Ramírez',
+    email: 'sofia.ramirez@arcanstudios.com',
+    tel: '+34 667 890 123',
+    status: 'inactive',
+    caps: ['ZBrush', 'Unity'],
+  },
+];

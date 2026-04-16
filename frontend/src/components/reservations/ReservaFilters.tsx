@@ -7,6 +7,7 @@ type Props = {
   onReset: () => void;
 };
 
+// TODO: migrate bg-[#141414] → COLORS.surfaceElevated, focus:border-[#267F6B] → COLORS.accent
 const selectClass =
   "rounded-xl border border-white/10 bg-[#141414] px-4 py-2.5 text-sm text-white outline-none transition focus:border-[#267F6B]/50 min-w-[180px]";
 

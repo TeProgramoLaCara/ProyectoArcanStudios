@@ -1,5 +1,5 @@
 import CategoryBadge from "./CategoryBadge";
-import type { Capacitacion } from "./CourseCard";
+import type { Capacitacion } from "@/resources/data";
 
 type Props = {
   cap: Capacitacion;
@@ -7,7 +7,7 @@ type Props = {
 
 export default function CapacitacionCard({ cap }: Props) {
   return (
-    <div className="flex flex-col gap-3 rounded-[24px] border border-white/10 bg-[#0d0d0d] p-5 shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition hover:border-[#267F6B]/30">
+    <div className="flex flex-col gap-3 rounded-[24px] border border-white/10 bg-[#0d0d0d] p-5 shadow-[0_8px_30px_rgba(0,0,0,0.2)] transition hover:border-[#267F6B]/30"> {/* TODO: migrate to COLORS.surface, COLORS.accent */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-lg">
           📦
