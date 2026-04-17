@@ -3,19 +3,21 @@
 type CalendarFiltersProps = {
   professor: string;
   company: string;
+  professorLegend: { id: string; name: string; color: string }[];
   onProfessorChange: (value: string) => void;
   onCompanyChange: (value: string) => void;
   onReset: () => void;
 };
 
 const legend = [
-  { label: "Mañana", bg: "#60a5fa" },
-  { label: "Tarde",  bg: "#fb923c" },
+  { label: "Mañana — turno de mañana" },
+  { label: "Tarde — turno de tarde" },
 ];
 
 export default function CalendarFilters({
   professor,
   company,
+  professorLegend,
   onProfessorChange,
   onCompanyChange,
   onReset,
@@ -28,15 +30,24 @@ export default function CalendarFilters({
           <p className="mt-1 text-sm text-white/55">
             Calendario de cursos en las aulas de la academia.
           </p>
-          {/* Leyenda */}
-          <div className="mt-3 flex items-center gap-4">
-            {legend.map(({ bg, label }) => (
+          {/* Leyenda de turnos */}
+          <div className="mt-3 flex flex-wrap items-center gap-4">
+            {legend.map(({ label }) => (
               <div key={label} className="flex items-center gap-1.5">
-                <span
-                  className="h-2.5 w-8 rounded-sm"
-                  style={{ backgroundColor: bg }}
-                />
+                <span className="h-2.5 w-8 rounded-sm bg-black/30 dark:bg-white/40" />
                 <span className="text-xs text-white/40">{label}</span>
+              </div>
+            ))}
+          </div>
+          {/* Leyenda de profesores */}
+          <div className="mt-2 flex flex-wrap items-center gap-4">
+            {professorLegend.map((prof) => (
+              <div key={prof.id} className="flex items-center gap-1.5">
+                <span
+                  className="h-2.5 w-2.5 rounded-full"
+                  style={{ backgroundColor: prof.color }}
+                />
+                <span className="text-xs text-white/50">{prof.name}</span>
               </div>
             ))}
           </div>

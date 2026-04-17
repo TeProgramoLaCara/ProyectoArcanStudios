@@ -63,8 +63,13 @@ export default function EventDetailCard({ event, position, onClose }: Props) {
           </span>
           <div className="flex items-center gap-2">
             <span
-              className="h-2.5 w-2.5 shrink-0 rounded-sm"
-              style={{ backgroundColor: event.color }}
+              style={{
+                backgroundColor: event.color,
+                borderRadius: "4px",
+                width: "10px",
+                height: "10px",
+                flexShrink: 0,
+              }}
             />
             <h3 className="text-base font-semibold leading-snug text-white">
               {event.title}
@@ -117,6 +122,21 @@ export default function EventDetailCard({ event, position, onClose }: Props) {
             </span>
             <span className="text-sm font-medium text-white/85">
               {formatDate(event.start)} → {formatDate(event.end)}
+            </span>
+          </div>
+        </div>
+
+        {/* Turno */}
+        <div className="flex items-center gap-2.5 rounded-xl border border-white/[0.07] bg-white/[0.03] px-3 py-2.5">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/5 text-sm">
+            🕒
+          </div>
+          <div className="flex flex-col gap-0">
+            <span className="text-[10px] font-medium uppercase tracking-wider text-white/30">
+              Turno
+            </span>
+            <span className="text-sm font-medium text-white/85">
+              {event.turno === "manana" ? "Mañana" : "Tarde"}
             </span>
           </div>
         </div>

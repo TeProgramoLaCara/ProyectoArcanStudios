@@ -4,7 +4,11 @@ import { useMemo, useState } from "react";
 import CalendarFilters from "@/components/calendar/CalendarFilters";
 import ClassroomCalendar from "@/components/calendar/ClassroomCalendar";
 import MonthNavigator from "@/components/calendar/MonthNavigator";
-import { allEvents, type CalendarEvent } from "@/resources/data";
+import {
+  allEvents,
+  PROFESSOR_COLORS,
+  type CalendarEvent,
+} from "@/resources/data";
 
 // Re-exportado para compatibilidad con importaciones existentes
 export type { CalendarEvent };
@@ -37,6 +41,21 @@ export default function Page() {
     [filteredEvents],
   );
 
+  const professorLegend = useMemo(() => {
+    const seen = new Set<string>();
+    return allEvents
+      .filter((event) => {
+        if (seen.has(event.professorId)) return false;
+        seen.add(event.professorId);
+        return true;
+      })
+      .map((event) => ({
+        id: event.professorId,
+        name: event.professorName,
+        color: PROFESSOR_COLORS[event.professorId] ?? "#9ca3af",
+      }));
+  }, []);
+
   function handlePrev() {
     setCurrentDate((d) => {
       const nd = new Date(d);
@@ -59,6 +78,7 @@ export default function Page() {
         <CalendarFilters
           professor={professor}
           company={company}
+          professorLegend={professorLegend}
           onProfessorChange={setProfessor}
           onCompanyChange={setCompany}
           onReset={() => {

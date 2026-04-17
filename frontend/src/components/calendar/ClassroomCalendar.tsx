@@ -5,6 +5,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { CalendarEvent } from "@/app/admin/calendario/page";
+import { PROFESSOR_COLORS } from "@/resources/data";
 import EventDetailCard from "./EventDetailCard";
 
 type ClassroomCalendarProps = {
@@ -29,10 +30,19 @@ export default function ClassroomCalendar({
   });
 
   useEffect(() => {
-    const api = calendarRef.current?.getApi();
-    if (api) {
-      api.gotoDate(currentDate);
-    }
+    let cancelled = false;
+
+    queueMicrotask(() => {
+      if (cancelled) return;
+      const api = calendarRef.current?.getApi();
+      if (api) {
+        api.gotoDate(currentDate);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [currentDate]);
 
   const fcEvents = useMemo(
@@ -51,6 +61,7 @@ export default function ClassroomCalendar({
           sortOrder: e.turno === "manana" ? 0 : 1,
           professorId: e.professorId,
           professorName: e.professorName,
+          professorColor: PROFESSOR_COLORS[e.professorId] ?? "#9ca3af",
           companyId: e.companyId,
           companyName: e.companyName,
           capacitaciones: e.capacitaciones,
@@ -79,53 +90,60 @@ export default function ClassroomCalendar({
           initialDate={currentDate}
           height="100%"
           fixedWeekCount={false}
-          dayMaxEventRows={4}
+          dayMaxEventRows={2}
           weekends={false}
           defaultAllDay={true}
           eventDisplay="block"
+          eventColor="transparent"
+          eventBorderColor="transparent"
+          eventBackgroundColor="transparent"
           displayEventTime={false}
           events={fcEvents}
           eventOrder="extendedProps.sortOrder,title"
           eventContent={(arg) => {
-            const turno = arg.event.extendedProps.turno as string;
             const color = arg.event.extendedProps.color as string;
+            const professorColor = arg.event.extendedProps.professorColor as string;
+            const titleText = arg.event.title;
             return (
               <div
                 style={{
                   backgroundColor: color,
+                  borderRadius: "3px",
+                  padding: "1px 4px",
+                  fontSize: "9px",
+                  fontWeight: 500,
+                  color: "#ffffff",
+                  whiteSpace: "nowrap",
+                  overflow: "clip",
+                  textOverflow: "ellipsis",
                   width: "100%",
-                  height: "100%",
-                  borderRadius: "4px",
+                  opacity: 0.92,
                   display: "flex",
                   alignItems: "center",
                   gap: "4px",
-                  padding: "0 6px",
-                  overflow: "hidden",
                 }}
+                title={titleText}
               >
                 <span
                   style={{
-                    color: "#000",
-                    fontSize: "9px",
-                    fontWeight: 700,
+                    width: "6px",
+                    height: "6px",
+                    borderRadius: "9999px",
+                    backgroundColor: professorColor,
                     flexShrink: 0,
-                    opacity: 0.6,
-                    textTransform: "uppercase",
+                    boxShadow: "0 0 0 1px rgba(0,0,0,0.22)",
                   }}
-                >
-                  {turno === "manana" ? "M" : "T"}
-                </span>
+                  aria-hidden
+                />
                 <span
                   style={{
-                    color: "#000",
-                    fontSize: "10px",
-                    fontWeight: 600,
-                    overflow: "hidden",
+                    minWidth: 0,
                     whiteSpace: "nowrap",
+                    overflow: "hidden",
                     textOverflow: "ellipsis",
                   }}
                 >
-                  {arg.event.title}
+                  {titleText}
                 </span>
               </div>
             );

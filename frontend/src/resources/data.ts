@@ -38,15 +38,20 @@ export type CalendarEvent = {
 };
 
 export const EVENT_COLORS = [
-  "#60a5fa", // blue-400
-  "#a78bfa", // violet-400
-  "#34d399", // emerald-400
-  "#fb923c", // orange-400
-  "#f472b6", // pink-400
-  "#facc15", // yellow-400
-  "#2dd4bf", // teal-400
-  "#f87171", // red-400
+  "#4f86c6", // slate blue
+  "#7c6bc9", // soft purple
+  "#c4704f", // terracotta
+  "#4fa882", // muted teal
+  "#c4a44f", // warm gold
+  "#c45f7a", // dusty rose
+  "#5f9ea0", // cadet blue
+  "#8fbc8f", // soft sage
 ];
+
+export const PROFESSOR_COLORS: Record<string, string> = {
+  p1: "#4fc3f7", // azul claro
+  p2: "#ffb86b", // naranja suave
+};
 
 export type ReservaStatus =
   | "Pendiente"
@@ -151,7 +156,7 @@ export const cursos: Curso[] = [
 
 // ─── Eventos de calendario ────────────────────────────────────────────────────
 
-export const allEvents: CalendarEvent[] = [
+const baseEvents: Omit<CalendarEvent, "color">[] = [
   {
     id: "1",
     title: "React Course - Nova",
@@ -159,7 +164,6 @@ export const allEvents: CalendarEvent[] = [
     end: "2026-03-17",
     aula: "aula1",
     turno: "manana",
-    color: EVENT_COLORS[0],
     professorId: "p1",
     professorName: "Carlos Martínez",
     companyId: "e1",
@@ -173,7 +177,6 @@ export const allEvents: CalendarEvent[] = [
     end: "2026-03-24",
     aula: "aula2",
     turno: "manana",
-    color: EVENT_COLORS[1],
     professorId: "p2",
     professorName: "Laura Sánchez",
     companyId: "e2",
@@ -187,7 +190,6 @@ export const allEvents: CalendarEvent[] = [
     end: "2026-03-27",
     aula: "aula3",
     turno: "manana",
-    color: EVENT_COLORS[2],
     professorId: "p1",
     professorName: "Carlos Martínez",
     companyId: "e1",
@@ -201,7 +203,6 @@ export const allEvents: CalendarEvent[] = [
     end: "2026-04-01",
     aula: "aula1",
     turno: "tarde",
-    color: EVENT_COLORS[3],
     professorId: "p2",
     professorName: "Laura Sánchez",
     companyId: "e2",
@@ -215,7 +216,6 @@ export const allEvents: CalendarEvent[] = [
     end: "2026-04-04",
     aula: "aula2",
     turno: "tarde",
-    color: EVENT_COLORS[4],
     professorId: "p1",
     professorName: "Carlos Martínez",
     companyId: "e1",
@@ -229,7 +229,6 @@ export const allEvents: CalendarEvent[] = [
     end: "2026-03-26",
     aula: "aula3",
     turno: "tarde",
-    color: EVENT_COLORS[5],
     professorId: "p2",
     professorName: "Laura Sánchez",
     companyId: "e1",
@@ -243,7 +242,6 @@ export const allEvents: CalendarEvent[] = [
     end: "2026-03-17",
     aula: "aula1",
     turno: "tarde",
-    color: EVENT_COLORS[6],
     professorId: "p2",
     professorName: "Laura Sánchez",
     companyId: "e2",
@@ -251,6 +249,11 @@ export const allEvents: CalendarEvent[] = [
     capacitaciones: ["Introducción a Python", "POO"],
   },
 ];
+
+export const allEvents: CalendarEvent[] = baseEvents.map((event, index) => ({
+  ...event,
+  color: EVENT_COLORS[index % EVENT_COLORS.length],
+}));
 
 // ─── Clientes (empresas) ─────────────────────────────────────────────────────
 
