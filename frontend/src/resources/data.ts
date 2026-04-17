@@ -250,10 +250,35 @@ const baseEvents: Omit<CalendarEvent, "color">[] = [
   },
 ];
 
-export const allEvents: CalendarEvent[] = baseEvents.map((event, index) => ({
-  ...event,
-  color: EVENT_COLORS[index % EVENT_COLORS.length],
-}));
+function addDaysToIsoDate(isoDate: string, days: number): string {
+  const date = new Date(`${isoDate}T00:00:00`);
+  date.setDate(date.getDate() + days);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function getMondayFromIsoDate(isoDate: string): string {
+  const date = new Date(`${isoDate}T00:00:00`);
+  const day = date.getDay(); // 0 domingo, 1 lunes, ...
+  const diffToMonday = day === 0 ? -6 : 1 - day;
+  date.setDate(date.getDate() + diffToMonday);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const dayOfMonth = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${dayOfMonth}`;
+}
+
+export const allEvents: CalendarEvent[] = baseEvents.map((event, index) => {
+  const mondayStart = getMondayFromIsoDate(event.start);
+  return {
+    ...event,
+    start: mondayStart,
+    end: addDaysToIsoDate(mondayStart, 5),
+    color: EVENT_COLORS[index % EVENT_COLORS.length],
+  };
+});
 
 // ─── Clientes (empresas) ─────────────────────────────────────────────────────
 
