@@ -70,8 +70,26 @@ export default function ClassroomCalendar({
   );
 
   const fcEvents = useMemo(
-    () =>
-      events.map((e) => ({
+    () => {
+      const toLocalKey = (date: Date) => {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, "0");
+        const d = String(date.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
+      };
+
+      const addDays = (date: Date, days: number) => {
+        const d = new Date(date);
+        d.setDate(d.getDate() + days);
+        return d;
+      };
+
+      const isWeekday = (date: Date) => {
+        const day = date.getDay();
+        return day >= 1 && day <= 5;
+      };
+
+      const busyEvents = events.map((e) => ({
         id: e.id,
         title: e.title,
         start: e.start,
@@ -82,6 +100,7 @@ export default function ClassroomCalendar({
         borderColor: e.color,
         textColor: "#ffffff",
         extendedProps: {
+          isAvailable: false,
           color: e.color,
           turno: e.turno,
           sortOrder: e.turno === "manana" ? 0 : 1,
@@ -92,8 +111,100 @@ export default function ClassroomCalendar({
           companyName: e.companyName,
           capacitaciones: e.capacitaciones,
         },
-      })),
-    [events],
+      }));
+
+      const occupied = {
+        manana: new Set<string>(),
+        tarde: new Set<string>(),
+      };
+
+      for (const event of events) {
+        const start = new Date(`${event.start}T00:00:00`);
+        const endExclusive = new Date(`${event.end}T00:00:00`);
+        for (
+          const cursor = new Date(start);
+          cursor < endExclusive;
+          cursor.setDate(cursor.getDate() + 1)
+        ) {
+          if (!isWeekday(cursor)) continue;
+          occupied[event.turno].add(toLocalKey(cursor));
+        }
+      }
+
+      const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+      const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+
+      const createAvailabilityRanges = (turno: CalendarEvent["turno"]) => {
+        const ranges: Array<{ start: string; end: string }> = [];
+        let rangeStart: Date | null = null;
+        let previousDate: Date | null = null;
+
+        for (
+          const cursor = new Date(monthStart);
+          cursor <= monthEnd;
+          cursor.setDate(cursor.getDate() + 1)
+        ) {
+          if (!isWeekday(cursor)) continue;
+          const key = toLocalKey(cursor);
+          const isFree = !occupied[turno].has(key);
+
+          if (isFree) {
+            if (!rangeStart) {
+              rangeStart = new Date(cursor);
+            } else if (previousDate && toLocalKey(addDays(previousDate, 1)) !== key) {
+              ranges.push({
+                start: toLocalKey(rangeStart),
+                end: toLocalKey(addDays(previousDate, 1)),
+              });
+              rangeStart = new Date(cursor);
+            }
+            previousDate = new Date(cursor);
+          } else if (rangeStart && previousDate) {
+            ranges.push({
+              start: toLocalKey(rangeStart),
+              end: toLocalKey(addDays(previousDate, 1)),
+            });
+            rangeStart = null;
+            previousDate = null;
+          }
+        }
+
+        if (rangeStart && previousDate) {
+          ranges.push({
+            start: toLocalKey(rangeStart),
+            end: toLocalKey(addDays(previousDate, 1)),
+          });
+        }
+
+        return ranges;
+      };
+
+      const availabilityColor = "rgba(34, 197, 94, 0.33)";
+
+      const availabilityEvents = (["manana", "tarde"] as const).flatMap((turno) =>
+        createAvailabilityRanges(turno).map((range, idx) => ({
+          id: `available-${turno}-${range.start}-${idx}`,
+          title: "Disponible",
+          start: range.start,
+          end: range.end,
+          allDay: true,
+          order: turno === "manana" ? 0 : 1,
+          backgroundColor: availabilityColor,
+          borderColor: "transparent",
+          textColor: "#dcfce7",
+          extendedProps: {
+            isAvailable: true,
+            color: availabilityColor,
+            turno,
+            sortOrder: turno === "manana" ? 0 : 1,
+            professorColor: "transparent",
+          },
+        })),
+      );
+
+      return [...busyEvents, ...availabilityEvents];
+    },
+    [events, currentDate],
   );
 
   return (
@@ -110,7 +221,7 @@ export default function ClassroomCalendar({
             className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/10"
             aria-label={`Mes anterior en ${title}`}
           >
-            Anterior
+            ←
           </button>
           <button
             type="button"
@@ -118,7 +229,7 @@ export default function ClassroomCalendar({
             className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/10"
             aria-label={`Mes siguiente en ${title}`}
           >
-            Siguiente
+            →
           </button>
         </div>
       </div>
@@ -146,9 +257,27 @@ export default function ClassroomCalendar({
           events={fcEvents}
           eventOrder="order,title"
           eventOrderStrict={true}
+          eventDidMount={(info) => {
+            const turno = info.event.extendedProps.turno as CalendarEvent["turno"];
+            const isAvailable = Boolean(info.event.extendedProps.isAvailable);
+            const harness = info.el.closest(".fc-daygrid-event-harness");
+            if (!harness) return;
+            harness.classList.remove(
+              "turno-manana-slot",
+              "turno-tarde-slot",
+              "availability-slot",
+            );
+            harness.classList.add(
+              turno === "manana" ? "turno-manana-slot" : "turno-tarde-slot",
+            );
+            if (isAvailable) {
+              harness.classList.add("availability-slot");
+            }
+          }}
           eventContent={(arg) => {
             const professorColor = arg.event.extendedProps.professorColor as string;
             const turno = arg.event.extendedProps.turno as CalendarEvent["turno"];
+            const isAvailable = Boolean(arg.event.extendedProps.isAvailable);
             const turnoIcon = turno === "manana" ? "☀" : "☾";
             const titleText = arg.event.title;
             const showLabel = arg.isStart;
@@ -183,23 +312,26 @@ export default function ClassroomCalendar({
                 >
                   {turnoIcon}
                 </span>
-                <span
-                  style={{
-                    width: "8px",
-                    height: "8px",
-                    borderRadius: "9999px",
-                    backgroundColor: professorColor,
-                    flexShrink: 0,
-                    boxShadow: "0 0 0 1px rgba(0,0,0,0.22)",
-                  }}
-                  aria-hidden
-                />
+                {!isAvailable && (
+                  <span
+                    style={{
+                      width: "8px",
+                      height: "8px",
+                      borderRadius: "9999px",
+                      backgroundColor: professorColor,
+                      flexShrink: 0,
+                      boxShadow: "0 0 0 1px rgba(0,0,0,0.22)",
+                    }}
+                    aria-hidden
+                  />
+                )}
                 <span>{titleText}</span>
               </div>
             );
           }}
           eventClick={(info) => {
             const ep = info.event.extendedProps;
+            if (ep.isAvailable) return;
             const reconstructed: CalendarEvent = {
               id: info.event.id,
               title: info.event.title,

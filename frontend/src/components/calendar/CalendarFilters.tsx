@@ -10,8 +10,8 @@ type CalendarFiltersProps = {
 };
 
 const legend = [
-  { label: "Mañana — turno de mañana" },
-  { label: "Tarde — turno de tarde" },
+  { icon: "☀", label: "Mañana" },
+  { icon: "☾", label: "Tarde" },
 ];
 
 export default function CalendarFilters({
@@ -32,10 +32,13 @@ export default function CalendarFilters({
           </p>
           {/* Leyenda de turnos */}
           <div className="mt-3 flex flex-wrap items-center gap-4">
-            {legend.map(({ label }) => (
+            {legend.map(({ icon, label }) => (
               <div key={label} className="flex items-center gap-1.5">
                 <span className="h-2.5 w-8 rounded-sm bg-black/30 dark:bg-white/40" />
-                <span className="text-xs text-white/40">{label}</span>
+                <span className="text-xs text-white/70" aria-hidden>
+                  {icon}
+                </span>
+                <span className="text-xs text-white">{label}</span>
               </div>
             ))}
           </div>

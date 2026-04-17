@@ -203,12 +203,27 @@ body {
   min-height: 56px;
   padding-top: 2px;
   padding-bottom: 2px;
+  display: grid;
+  grid-template-rows: minmax(22px, auto) minmax(22px, auto);
+  row-gap: 4px;
+  align-content: start;
 }
 
 .calendar-modern-wrapper .fc-daygrid-event-harness {
   margin-left: 0;
   margin-right: 0;
 }
+
+.calendar-modern-wrapper .fc-daygrid-event-harness.turno-manana-slot {
+  grid-row: 1;
+  margin-top: 0;
+}
+
+.calendar-modern-wrapper .fc-daygrid-event-harness.turno-tarde-slot {
+  grid-row: 2;
+  margin-top: 0 !important;
+}
+
 
 .calendar-modern-wrapper .fc-event-resizer,
 .calendar-modern-wrapper .fc-event-resizer-start,
