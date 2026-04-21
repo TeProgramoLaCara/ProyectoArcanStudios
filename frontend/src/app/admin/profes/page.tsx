@@ -88,15 +88,15 @@ export default function ProfesPage() {
 
   return (
     <>
-      <section className="bg-[#050505] p-6">
+      <section className="bg-surface rounded-2xl p-6">
         <div className="mx-auto flex max-w-[1600px] flex-col gap-8">
 
           {/* ── Page header ── */}
-          <div className="relative overflow-hidden rounded-[26px] border border-white/10 bg-[#0d0d0d] p-6 shadow-[0_10px_40px_rgba(0,0,0,0.25)]">
+          <div className="relative overflow-hidden rounded-[26px] border border-white/10bg-surface p-6 shadow-[0_10px_40px_rgba(0,0,0,0.25)]">
             <div className="pointer-events-none absolute right-0 top-0 h-full w-64 bg-gradient-to-l from-[#267F6B]/10 to-transparent" />
             <div className="pointer-events-none absolute bottom-0 left-0 h-[2px] w-full bg-gradient-to-r from-[#267F6B]/0 via-[#267F6B]/60 to-[#267F6B]/0" />
-            <h1 className="text-3xl font-bold text-white">Profesores</h1>
-            <p className="mt-1 text-sm text-white/55">
+            <h1 className="text-3xl font-bold text-(--text-primary)">Profesores</h1>
+            <p className="mt-1 text-sm text-(--text-muted)">
               Gestión del equipo docente y sus capacitaciones.
             </p>
           </div>

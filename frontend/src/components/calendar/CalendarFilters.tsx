@@ -23,22 +23,22 @@ export default function CalendarFilters({
   onReset,
 }: CalendarFiltersProps) {
   return (
-    <div className="rounded-[26px] border border-white/10 bg-[#0d0d0d] p-6 shadow-[0_10px_40px_rgba(0,0,0,0.25)]">
+    <div className="rounded-[26px] border border-(--border) bg-surface p-6 shadow-[0_10px_40px_rgba(0,0,0,0.25)]">
       <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">Calendario</h1>
-          <p className="mt-1 text-sm text-white/55">
+          <h1 className="text-3xl font-bold text-(--text-primary)">Calendario</h1>
+          <p className="mt-1 text-sm text-(--text-secondary)">
             Calendario de cursos en las aulas de la academia.
           </p>
           {/* Leyenda de turnos */}
           <div className="mt-3 flex flex-wrap items-center gap-4">
             {legend.map(({ icon, label }) => (
               <div key={label} className="flex items-center gap-1.5">
-                <span className="h-2.5 w-8 rounded-sm bg-black/30 dark:bg-white/40" />
-                <span className="text-xs text-white/70" aria-hidden>
+                <span className="h-2.5 w-8 rounded-sm bg-(--border)" />
+                <span className="text-xs text-(--text-secondary)" aria-hidden>
                   {icon}
                 </span>
-                <span className="text-xs text-white">{label}</span>
+                <span className="text-xs text-(--text-primary)">{label}</span>
               </div>
             ))}
           </div>
@@ -50,7 +50,7 @@ export default function CalendarFilters({
                   className="h-2.5 w-2.5 rounded-full"
                   style={{ backgroundColor: prof.color }}
                 />
-                <span className="text-xs text-white/50">{prof.name}</span>
+                <span className="text-xs text-(--text-muted)">{prof.name}</span>
               </div>
             ))}
           </div>
@@ -59,7 +59,7 @@ export default function CalendarFilters({
           <div className="flex flex-col gap-2">
             <label
               htmlFor="professor-filter"
-              className="text-sm font-medium text-white/75"
+              className="text-sm font-medium text-(--text-secondary)"
             >
               Profesor
             </label>
@@ -67,7 +67,7 @@ export default function CalendarFilters({
               id="professor-filter"
               value={professor}
               onChange={(e) => onProfessorChange(e.target.value)}
-              className="min-w-[220px] rounded-2xl border border-white/10 bg-[#141414] px-4 py-3 text-sm text-white outline-none transition focus:border-white/20"
+              className="min-w-55 rounded-2xl border border-(--border) bg-surface-elevated px-4 py-3 text-sm text-(--text-primary) outline-none transition focus:border-(--border)"
             >
               <option value="all">Todos los profesores</option>
               <option value="p1">Profesor 1</option>
@@ -77,7 +77,7 @@ export default function CalendarFilters({
           <div className="flex flex-col gap-2">
             <label
               htmlFor="company-filter"
-              className="text-sm font-medium text-white/75"
+              className="text-sm font-medium text-(--text-secondary)"
             >
               Empresa
             </label>
@@ -85,7 +85,7 @@ export default function CalendarFilters({
               id="company-filter"
               value={company}
               onChange={(e) => onCompanyChange(e.target.value)}
-              className="min-w-[220px] rounded-2xl border border-white/10 bg-[#141414] px-4 py-3 text-sm text-white outline-none transition focus:border-white/20"
+              className="min-w-55 rounded-2xl border border-(--border) bg-surface-elevated px-4 py-3 text-sm text-(--text-primary) outline-none transition focus:border-(--border)"
             >
               <option value="all">Todas las empresas</option>
               <option value="e1">Nova</option>
@@ -95,7 +95,7 @@ export default function CalendarFilters({
           <button
             type="button"
             onClick={onReset}
-            className="rounded-2xl border border-white/10 bg-white px-5 py-3 text-sm font-semibold text-black transition hover:opacity-90"
+            className="rounded-2xl border border-(--border) bg-(--text-primary) px-5 py-3 text-sm font-semibold text-background transition hover:opacity-90"
           >
             Restaurar filtros
           </button>

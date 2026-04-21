@@ -87,34 +87,80 @@ export default function ClassroomCalendar({
         return d;
       };
 
+      const splitRangeByWeeks = (startStr: string, endStr: string) => {
+        const segments: Array<{ start: string; end: string }> = [];
+        const start = new Date(`${startStr}T00:00:00`);
+        const endExclusive = new Date(`${endStr}T00:00:00`);
+        let segmentStart: Date | null = null;
+        let previousDate: Date | null = null;
+
+        for (
+          const cursor = new Date(start);
+          cursor < endExclusive;
+          cursor.setDate(cursor.getDate() + 1)
+        ) {
+          const key = toLocalKey(cursor);
+          const startsNewWeek = cursor.getDay() === 1;
+
+          if (!segmentStart) {
+            segmentStart = new Date(cursor);
+          } else if (startsNewWeek && previousDate) {
+            segments.push({
+              start: toLocalKey(segmentStart),
+              end: toLocalKey(addDays(previousDate, 1)),
+            });
+            segmentStart = new Date(cursor);
+          } else if (previousDate && toLocalKey(addDays(previousDate, 1)) !== key) {
+            segments.push({
+              start: toLocalKey(segmentStart),
+              end: toLocalKey(addDays(previousDate, 1)),
+            });
+            segmentStart = new Date(cursor);
+          }
+
+          previousDate = new Date(cursor);
+        }
+
+        if (segmentStart && previousDate) {
+          segments.push({
+            start: toLocalKey(segmentStart),
+            end: toLocalKey(addDays(previousDate, 1)),
+          });
+        }
+
+        return segments;
+      };
+
+      const busyEvents = events.flatMap((e) =>
+        splitRangeByWeeks(e.start, e.end).map((segment, idx) => ({
+          id: `${e.id}-seg-${idx}`,
+          title: e.title,
+          start: segment.start,
+          end: segment.end,
+          allDay: true,
+          order: e.turno === "manana" ? 0 : 1,
+          backgroundColor: e.color,
+          borderColor: e.color,
+          textColor: "#ffffff",
+          extendedProps: {
+            isAvailable: false,
+            color: e.color,
+            turno: e.turno,
+            sortOrder: e.turno === "manana" ? 0 : 1,
+            professorId: e.professorId,
+            professorName: e.professorName,
+            professorColor: PROFESSOR_COLORS[e.professorId] ?? "#9ca3af",
+            companyId: e.companyId,
+            companyName: e.companyName,
+            capacitaciones: e.capacitaciones,
+          },
+        })),
+      );
+
       const isWeekday = (date: Date) => {
         const day = date.getDay();
         return day >= 1 && day <= 5;
       };
-
-      const busyEvents = events.map((e) => ({
-        id: e.id,
-        title: e.title,
-        start: e.start,
-        end: e.end,
-        allDay: true,
-        order: e.turno === "manana" ? 0 : 1,
-        backgroundColor: e.color,
-        borderColor: e.color,
-        textColor: "#ffffff",
-        extendedProps: {
-          isAvailable: false,
-          color: e.color,
-          turno: e.turno,
-          sortOrder: e.turno === "manana" ? 0 : 1,
-          professorId: e.professorId,
-          professorName: e.professorName,
-          professorColor: PROFESSOR_COLORS[e.professorId] ?? "#9ca3af",
-          companyId: e.companyId,
-          companyName: e.companyName,
-          capacitaciones: e.capacitaciones,
-        },
-      }));
 
       const occupied = {
         manana: new Set<string>(),
@@ -276,11 +322,11 @@ export default function ClassroomCalendar({
   };
 
   return (
-    <div className="flex flex-col rounded-[28px] border border-white/10 bg-[#0d0d0d] p-5 shadow-[0_8px_30px_rgba(0,0,0,0.22)]">
+    <div className="flex flex-col rounded-[28px] border border-(--border) bg-surface p-5 shadow-[0_8px_30px_rgba(0,0,0,0.22)]">
       <div className="mb-4 flex items-start justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-semibold text-white">{title}</h2>
-          <p className="mt-1 text-xs capitalize text-white/50">{monthLabel}</p>
+          <h2 className="text-2xl font-semibold text-(--text-primary)">{title}</h2>
+          <p className="mt-1 text-xs capitalize text-(--text-muted)">{monthLabel}</p>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -302,7 +348,7 @@ export default function ClassroomCalendar({
           <button
             type="button"
             onClick={handlePrevMonth}
-            className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/10"
+            className="rounded-lg border border-(--border) bg-surface-elevated px-2.5 py-1.5 text-xs font-medium text-(--text-secondary) transition hover:bg-(--border)"
             aria-label={`Mes anterior en ${title}`}
           >
             ←
@@ -310,7 +356,7 @@ export default function ClassroomCalendar({
           <button
             type="button"
             onClick={handleNextMonth}
-            className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/10"
+            className="rounded-lg border border-(--border) bg-surface-elevated px-2.5 py-1.5 text-xs font-medium text-(--text-secondary) transition hover:bg-(--border)"
             aria-label={`Mes siguiente en ${title}`}
           >
             →
@@ -373,7 +419,7 @@ export default function ClassroomCalendar({
       )}
 
       <div
-        className="calendar-modern-wrapper overflow-hidden rounded-[22px] border border-white/10 bg-[#121212]"
+        className="calendar-modern-wrapper overflow-hidden rounded-[22px] border border-(--border) bg-background"
         style={{ height: "600px" }}
       >
         <FullCalendar
@@ -420,7 +466,6 @@ export default function ClassroomCalendar({
             const turnoIcon = turno === "manana" ? "☀" : "☾";
             const titleText = arg.event.title;
             const showLabel = arg.isStart;
-            if (!showLabel) return null;
 
             return (
               <div
@@ -449,9 +494,9 @@ export default function ClassroomCalendar({
                   }}
                   aria-hidden
                 >
-                  {turnoIcon}
+                  {showLabel ? turnoIcon : ""}
                 </span>
-                {!isAvailable && (
+                {!isAvailable && showLabel && (
                   <span
                     style={{
                       width: "8px",
@@ -464,7 +509,7 @@ export default function ClassroomCalendar({
                     aria-hidden
                   />
                 )}
-                <span>{titleText}</span>
+                <span>{showLabel ? titleText : ""}</span>
               </div>
             );
           }}
