@@ -17,16 +17,17 @@ export default function Page() {
   const [professor, setProfessor] = useState("all");
   const [company, setCompany] = useState("all");
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [eventsState, setEventsState] = useState<CalendarEvent[]>(allEvents);
 
   const filteredEvents = useMemo(() => {
-    return allEvents.filter((event) => {
+    return eventsState.filter((event) => {
       const matchesProfessor =
         professor === "all" || event.professorId === professor;
       const matchesCompany =
         company === "all" || event.companyId === company;
       return matchesProfessor && matchesCompany;
     });
-  }, [professor, company]);
+  }, [eventsState, professor, company]);
 
   const aula1Events = useMemo(
     () => filteredEvents.filter((e) => e.aula === "aula1"),
@@ -43,7 +44,7 @@ export default function Page() {
 
   const professorLegend = useMemo(() => {
     const seen = new Set<string>();
-    return allEvents
+    return eventsState
       .filter((event) => {
         if (seen.has(event.professorId)) return false;
         seen.add(event.professorId);
@@ -54,7 +55,17 @@ export default function Page() {
         name: event.professorName,
         color: PROFESSOR_COLORS[event.professorId] ?? "#9ca3af",
       }));
-  }, []);
+  }, [eventsState]);
+
+  function handleDeleteEvent(eventId: string) {
+    setEventsState((prev) => prev.filter((event) => event.id !== eventId));
+  }
+
+  function handleUpdateEvent(updatedEvent: CalendarEvent) {
+    setEventsState((prev) =>
+      prev.map((event) => (event.id === updatedEvent.id ? updatedEvent : event)),
+    );
+  }
 
   function handlePrev() {
     setCurrentDate((d) => {
@@ -99,18 +110,24 @@ export default function Page() {
             aulaId="aula1"
             events={aula1Events}
             currentDate={currentDate}
+            onDeleteEvent={handleDeleteEvent}
+            onUpdateEvent={handleUpdateEvent}
           />
           <ClassroomCalendar
             title="Aula 2"
             aulaId="aula2"
             events={aula2Events}
             currentDate={currentDate}
+            onDeleteEvent={handleDeleteEvent}
+            onUpdateEvent={handleUpdateEvent}
           />
           <ClassroomCalendar
             title="Aula 3"
             aulaId="aula3"
             events={aula3Events}
             currentDate={currentDate}
+            onDeleteEvent={handleDeleteEvent}
+            onUpdateEvent={handleUpdateEvent}
           />
         </div>
       </div>

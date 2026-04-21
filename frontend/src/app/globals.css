@@ -206,11 +206,10 @@ body {
 
 .calendar-modern-wrapper .fc-daygrid-day-events {
   overflow: visible;
-  min-height: 40px;
+  min-height: 56px;
   padding-top: 0;
   padding-bottom: 0;
-  display: grid;
-  grid-template-rows: minmax(18px, auto) minmax(18px, auto);
+  grid-template-rows: minmax(16px, auto) minmax(18px, auto) minmax(18px, auto);
   row-gap: 0;
   align-content: start;
 }
@@ -223,13 +222,40 @@ body {
 }
 
 .calendar-modern-wrapper .fc-daygrid-event-harness.turno-manana-slot {
-  grid-row: 1;
+  grid-row: 2;
   margin-top: 0;
 }
 
 .calendar-modern-wrapper .fc-daygrid-event-harness.turno-tarde-slot {
-  grid-row: 2;
+  grid-row: 3;
   margin-top: 0 !important;
+}
+
+.calendar-modern-wrapper .fc-daygrid-day.has-day-note .fc-daygrid-day-events {
+  position: relative;
+}
+
+.calendar-modern-wrapper .fc-day-note-chip {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  top: 22px;
+  height: 14px;
+  border: none;
+  border-radius: 5px;
+  padding: 0 5px;
+  display: block;
+  text-align: left;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 14px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  z-index: 3;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+  cursor: pointer;
 }
 
 

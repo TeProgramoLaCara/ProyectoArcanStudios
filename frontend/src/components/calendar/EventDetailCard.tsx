@@ -7,6 +7,8 @@ type Props = {
   event: CalendarEvent;
   position: { x: number; y: number; openUpward?: boolean };
   onClose: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
 };
 
 function formatDate(dateStr: string) {
@@ -23,7 +25,13 @@ const AULA_LABELS: Record<string, string> = {
   aula3: "Aula 3",
 };
 
-export default function EventDetailCard({ event, position, onClose }: Props) {
+export default function EventDetailCard({
+  event,
+  position,
+  onClose,
+  onEdit,
+  onDelete,
+}: Props) {
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -156,6 +164,22 @@ export default function EventDetailCard({ event, position, onClose }: Props) {
               </span>
             ))}
           </div>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={onEdit}
+            className="rounded-lg border border-sky-300/35 bg-sky-500/20 px-3 py-2 text-xs font-semibold text-sky-100 transition hover:bg-sky-500/30"
+          >
+            Editar
+          </button>
+          <button
+            type="button"
+            onClick={onDelete}
+            className="rounded-lg border border-rose-300/35 bg-rose-500/20 px-3 py-2 text-xs font-semibold text-rose-100 transition hover:bg-rose-500/30"
+          >
+            Eliminar
+          </button>
         </div>
       </div>
     </div>

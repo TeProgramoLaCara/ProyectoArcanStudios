@@ -37,20 +37,11 @@ export type CalendarEvent = {
   capacitaciones: string[];
 };
 
-export const EVENT_COLORS = [
-  "#4f86c6", // slate blue
-  "#7c6bc9", // soft purple
-  "#c4704f", // terracotta
-  "#4fa882", // muted teal
-  "#c4a44f", // warm gold
-  "#c45f7a", // dusty rose
-  "#5f9ea0", // cadet blue
-  "#8fbc8f", // soft sage
-];
-
 export const PROFESSOR_COLORS: Record<string, string> = {
   p1: "#4fc3f7", // azul claro
   p2: "#ffb86b", // naranja suave
+  p3: "#a78bfa", // violeta
+  p4: "#34d399", // verde menta
 };
 
 export type ReservaStatus =
@@ -190,8 +181,8 @@ const baseEvents: Omit<CalendarEvent, "color">[] = [
     end: "2026-03-27",
     aula: "aula3",
     turno: "manana",
-    professorId: "p1",
-    professorName: "Carlos Martínez",
+    professorId: "p3",
+    professorName: "Diego Romero",
     companyId: "e1",
     companyName: "Nova",
     capacitaciones: ["Componentes y Auto Layout", "Design Systems"],
@@ -229,8 +220,8 @@ const baseEvents: Omit<CalendarEvent, "color">[] = [
     end: "2026-03-26",
     aula: "aula3",
     turno: "tarde",
-    professorId: "p2",
-    professorName: "Laura Sánchez",
+    professorId: "p4",
+    professorName: "Inés Delgado",
     companyId: "e1",
     companyName: "Nova",
     capacitaciones: ["Identidad corporativa", "Posicionamiento de marca"],
@@ -270,13 +261,14 @@ function getMondayFromIsoDate(isoDate: string): string {
   return `${year}-${month}-${dayOfMonth}`;
 }
 
-export const allEvents: CalendarEvent[] = baseEvents.map((event, index) => {
+export const allEvents: CalendarEvent[] = baseEvents.map((event) => {
   const mondayStart = getMondayFromIsoDate(event.start);
+  const durationDays = event.id === "1" ? 21 : 5;
   return {
     ...event,
     start: mondayStart,
-    end: addDaysToIsoDate(mondayStart, 5),
-    color: EVENT_COLORS[index % EVENT_COLORS.length],
+    end: addDaysToIsoDate(mondayStart, durationDays),
+    color: PROFESSOR_COLORS[event.professorId] ?? "#9ca3af",
   };
 });
 
