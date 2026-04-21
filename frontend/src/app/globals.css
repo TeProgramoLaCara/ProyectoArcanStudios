@@ -138,10 +138,13 @@ body {
   border: none !important;
   border-radius: 4px !important;
   padding: 0 !important;
+  margin: 0 !important;
 }
 
 .calendar-modern-wrapper .fc-event-main {
   color: inherit !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 .calendar-modern-wrapper .fc-daygrid-more-link {
@@ -177,6 +180,9 @@ body {
   min-height: 86px !important;
   position: relative;
   overflow: visible;
+  margin: 2px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   background:
     linear-gradient(
       to bottom,
@@ -190,28 +196,30 @@ body {
 .calendar-modern-wrapper .fc-daygrid-day-frame::before {
   content: "";
   position: absolute;
-  left: 4px;
-  right: 4px;
+  left: 6px;
+  right: 6px;
   top: 50%;
-  border-top: 2px solid rgba(148, 163, 184, 0.45);
+  border-top: 1px solid rgba(148, 163, 184, 0.4);
   pointer-events: none;
   z-index: 0;
 }
 
 .calendar-modern-wrapper .fc-daygrid-day-events {
   overflow: visible;
-  min-height: 56px;
-  padding-top: 2px;
-  padding-bottom: 2px;
+  min-height: 40px;
+  padding-top: 0;
+  padding-bottom: 0;
   display: grid;
-  grid-template-rows: minmax(22px, auto) minmax(22px, auto);
-  row-gap: 4px;
+  grid-template-rows: minmax(18px, auto) minmax(18px, auto);
+  row-gap: 0;
   align-content: start;
 }
 
 .calendar-modern-wrapper .fc-daygrid-event-harness {
   margin-left: 0;
   margin-right: 0;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
 }
 
 .calendar-modern-wrapper .fc-daygrid-event-harness.turno-manana-slot {
