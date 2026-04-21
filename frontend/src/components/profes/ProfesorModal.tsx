@@ -8,9 +8,9 @@ import { ALL_CAPS, CAP_TOGGLE_STYLES, INACTIVE_TOGGLE_PILL } from './colors';
 // ─── Shared styles ────────────────────────────────────────────────────────────
 
 const inputClass =
-  'w-full rounded-xl border border-white/10 bg-[#1a1a1a] px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none transition focus:border-[#267F6B]/60 focus:ring-1 focus:ring-[#267F6B]/30';
+  'w-full rounded-xl border border-(--border) bg-surface-input px-4 py-2.5 text-sm text-(--text-primary) placeholder:text-(--text-muted) outline-none transition focus:border-accent/60 focus:ring-1 focus:ring-accent/30';
 
-const labelClass = 'text-xs font-medium uppercase tracking-wider text-white/40';
+const labelClass = 'text-xs font-medium uppercase tracking-wider text-(--text-muted)';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -86,23 +86,23 @@ export default function ProfesorModal({ open, profesor, onClose, onSave }: Props
       />
 
       {/* Modal box */}
-      <div className="relative z-10 w-full max-w-lg overflow-hidden rounded-2xl border border-white/10 bg-[#111111] shadow-[0_32px_80px_rgba(0,0,0,0.7)]">
+      <div className="relative z-10 w-full max-w-lg overflow-hidden rounded-2xl border border-(--border) bg-surface shadow-[0_32px_80px_rgba(0,0,0,0.7)]">
         {/* Top accent bar */}
-        <div className="h-[3px] w-full bg-gradient-to-r from-[#267F6B]/0 via-[#267F6B] to-[#267F6B]/0" />
+        <div className="h-[3px] w-full bg-linear-to-r from-accent/0 via-accent to-accent/0" />
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 pt-5 pb-4">
-          <h3 className="text-base font-semibold text-white">
+          <h3 className="text-base font-semibold text-(--text-primary)">
             {profesor ? 'Editar profesor' : 'Añadir profesor'}
           </h3>
           <button
             onClick={onClose}
-            className="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xs text-white/40 transition hover:text-white/80"
+            className="flex h-7 w-7 items-center justify-center rounded-full border border-(--border) bg-surface-elevated text-xs text-(--text-muted) transition hover:text-(--text-primary)"
           >
             ✕
           </button>
         </div>
-        <div className="h-px bg-white/[0.06]" />
+        <div className="h-px bg-(--border-subtle)" />
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 px-6 py-5">
@@ -201,13 +201,13 @@ export default function ProfesorModal({ open, profesor, onClose, onSave }: Props
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-white/10 px-4 py-2 text-sm text-white/50 transition hover:text-white/80"
+              className="rounded-xl border border-(--border) px-4 py-2 text-sm text-(--text-secondary) transition hover:text-(--text-primary)"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="rounded-xl bg-[#267F6B] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#2fa58a]"
+              className="rounded-xl bg-accent px-5 py-2 text-sm font-semibold text-white transition hover:bg-accent-light"
             >
               Guardar
             </button>

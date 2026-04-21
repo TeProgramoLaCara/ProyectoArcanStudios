@@ -197,17 +197,17 @@ export default function ClassroomCalendar({
   );
 
   return (
-    <div className="flex flex-col rounded-[28px] border border-white/10 bg-[#0d0d0d] p-5 shadow-[0_8px_30px_rgba(0,0,0,0.22)]">
+    <div className="flex flex-col rounded-[28px] border border-(--border) bg-surface p-5 shadow-[0_8px_30px_rgba(0,0,0,0.22)]">
       <div className="mb-4 flex items-start justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-semibold text-white">{title}</h2>
-          <p className="mt-1 text-xs capitalize text-white/50">{monthLabel}</p>
+          <h2 className="text-2xl font-semibold text-(--text-primary)">{title}</h2>
+          <p className="mt-1 text-xs capitalize text-(--text-muted)">{monthLabel}</p>
         </div>
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={handlePrevMonth}
-            className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/10"
+            className="rounded-lg border border-(--border) bg-surface-elevated px-2.5 py-1.5 text-xs font-medium text-(--text-secondary) transition hover:bg-(--border)"
             aria-label={`Mes anterior en ${title}`}
           >
             ←
@@ -215,7 +215,7 @@ export default function ClassroomCalendar({
           <button
             type="button"
             onClick={handleNextMonth}
-            className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/10"
+            className="rounded-lg border border-(--border) bg-surface-elevated px-2.5 py-1.5 text-xs font-medium text-(--text-secondary) transition hover:bg-(--border)"
             aria-label={`Mes siguiente en ${title}`}
           >
             →
@@ -224,7 +224,7 @@ export default function ClassroomCalendar({
       </div>
 
       <div
-        className="calendar-modern-wrapper overflow-hidden rounded-[22px] border border-white/10 bg-[#121212]"
+        className="calendar-modern-wrapper overflow-hidden rounded-[22px] border border-(--border) bg-background"
         style={{ height: "600px" }}
       >
         <FullCalendar

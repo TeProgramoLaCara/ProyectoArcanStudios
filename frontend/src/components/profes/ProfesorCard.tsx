@@ -14,13 +14,13 @@ export default function ProfesorCard({ profesor, onEdit, onDelete }: Props) {
   const initials = `${profesor.nombre[0]}${profesor.apellidos[0]}`.toUpperCase();
 
   return (
-    <div className="relative flex flex-col gap-4 rounded-[18px] border border-[rgba(255,255,255,0.08)] bg-[#0f0f0f] p-5 transition hover:bg-[#131313]">
+    <div className="relative flex flex-col gap-4 rounded-[18px] border border-(--border) bg-surface p-5 transition hover:bg-surface-elevated">
 
       {/* Edit shortcut — top-right corner */}
       <button
         onClick={onEdit}
         title="Editar"
-        className="absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/5 text-sm text-white/30 transition hover:border-[#267F6B]/40 hover:text-[#2fa58a]"
+        className="absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-full border border-(--border) bg-surface-elevated text-sm text-(--text-muted) transition hover:border-accent/40 hover:text-accent-light"
       >
         ✎
       </button>
@@ -36,13 +36,13 @@ export default function ProfesorCard({ profesor, onEdit, onDelete }: Props) {
           </div>
           {/* Status dot */}
           <span
-            className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-[#0f0f0f]"
+            className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-surface"
             style={{ backgroundColor: STATUS_COLORS[profesor.status].dot }}
           />
         </div>
 
         <div className="min-w-0">
-          <p className="truncate font-semibold text-white">
+          <p className="truncate font-semibold text-(--text-primary)">
             {profesor.nombre} {profesor.apellidos}
           </p>
           <p
@@ -56,12 +56,12 @@ export default function ProfesorCard({ profesor, onEdit, onDelete }: Props) {
 
       {/* Contact */}
       <div className="flex flex-col gap-1.5">
-        <div className="flex items-center gap-2 text-sm text-white/50">
-          <span className="shrink-0 text-white/25">✉</span>
+        <div className="flex items-center gap-2 text-sm text-(--text-secondary)">
+          <span className="shrink-0 text-(--text-muted)">✉</span>
           <span className="truncate">{profesor.email}</span>
         </div>
-        <div className="flex items-center gap-2 text-sm text-white/50">
-          <span className="shrink-0 text-white/25">✆</span>
+        <div className="flex items-center gap-2 text-sm text-(--text-secondary)">
+          <span className="shrink-0 text-(--text-muted)">✆</span>
           <span>{profesor.tel}</span>
         </div>
       </div>
@@ -87,19 +87,19 @@ export default function ProfesorCard({ profesor, onEdit, onDelete }: Props) {
       </div>
 
       {/* Separator */}
-      <div className="h-px bg-white/[0.06]" />
+      <div className="h-px bg-(--border-subtle)" />
 
       {/* Footer actions */}
       <div className="flex items-center gap-2">
         <button
           onClick={onEdit}
-          className="flex-1 rounded-xl border border-white/10 py-2 text-sm text-white/50 transition hover:border-[#267F6B]/40 hover:text-[#2fa58a]"
+          className="flex-1 rounded-xl border border-(--border) py-2 text-sm text-(--text-secondary) transition hover:border-accent/40 hover:text-accent-light"
         >
           Editar
         </button>
         <button
           onClick={onDelete}
-          className="flex-1 rounded-xl border border-white/10 py-2 text-sm text-white/50 transition hover:border-red-500/30 hover:text-red-400"
+          className="flex-1 rounded-xl border border-(--border) py-2 text-sm text-(--text-secondary) transition hover:border-red-500/30 hover:text-red-400"
         >
           Eliminar
         </button>

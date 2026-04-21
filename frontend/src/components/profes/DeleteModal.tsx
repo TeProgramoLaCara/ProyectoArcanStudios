@@ -21,9 +21,9 @@ export default function DeleteModal({ open, profesorNombre, onClose, onConfirm }
       />
 
       {/* Modal box */}
-      <div className="relative z-10 w-full max-w-sm overflow-hidden rounded-2xl border border-white/10 bg-[#111111] shadow-[0_32px_80px_rgba(0,0,0,0.7)]">
+      <div className="relative z-10 w-full max-w-sm overflow-hidden rounded-2xl border border-(--border) bg-surface shadow-[0_32px_80px_rgba(0,0,0,0.7)]">
         {/* Top accent — red */}
-        <div className="h-[3px] w-full bg-gradient-to-r from-red-500/0 via-red-500/60 to-red-500/0" />
+        <div className="h-[3px] w-full bg-linear-to-r from-red-500/0 via-red-500/60 to-red-500/0" />
 
         <div className="flex flex-col items-center gap-5 px-6 py-7 text-center">
           {/* Alert icon */}
@@ -33,10 +33,10 @@ export default function DeleteModal({ open, profesorNombre, onClose, onConfirm }
 
           {/* Message */}
           <div>
-            <h3 className="text-base font-semibold text-white">Eliminar profesor</h3>
-            <p className="mt-2 text-sm leading-relaxed text-white/50">
+            <h3 className="text-base font-semibold text-(--text-primary)">Eliminar profesor</h3>
+            <p className="mt-2 text-sm leading-relaxed text-(--text-secondary)">
               ¿Estás seguro de que quieres eliminar a{' '}
-              <span className="font-semibold text-white/80">{profesorNombre}</span>?
+              <span className="font-semibold text-(--text-primary)">{profesorNombre}</span>?
               Esta acción no se puede deshacer.
             </p>
           </div>
@@ -45,7 +45,7 @@ export default function DeleteModal({ open, profesorNombre, onClose, onConfirm }
           <div className="flex w-full gap-2">
             <button
               onClick={onClose}
-              className="flex-1 rounded-xl border border-white/10 py-2 text-sm text-white/50 transition hover:text-white/80"
+              className="flex-1 rounded-xl border border-(--border) py-2 text-sm text-(--text-secondary) transition hover:text-(--text-primary)"
             >
               Cancelar
             </button>
