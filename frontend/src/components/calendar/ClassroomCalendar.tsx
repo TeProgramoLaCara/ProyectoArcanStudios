@@ -28,12 +28,34 @@ export default function ClassroomCalendar({
     y: 0,
     openUpward: false,
   });
+  const monthLabel = useMemo(
+    () =>
+      currentDate.toLocaleDateString("es-ES", {
+        month: "long",
+        year: "numeric",
+      }),
+    [currentDate],
+  );
+
+  const handlePrevMonth = () => {
+    calendarRef.current?.getApi().prev();
+  };
+
+  const handleNextMonth = () => {
+    calendarRef.current?.getApi().next();
+  };
 
   useEffect(() => {
-    const api = calendarRef.current?.getApi();
-    if (api) {
-      api.gotoDate(currentDate);
-    }
+    const frameId = window.requestAnimationFrame(() => {
+      const api = calendarRef.current?.getApi();
+      if (api) {
+        api.gotoDate(currentDate);
+      }
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+    };
   }, [currentDate]);
 
   const fcEvents = useMemo(
