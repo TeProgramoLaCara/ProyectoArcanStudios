@@ -2,6 +2,7 @@
 
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
+import interactionPlugin from "@fullcalendar/interaction";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { CalendarEvent } from "@/app/admin/calendario/page";
 import { PROFESSOR_COLORS } from "@/resources/data";
@@ -21,7 +22,6 @@ export default function ClassroomCalendar({
   currentDate,
 }: ClassroomCalendarProps) {
   const calendarRef = useRef<FullCalendar>(null);
-  const [viewDate, setViewDate] = useState(currentDate);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [cardPosition, setCardPosition] = useState({
     x: 0,
@@ -30,44 +30,11 @@ export default function ClassroomCalendar({
   });
 
   useEffect(() => {
-    let cancelled = false;
-
-    queueMicrotask(() => {
-      if (cancelled) return;
-      const api = calendarRef.current?.getApi();
-      if (api) {
-        api.gotoDate(currentDate);
-        setViewDate(api.getDate());
-      }
-    });
-
-    return () => {
-      cancelled = true;
-    };
+    const api = calendarRef.current?.getApi();
+    if (api) {
+      api.gotoDate(currentDate);
+    }
   }, [currentDate]);
-
-  function handlePrevMonth() {
-    const api = calendarRef.current?.getApi();
-    if (!api) return;
-    api.prev();
-    setViewDate(api.getDate());
-  }
-
-  function handleNextMonth() {
-    const api = calendarRef.current?.getApi();
-    if (!api) return;
-    api.next();
-    setViewDate(api.getDate());
-  }
-
-  const monthLabel = useMemo(
-    () =>
-      viewDate.toLocaleDateString("es-ES", {
-        month: "long",
-        year: "numeric",
-      }),
-    [viewDate],
-  );
 
   const fcEvents = useMemo(
     () => {
@@ -240,7 +207,7 @@ export default function ClassroomCalendar({
       >
         <FullCalendar
           ref={calendarRef}
-          plugins={[dayGridPlugin]}
+          plugins={[dayGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
           headerToolbar={false}
           initialDate={currentDate}
