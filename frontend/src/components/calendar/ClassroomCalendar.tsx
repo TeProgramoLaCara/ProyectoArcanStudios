@@ -1,6 +1,6 @@
 "use client";
 
-import FullCalendar from "@fullcalendar/react";
+import { Calendar } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -21,7 +21,8 @@ export default function ClassroomCalendar({
   events,
   currentDate,
 }: ClassroomCalendarProps) {
-  const calendarRef = useRef<FullCalendar>(null);
+  const calendarRootRef = useRef<HTMLDivElement | null>(null);
+  const calendarApiRef = useRef<Calendar | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [cardPosition, setCardPosition] = useState({
     x: 0,
@@ -38,25 +39,12 @@ export default function ClassroomCalendar({
   );
 
   const handlePrevMonth = () => {
-    calendarRef.current?.getApi().prev();
+    calendarApiRef.current?.prev();
   };
 
   const handleNextMonth = () => {
-    calendarRef.current?.getApi().next();
+    calendarApiRef.current?.next();
   };
-
-  useEffect(() => {
-    const frameId = window.requestAnimationFrame(() => {
-      const api = calendarRef.current?.getApi();
-      if (api) {
-        api.gotoDate(currentDate);
-      }
-    });
-
-    return () => {
-      window.cancelAnimationFrame(frameId);
-    };
-  }, [currentDate]);
 
   const fcEvents = useMemo(
     () => {
@@ -127,6 +115,8 @@ export default function ClassroomCalendar({
         const ranges: Array<{ start: string; end: string }> = [];
         let rangeStart: Date | null = null;
         let previousDate: Date | null = null;
+        const otherTurno: CalendarEvent["turno"] =
+          turno === "manana" ? "tarde" : "manana";
 
         for (
           const cursor = new Date(monthStart);
@@ -135,9 +125,11 @@ export default function ClassroomCalendar({
         ) {
           if (!isWeekday(cursor)) continue;
           const key = toLocalKey(cursor);
-          const isFree = !occupied[turno].has(key);
+          const thisTurnoIsFree = !occupied[turno].has(key);
+          const otherTurnoIsOccupied = occupied[otherTurno].has(key);
+          const isPartiallyReserved = thisTurnoIsFree && otherTurnoIsOccupied;
 
-          if (isFree) {
+          if (isPartiallyReserved) {
             if (!rangeStart) {
               rangeStart = new Date(cursor);
             } else if (previousDate && toLocalKey(addDays(previousDate, 1)) !== key) {
@@ -196,6 +188,153 @@ export default function ClassroomCalendar({
     [events, currentDate],
   );
 
+  useEffect(() => {
+    if (!calendarRootRef.current || calendarApiRef.current) return;
+
+    const calendar = new Calendar(calendarRootRef.current, {
+      plugins: [dayGridPlugin, interactionPlugin],
+      initialView: "dayGridMonth",
+      headerToolbar: false,
+      initialDate: currentDate,
+      height: "100%",
+      fixedWeekCount: false,
+      dayMaxEventRows: 2,
+      weekends: false,
+      editable: false,
+      eventStartEditable: false,
+      eventDurationEditable: false,
+      defaultAllDay: true,
+      eventDisplay: "block",
+      displayEventTime: false,
+      events: fcEvents,
+      eventOrder: "order,title",
+      eventOrderStrict: true,
+      eventDidMount: (info) => {
+        const turno = info.event.extendedProps.turno as CalendarEvent["turno"];
+        const isAvailable = Boolean(info.event.extendedProps.isAvailable);
+        const harness = info.el.closest(".fc-daygrid-event-harness");
+        if (!harness) return;
+        harness.classList.remove(
+          "turno-manana-slot",
+          "turno-tarde-slot",
+          "availability-slot",
+        );
+        harness.classList.add(
+          turno === "manana" ? "turno-manana-slot" : "turno-tarde-slot",
+        );
+        if (isAvailable) {
+          harness.classList.add("availability-slot");
+        }
+      },
+      eventContent: (arg) => {
+        const professorColor = arg.event.extendedProps.professorColor as string;
+        const turno = arg.event.extendedProps.turno as CalendarEvent["turno"];
+        const isAvailable = Boolean(arg.event.extendedProps.isAvailable);
+        const turnoIcon = turno === "manana" ? "☀" : "☾";
+        const titleText = arg.event.title;
+        if (!arg.isStart) {
+          return { domNodes: [] };
+        }
+
+        const container = document.createElement("div");
+        container.style.padding = "1px 6px";
+        container.style.fontSize = "12px";
+        container.style.fontWeight = "600";
+        container.style.lineHeight = "1.05";
+        container.style.minHeight = "18px";
+        container.style.color = "#ffffff";
+        container.style.whiteSpace = "nowrap";
+        container.style.overflow = "hidden";
+        container.style.textOverflow = "ellipsis";
+        container.style.display = "flex";
+        container.style.alignItems = "center";
+        container.style.gap = "6px";
+        container.title = titleText;
+
+        const turnoNode = document.createElement("span");
+        turnoNode.style.fontSize = "12px";
+        turnoNode.style.lineHeight = "1";
+        turnoNode.style.flexShrink = "0";
+        turnoNode.style.opacity = "0.95";
+        turnoNode.setAttribute("aria-hidden", "true");
+        turnoNode.textContent = turnoIcon;
+        container.appendChild(turnoNode);
+
+        if (!isAvailable) {
+          const dotNode = document.createElement("span");
+          dotNode.style.width = "8px";
+          dotNode.style.height = "8px";
+          dotNode.style.borderRadius = "9999px";
+          dotNode.style.backgroundColor = professorColor;
+          dotNode.style.flexShrink = "0";
+          dotNode.style.boxShadow = "0 0 0 1px rgba(0,0,0,0.22)";
+          dotNode.setAttribute("aria-hidden", "true");
+          container.appendChild(dotNode);
+        }
+
+        const titleNode = document.createElement("span");
+        titleNode.textContent = titleText;
+        container.appendChild(titleNode);
+
+        return { domNodes: [container] };
+      },
+      eventClick: (info) => {
+        const ep = info.event.extendedProps;
+        if (ep.isAvailable) return;
+        const reconstructed: CalendarEvent = {
+          id: info.event.id,
+          title: info.event.title,
+          start: info.event.startStr,
+          end: info.event.endStr,
+          aula: aulaId as CalendarEvent["aula"],
+          turno: ep.turno as CalendarEvent["turno"],
+          color: ep.color as string,
+          professorId: ep.professorId as string,
+          professorName: ep.professorName as string,
+          companyId: ep.companyId as string,
+          companyName: ep.companyName as string,
+          capacitaciones: ep.capacitaciones as string[],
+        };
+
+        const rect = info.el.getBoundingClientRect();
+        const cardHeight = 320;
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
+
+        const y =
+          spaceBelow >= cardHeight || spaceBelow >= spaceAbove
+            ? rect.bottom
+            : rect.top;
+
+        setCardPosition({
+          x: rect.left + rect.width / 2,
+          y,
+          openUpward: spaceBelow < cardHeight && spaceAbove > spaceBelow,
+        });
+        setSelectedEvent(reconstructed);
+      },
+    });
+
+    calendar.render();
+    calendarApiRef.current = calendar;
+
+    return () => {
+      calendar.destroy();
+      calendarApiRef.current = null;
+    };
+  }, [aulaId, fcEvents, currentDate]);
+
+  useEffect(() => {
+    if (!calendarApiRef.current) return;
+    calendarApiRef.current.removeAllEvents();
+    calendarApiRef.current.addEventSource(fcEvents);
+  }, [fcEvents]);
+
+  useEffect(() => {
+    if (!calendarApiRef.current) return;
+    calendarApiRef.current.gotoDate(currentDate);
+  }, [currentDate]);
+
   return (
     <div className="flex flex-col rounded-[28px] border border-(--border) bg-surface p-5 shadow-[0_8px_30px_rgba(0,0,0,0.22)]">
       <div className="mb-4 flex items-start justify-between gap-4">
@@ -227,133 +366,7 @@ export default function ClassroomCalendar({
         className="calendar-modern-wrapper overflow-hidden rounded-[22px] border border-(--border) bg-background"
         style={{ height: "600px" }}
       >
-        <FullCalendar
-          ref={calendarRef}
-          plugins={[dayGridPlugin, interactionPlugin]}
-          initialView="dayGridMonth"
-          headerToolbar={false}
-          initialDate={currentDate}
-          height="100%"
-          fixedWeekCount={false}
-          dayMaxEventRows={2}
-          weekends={false}
-          editable={false}
-          eventStartEditable={false}
-          eventDurationEditable={false}
-          defaultAllDay={true}
-          eventDisplay="block"
-          displayEventTime={false}
-          events={fcEvents}
-          eventOrder="order,title"
-          eventOrderStrict={true}
-          eventDidMount={(info) => {
-            const turno = info.event.extendedProps.turno as CalendarEvent["turno"];
-            const isAvailable = Boolean(info.event.extendedProps.isAvailable);
-            const harness = info.el.closest(".fc-daygrid-event-harness");
-            if (!harness) return;
-            harness.classList.remove(
-              "turno-manana-slot",
-              "turno-tarde-slot",
-              "availability-slot",
-            );
-            harness.classList.add(
-              turno === "manana" ? "turno-manana-slot" : "turno-tarde-slot",
-            );
-            if (isAvailable) {
-              harness.classList.add("availability-slot");
-            }
-          }}
-          eventContent={(arg) => {
-            const professorColor = arg.event.extendedProps.professorColor as string;
-            const turno = arg.event.extendedProps.turno as CalendarEvent["turno"];
-            const isAvailable = Boolean(arg.event.extendedProps.isAvailable);
-            const turnoIcon = turno === "manana" ? "☀" : "☾";
-            const titleText = arg.event.title;
-            const showLabel = arg.isStart;
-            if (!showLabel) return null;
-
-            return (
-              <div
-                style={{
-                  padding: "3px 8px",
-                  fontSize: "12px",
-                  fontWeight: 600,
-                  lineHeight: 1.2,
-                  minHeight: "22px",
-                  color: "#ffffff",
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                }}
-                title={titleText}
-              >
-                <span
-                  style={{
-                    fontSize: "12px",
-                    lineHeight: 1,
-                    flexShrink: 0,
-                    opacity: 0.95,
-                  }}
-                  aria-hidden
-                >
-                  {turnoIcon}
-                </span>
-                {!isAvailable && (
-                  <span
-                    style={{
-                      width: "8px",
-                      height: "8px",
-                      borderRadius: "9999px",
-                      backgroundColor: professorColor,
-                      flexShrink: 0,
-                      boxShadow: "0 0 0 1px rgba(0,0,0,0.22)",
-                    }}
-                    aria-hidden
-                  />
-                )}
-                <span>{titleText}</span>
-              </div>
-            );
-          }}
-          eventClick={(info) => {
-            const ep = info.event.extendedProps;
-            if (ep.isAvailable) return;
-            const reconstructed: CalendarEvent = {
-              id: info.event.id,
-              title: info.event.title,
-              start: info.event.startStr,
-              end: info.event.endStr,
-              aula: aulaId as CalendarEvent["aula"],
-              turno: ep.turno as CalendarEvent["turno"],
-              color: ep.color as string,
-              professorId: ep.professorId as string,
-              professorName: ep.professorName as string,
-              companyId: ep.companyId as string,
-              companyName: ep.companyName as string,
-              capacitaciones: ep.capacitaciones as string[],
-            };
-
-            const rect = info.el.getBoundingClientRect();
-            const cardHeight = 320;
-            const spaceBelow = window.innerHeight - rect.bottom;
-            const spaceAbove = rect.top;
-
-            const y =
-              spaceBelow >= cardHeight || spaceBelow >= spaceAbove
-                ? rect.bottom
-                : rect.top;
-
-            setCardPosition({
-              x: rect.left + rect.width / 2,
-              y,
-              openUpward: spaceBelow < cardHeight && spaceAbove > spaceBelow,
-            });
-            setSelectedEvent(reconstructed);
-          }}
-        />
+        <div ref={calendarRootRef} className="h-full" />
       </div>
 
       {selectedEvent && (
