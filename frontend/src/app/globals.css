@@ -5,42 +5,130 @@
 
 :root,
 html.dark {
+  /* Fondos y superficies */
   --bg:               #050505;
   --surface:          #0d0d0d;
   --surface-elevated: #141414;
   --surface-input:    #1a1a1a;
+
+  /* Bordes */
   --border:           rgba(255,255,255,0.10);
   --border-subtle:    rgba(255,255,255,0.06);
+
+  /* Texto */
   --text-primary:     #ffffff;
   --text-secondary:   rgba(255,255,255,0.55);
   --text-muted:       rgba(255,255,255,0.35);
+
+  /* Acento */
   --accent:           #267F6B;
   --accent-light:     #2fa58a;
+
+  /* Overlay */
+  --overlay-bg:       rgba(0,0,0,0.70);
+
+  /* Status inactivo (profesores) */
+  --status-inactive-dot:   rgba(255,255,255,0.20);
+  --status-inactive-text:  rgba(255,255,255,0.30);
+
+  /* Pills inactivas (modales de profesor) */
+  --inactive-pill-color:   rgba(255,255,255,0.35);
+  --inactive-pill-bg:      rgba(255,255,255,0.04);
+  --inactive-pill-border:  rgba(255,255,255,0.08);
+
+  /* Calendario */
+  --calendar-cell-border:  rgba(255,255,255,0.12);
+  --calendar-divider:      rgba(148,163,184,0.40);
+
+  /* Badges de estado de reserva */
+  --status-pendiente-color:   #facc15;
+  --status-pendiente-bg:      rgba(234,179,8,0.10);
+  --status-pendiente-border:  rgba(234,179,8,0.30);
+  --status-confirmada-color:  #2fa58a;
+  --status-confirmada-bg:     rgba(38,127,107,0.10);
+  --status-confirmada-border: rgba(38,127,107,0.40);
+  --status-encurso-color:     #38bdf8;
+  --status-encurso-bg:        rgba(14,165,233,0.10);
+  --status-encurso-border:    rgba(14,165,233,0.30);
+  --status-cancelada-color:   #f87171;
+  --status-cancelada-bg:      rgba(239,68,68,0.10);
+  --status-cancelada-border:  rgba(239,68,68,0.30);
+
+  /* Badges de categoría de curso */
+  --category-blender-color:   #fb923c;
+  --category-blender-bg:      rgba(249,115,22,0.10);
+  --category-blender-border:  rgba(249,115,22,0.30);
+  --category-unity-color:     #38bdf8;
+  --category-unity-bg:        rgba(14,165,233,0.10);
+  --category-unity-border:    rgba(14,165,233,0.30);
 }
 
 html.light {
-  --bg:               #f5f5f5;
-  --surface:          #ffffff;
-  --surface-elevated: #f0f0f0;
-  --surface-input:    #e8e8e8;
-  --border:           rgba(0,0,0,0.10);
-  --border-subtle:    rgba(0,0,0,0.06);
-  --text-primary:     #0a0a0a;
-  --text-secondary:   rgba(0,0,0,0.55);
-  --text-muted:       rgba(0,0,0,0.35);
+  /* Fondos y superficies — tonos cálidos tipo papel/estudio */
+  --bg:               #f8f6f2;
+  --surface:          #f0ece4;
+  --surface-elevated: #e8e2d8;
+  --surface-input:    #e1dbd0;
+
+  /* Bordes cálidos */
+  --border:           rgba(100,78,42,0.14);
+  --border-subtle:    rgba(100,78,42,0.08);
+
+  /* Texto cálido */
+  --text-primary:     #1a1208;
+  --text-secondary:   #5a4a35;
+  --text-muted:       #8a7b6e;
+
+  /* Acento (igual en ambos temas) */
   --accent:           #267F6B;
   --accent-light:     #2fa58a;
+
+  /* Overlay */
+  --overlay-bg:       rgba(0,0,0,0.50);
+
+  /* Status inactivo (profesores) */
+  --status-inactive-dot:   #94a3b8;
+  --status-inactive-text:  #64748b;
+
+  /* Pills inactivas (modales de profesor) */
+  --inactive-pill-color:   #8a7b6e;
+  --inactive-pill-bg:      rgba(100,78,42,0.05);
+  --inactive-pill-border:  rgba(100,78,42,0.12);
+
+  /* Calendario */
+  --calendar-cell-border:  rgba(100,78,42,0.18);
+  --calendar-divider:      rgba(100,78,42,0.25);
+
+  /* Badges de estado de reserva */
+  --status-pendiente-color:   #b45309;
+  --status-pendiente-bg:      rgba(180,83,9,0.10);
+  --status-pendiente-border:  rgba(180,83,9,0.30);
+  --status-confirmada-color:  #267F6B;
+  --status-confirmada-bg:     rgba(38,127,107,0.10);
+  --status-confirmada-border: rgba(38,127,107,0.30);
+  --status-encurso-color:     #0369a1;
+  --status-encurso-bg:        rgba(3,105,161,0.10);
+  --status-encurso-border:    rgba(3,105,161,0.30);
+  --status-cancelada-color:   #b91c1c;
+  --status-cancelada-bg:      rgba(185,28,28,0.10);
+  --status-cancelada-border:  rgba(185,28,28,0.30);
+
+  /* Badges de categoría de curso */
+  --category-blender-color:   #ea580c;
+  --category-blender-bg:      rgba(234,88,12,0.10);
+  --category-blender-border:  rgba(234,88,12,0.30);
+  --category-unity-color:     #0284c7;
+  --category-unity-bg:        rgba(2,132,199,0.10);
+  --category-unity-border:    rgba(2,132,199,0.30);
 }
 
-/* ── Variables heredadas de Next.js (no modificar) ── */
+/* ── Variables heredadas de Next.js ── */
 :root {
   --background: #ffffff;
   --foreground: #171717;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
@@ -61,214 +149,8 @@ html.light {
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg);
+  color: var(--text-primary);
   font-family: Arial, Helvetica, sans-serif;
 }
 
-.calendar-modern-wrapper .fc {
-  font-family: inherit;
-  color: var(--text-primary);
-  height: 100%;
-}
-
-.calendar-modern-wrapper .fc-toolbar {
-  padding: 1rem 1rem 0.9rem 1rem;
-  background: var(--bg);
-  border-bottom: 1px solid var(--border-subtle);
-}
-
-.calendar-modern-wrapper .fc-toolbar-title {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.calendar-modern-wrapper .fc-button {
-  background: var(--surface-input) !important;
-  border: 1px solid var(--border) !important;
-  color: var(--text-primary) !important;
-  box-shadow: none !important;
-  padding: 0.45rem 0.8rem !important;
-  border-radius: 0.9rem !important;
-  font-size: 0.875rem !important;
-}
-
-.calendar-modern-wrapper .fc-button:hover {
-  background: var(--surface-elevated) !important;
-}
-
-.calendar-modern-wrapper .fc-button:focus {
-  box-shadow: none !important;
-}
-
-.calendar-modern-wrapper .fc-scrollgrid {
-  border: none !important;
-}
-
-.calendar-modern-wrapper .fc-theme-standard td,
-.calendar-modern-wrapper .fc-theme-standard th {
-  border-color: var(--border) !important;
-}
-
-.calendar-modern-wrapper .fc-col-header-cell {
-  background: var(--surface);
-  padding: 0.5rem 0;
-}
-
-.calendar-modern-wrapper .fc-col-header-cell-cushion {
-  color: var(--text-secondary);
-  font-size: 0.78rem;
-  font-weight: 600;
-  text-decoration: none !important;
-}
-
-.calendar-modern-wrapper .fc-daygrid-day-number {
-  color: var(--text-secondary);
-  font-size: 0.82rem;
-  padding: 0.55rem;
-  text-decoration: none !important;
-}
-
-.calendar-modern-wrapper .fc-day-today {
-  background: var(--border-subtle) !important;
-}
-
-.calendar-modern-wrapper .fc-event {
-  border: none !important;
-  border-radius: 4px !important;
-  padding: 0 !important;
-  margin: 0 !important;
-}
-
-.calendar-modern-wrapper .fc-event-main {
-  color: inherit !important;
-  padding: 0 !important;
-  margin: 0 !important;
-}
-
-.calendar-modern-wrapper .fc-daygrid-more-link {
-  color: var(--text-secondary) !important;
-}
-
-.calendar-modern-wrapper .fc-scroller {
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
-}
-
-.calendar-modern-wrapper .fc-scroller::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-.calendar-modern-wrapper .fc-scroller::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 999px;
-}
-
-.calendar-modern-wrapper .fc-scroller::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-/* ── Calendar cell height ── */
-.calendar-modern-wrapper .fc-daygrid-day {
-  height: 86px !important;
-  min-height: 86px !important;
-}
-
-.calendar-modern-wrapper .fc-daygrid-day-frame {
-  min-height: 86px !important;
-  position: relative;
-  overflow: visible;
-  margin: 2px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background:
-    linear-gradient(
-      to bottom,
-      var(--border-subtle) 0%,
-      var(--border-subtle) 49.5%,
-      transparent 49.5%,
-      transparent 100%
-    );
-}
-
-.calendar-modern-wrapper .fc-daygrid-day-frame::before {
-  content: "";
-  position: absolute;
-  left: 6px;
-  right: 6px;
-  top: 50%;
-  border-top: 1px solid rgba(148, 163, 184, 0.4);
-  pointer-events: none;
-  z-index: 0;
-}
-
-.calendar-modern-wrapper .fc-daygrid-day-events {
-  overflow: visible;
-  min-height: 56px;
-  padding-top: 0;
-  padding-bottom: 0;
-  grid-template-rows: minmax(16px, auto) minmax(18px, auto) minmax(18px, auto);
-  row-gap: 0;
-  align-content: start;
-}
-
-.calendar-modern-wrapper .fc-daygrid-event-harness {
-  margin-left: 0;
-  margin-right: 0;
-  margin-top: 0 !important;
-  margin-bottom: 0 !important;
-}
-
-.calendar-modern-wrapper .fc-daygrid-event-harness.turno-manana-slot {
-  grid-row: 2;
-  margin-top: 0;
-}
-
-.calendar-modern-wrapper .fc-daygrid-event-harness.turno-tarde-slot {
-  grid-row: 3;
-  margin-top: 0 !important;
-}
-
-.calendar-modern-wrapper .fc-daygrid-day.has-day-note .fc-daygrid-day-events {
-  position: relative;
-}
-
-.calendar-modern-wrapper .fc-day-note-chip {
-  position: absolute;
-  left: 6px;
-  right: 6px;
-  top: 22px;
-  height: 14px;
-  border: none;
-  border-radius: 5px;
-  padding: 0 5px;
-  display: block;
-  text-align: left;
-  color: #ffffff;
-  font-size: 10px;
-  font-weight: 700;
-  line-height: 14px;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  z-index: 3;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
-  cursor: pointer;
-}
-
-
-.calendar-modern-wrapper .fc-event-resizer,
-.calendar-modern-wrapper .fc-event-resizer-start,
-.calendar-modern-wrapper .fc-event-resizer-end {
-  display: none !important;
-}
-
-.calendar-modern-wrapper .fc-event-resizer::before,
-.calendar-modern-wrapper .fc-event-resizer::after,
-.calendar-modern-wrapper .fc-event-resizer-start::before,
-.calendar-modern-wrapper .fc-event-resizer-end::before {
-  content: none !important;
-  display: none !important;
-}

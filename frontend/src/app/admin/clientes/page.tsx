@@ -1,7 +1,6 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useTheme } from '@/context/ThemeContext';
 import MetricCard from '@/components/reservations/MetriCard';
 import ClientesFilters from '@/components/clientes/ClientesFilters';
 import EmpresaCard from '@/components/clientes/EmpresaCard';
@@ -9,11 +8,7 @@ import EmpresaModal from '@/components/clientes/EmpresaModal';
 import DeleteConfirmModal from '@/components/clientes/DeleteConfirmModal';
 import { empresas as initialEmpresas, type Empresa } from '@/resources/data';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 type ModalState = { mode: 'create' | 'edit'; empresa?: Empresa } | null;
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function ClientesPage() {
   const [empresas, setEmpresas] = useState<Empresa[]>(initialEmpresas);
@@ -21,27 +16,22 @@ export default function ClientesPage() {
   const [search, setSearch] = useState('');
   const [modalState, setModalState] = useState<ModalState>(null);
   const [deleteTarget, setDeleteTarget] = useState<Empresa | null>(null);
-  const { isDark } = useTheme();
 
-  // ── Métricas ──
-  const totalEmpresas = empresas.length;
-  const totalUsuarios = empresas.reduce((sum, e) => sum + e.usuarios.length, 0);
-  const completas = empresas.filter((e) => e.usuarios.length >= 5).length;
+  const totalEmpresas    = empresas.length;
+  const totalUsuarios    = empresas.reduce((sum, e) => sum + e.usuarios.length, 0);
+  const completas        = empresas.filter((e) => e.usuarios.length >= 5).length;
   const conDisponibilidad = empresas.filter((e) => e.usuarios.length < 5).length;
 
-  // ── Lista filtrada ──
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
     if (!q) return empresas;
     return empresas.filter((e) => e.name.toLowerCase().includes(q));
   }, [empresas, search]);
 
-  // ── Accordion: sólo una empresa expandida a la vez ──
   function handleToggle(id: string) {
     setExpandedId((prev) => (prev === id ? null : id));
   }
 
-  // ── CRUD ──
   function handleSave(empresa: Empresa) {
     if (modalState?.mode === 'edit') {
       setEmpresas((prev) => prev.map((e) => (e.id === empresa.id ? empresa : e)));
@@ -68,38 +58,26 @@ export default function ClientesPage() {
     );
   }
 
-  const cardClass = isDark
-    ? 'border-white/10 bg-[#0d0d0d] shadow-[0_10px_40px_rgba(0,0,0,0.25)]'
-    : 'border-black/[0.08] bg-[#f1f5f9] shadow-[0_4px_24px_rgba(15,23,42,0.08)]';
-
-  // ─── Render ───────────────────────────────────────────────────────────────
-
   return (
     <>
-      <section className={`p-6 ${isDark ? 'bg-[#050505]' : 'bg-[#f8fafc]'}`}>
+      <section className="p-6 bg-background">
         <div className="mx-auto flex max-w-[1600px] flex-col gap-8">
 
-          {/* ── Cabecera de página ── */}
-          <div className={`relative overflow-hidden rounded-[26px] border p-6 ${cardClass}`}>
-            <div className={`pointer-events-none absolute right-0 top-0 h-full w-64 bg-gradient-to-l to-transparent ${
-              isDark ? 'from-[#267F6B]/10' : 'from-[#267F6B]/[0.08]'
-            }`} />
-            <div className="pointer-events-none absolute bottom-0 left-0 h-[2px] w-full bg-gradient-to-r from-[#267F6B]/0 via-[#267F6B]/60 to-[#267F6B]/0" />
+          {/* Cabecera de página */}
+          <div className="relative overflow-hidden rounded-[26px] border border-(--border) bg-surface p-6 shadow-sm">
+            <div className="pointer-events-none absolute right-0 top-0 h-full w-64 bg-linear-to-l from-[#267F6B]/10 to-transparent" />
+            <div className="pointer-events-none absolute bottom-0 left-0 h-px w-full bg-linear-to-r from-[#267F6B]/0 via-[#267F6B]/60 to-[#267F6B]/0" />
 
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h1 className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-[#0f172a]'}`}>Clientes</h1>
-                <p className={`mt-1 text-sm ${isDark ? 'text-white/55' : 'text-[#475569]'}`}>
+                <h1 className="text-3xl font-bold text-(--text-primary)">Clientes</h1>
+                <p className="mt-1 text-sm text-(--text-secondary)">
                   Gestión de empresas cliente y sus usuarios.
                 </p>
               </div>
               <button
                 onClick={() => setModalState({ mode: 'create' })}
-                className={`flex shrink-0 items-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold transition ${
-                  isDark
-                    ? 'border-[#267F6B]/40 bg-[#267F6B]/15 text-[#2fa58a] hover:border-[#267F6B]/60 hover:bg-[#267F6B]/25'
-                    : 'border-[#267F6B]/50 bg-[#267F6B]/10 text-[#267F6B] hover:border-[#267F6B]/70 hover:bg-[#267F6B]/20'
-                }`}
+                className="flex shrink-0 items-center gap-2 rounded-xl border border-[#267F6B]/50 bg-[#267F6B]/10 px-4 py-2 text-sm font-semibold text-[#267F6B] transition hover:border-[#267F6B]/70 hover:bg-[#267F6B]/20"
               >
                 <span className="text-base leading-none">+</span>
                 Nueva empresa
@@ -107,31 +85,26 @@ export default function ClientesPage() {
             </div>
           </div>
 
-          {/* ── Métricas ── */}
+          {/* Métricas */}
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            <MetricCard label="Total empresas"    value={totalEmpresas}    icon="🏢" accent />
-            <MetricCard label="Total usuarios"    value={totalUsuarios}    icon="👥" />
-            <MetricCard label="Empresas completas" value={completas}       icon="✅" />
+            <MetricCard label="Total empresas"     value={totalEmpresas}     icon="🏢" accent />
+            <MetricCard label="Total usuarios"     value={totalUsuarios}     icon="👥" />
+            <MetricCard label="Empresas completas" value={completas}         icon="✅" />
             <MetricCard label="Con disponibilidad" value={conDisponibilidad} icon="📭" />
           </div>
 
-          {/* ── Separador degradado ── */}
+          {/* Separador */}
           <div className="relative h-px">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#267F6B]/40 to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-r from-transparent via-[#267F6B]/40 to-transparent" />
           </div>
 
-          {/* ── Filtros + lista ── */}
-          <div className={`flex flex-col gap-5 rounded-[26px] border p-6 ${cardClass}`}>
-
-            {/* Cabecera del panel */}
+          {/* Filtros + lista */}
+          <div className="flex flex-col gap-5 rounded-[26px] border border-(--border) bg-surface p-6 shadow-sm">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <h2 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-[#0f172a]'}`}>
-                  Lista de empresas
-                </h2>
-                <p className={`mt-0.5 text-sm ${isDark ? 'text-white/40' : 'text-[#475569]'}`}>
-                  {filtered.length} empresa{filtered.length !== 1 ? 's' : ''}{' '}
-                  encontrada{filtered.length !== 1 ? 's' : ''}
+                <h2 className="text-lg font-semibold text-(--text-primary)">Lista de empresas</h2>
+                <p className="mt-0.5 text-sm text-(--text-muted)">
+                  {filtered.length} empresa{filtered.length !== 1 ? 's' : ''} encontrada{filtered.length !== 1 ? 's' : ''}
                 </p>
               </div>
               <ClientesFilters
@@ -141,9 +114,8 @@ export default function ClientesPage() {
               />
             </div>
 
-            {/* Cards de empresas */}
             {filtered.length === 0 ? (
-              <div className={`py-12 text-center text-sm ${isDark ? 'text-white/30' : 'text-[#94a3b8]'}`}>
+              <div className="py-12 text-center text-sm text-(--text-muted)">
                 No se encontraron empresas con los filtros aplicados.
               </div>
             ) : (
@@ -155,9 +127,7 @@ export default function ClientesPage() {
                     isExpanded={expandedId === empresa.id}
                     onToggle={() => handleToggle(empresa.id)}
                     onEdit={(e) => setModalState({ mode: 'edit', empresa: e })}
-                    onDelete={(id) =>
-                      setDeleteTarget(empresas.find((e) => e.id === id) ?? null)
-                    }
+                    onDelete={(id) => setDeleteTarget(empresas.find((e) => e.id === id) ?? null)}
                     onRemoveUser={handleRemoveUser}
                   />
                 ))}
@@ -168,7 +138,6 @@ export default function ClientesPage() {
         </div>
       </section>
 
-      {/* ── Modales ── */}
       {modalState && (
         <EmpresaModal
           mode={modalState.mode}

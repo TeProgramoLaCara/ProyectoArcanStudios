@@ -84,7 +84,7 @@ export default function Page() {
   }
 
   return (
-    <section className="bg-surface p-6 rounded-2xl">
+    <section className=" p-6 rounded-2xl">
       <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
         <CalendarFilters
           professor={professor}

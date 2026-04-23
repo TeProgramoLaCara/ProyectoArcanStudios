@@ -3,14 +3,9 @@
 import { useTheme } from '@/context/ThemeContext';
 import COLORS from '@/resources/colors';
 
-// ─── Mock preview de cada tema ────────────────────────────────────────────────
-
 function DarkPreview() {
   return (
-    <div
-      className="flex overflow-hidden rounded-lg"
-      style={{ backgroundColor: '#0d0d0d', height: '68px' }}
-    >
+    <div className="flex overflow-hidden rounded-lg" style={{ backgroundColor: '#0d0d0d', height: '68px' }}>
       <div className="w-9 shrink-0" style={{ backgroundColor: '#0a0a0a' }} />
       <div className="flex flex-1 flex-col justify-center gap-1.5 p-2">
         <div className="h-1.5 rounded-sm" style={{ width: '65%', backgroundColor: 'rgba(255,255,255,0.18)' }} />
@@ -23,21 +18,16 @@ function DarkPreview() {
 
 function LightPreview() {
   return (
-    <div
-      className="flex overflow-hidden rounded-lg"
-      style={{ backgroundColor: '#ffffff', height: '68px' }}
-    >
-      <div className="w-9 shrink-0" style={{ backgroundColor: '#f0f0f0' }} />
+    <div className="flex overflow-hidden rounded-lg" style={{ backgroundColor: '#f0ece4', height: '68px' }}>
+      <div className="w-9 shrink-0" style={{ backgroundColor: '#e8e2d8' }} />
       <div className="flex flex-1 flex-col justify-center gap-1.5 p-2">
-        <div className="h-1.5 rounded-sm" style={{ width: '65%', backgroundColor: 'rgba(0,0,0,0.15)' }} />
-        <div className="h-1.5 rounded-sm" style={{ width: '45%', backgroundColor: 'rgba(0,0,0,0.08)' }} />
-        <div className="h-1.5 rounded-sm" style={{ width: '55%', backgroundColor: 'rgba(0,0,0,0.08)' }} />
+        <div className="h-1.5 rounded-sm" style={{ width: '65%', backgroundColor: 'rgba(100,78,42,0.20)' }} />
+        <div className="h-1.5 rounded-sm" style={{ width: '45%', backgroundColor: 'rgba(100,78,42,0.12)' }} />
+        <div className="h-1.5 rounded-sm" style={{ width: '55%', backgroundColor: 'rgba(100,78,42,0.12)' }} />
       </div>
     </div>
   );
 }
-
-// ─── Component ────────────────────────────────────────────────────────────────
 
 export default function ThemeToggle() {
   const { isDark, toggleTheme } = useTheme();
@@ -53,7 +43,7 @@ export default function ThemeToggle() {
           type="button"
           onClick={() => { if (!isDark) toggleTheme(); }}
           className={`relative overflow-hidden rounded-[14px] border p-2.5 transition-colors ${
-            isDark ? 'border-[#267F6B]' : 'border-black/[0.08]'
+            isDark ? 'border-[#267F6B]' : 'border-(--border)'
           }`}
         >
           {isDark && (
@@ -65,9 +55,7 @@ export default function ThemeToggle() {
             </span>
           )}
           <DarkPreview />
-          <p className={`mt-2 text-center text-xs font-medium ${isDark ? 'text-white/55' : 'text-[#475569]'}`}>
-            Oscuro
-          </p>
+          <p className="mt-2 text-center text-xs font-medium text-(--text-secondary)">Oscuro</p>
         </button>
 
         {/* Claro */}
@@ -75,7 +63,7 @@ export default function ThemeToggle() {
           type="button"
           onClick={() => { if (isDark) toggleTheme(); }}
           className={`relative overflow-hidden rounded-[14px] border p-2.5 transition-colors ${
-            !isDark ? 'border-[#267F6B]' : 'border-white/10'
+            !isDark ? 'border-[#267F6B]' : 'border-(--border)'
           }`}
         >
           {!isDark && (
@@ -87,16 +75,14 @@ export default function ThemeToggle() {
             </span>
           )}
           <LightPreview />
-          <p className={`mt-2 text-center text-xs font-medium ${isDark ? 'text-white/55' : 'text-[#475569]'}`}>
-            Claro
-          </p>
+          <p className="mt-2 text-center text-xs font-medium text-(--text-secondary)">Claro</p>
         </button>
 
       </div>
 
       {/* Pill toggle deslizante */}
       <div className="flex items-center gap-4">
-        <span className={`min-w-[48px] text-sm font-medium ${isDark ? 'text-white/55' : 'text-[#475569]'}`}>
+        <span className="min-w-12 text-sm font-medium text-(--text-secondary)">
           {isDark ? 'Oscuro' : 'Claro'}
         </span>
 
@@ -106,11 +92,8 @@ export default function ThemeToggle() {
           aria-checked={!isDark}
           aria-label="Cambiar tema"
           onClick={toggleTheme}
-          className={`relative h-7 w-14 rounded-full border transition-colors ${
-            isDark ? 'border-white/10 bg-white/10' : 'border-black/[0.08] bg-black/[0.08]'
-          }`}
+          className="relative h-7 w-14 rounded-full border border-(--border) bg-(--border) transition-colors"
         >
-          {/* Círculo deslizante */}
           <span
             className="absolute top-1 h-5 w-5 rounded-full shadow-sm transition-all duration-300 ease-in-out"
             style={{
@@ -120,7 +103,7 @@ export default function ThemeToggle() {
           />
         </button>
 
-        <span className={`text-xs ${isDark ? 'text-white/55' : 'text-[#475569]'}`}>
+        <span className="text-xs text-(--text-muted)">
           {isDark ? 'Activar modo claro' : 'Activar modo oscuro'}
         </span>
       </div>

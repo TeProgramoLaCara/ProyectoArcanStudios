@@ -68,20 +68,20 @@ export const LIGHT_COLORS = {
   accent:          "#267F6B",
   accentLight:     "#2fa58a",
 
-  // ─── Fondos y superficies ──────────────────────────────────────────────────
-  background:      "#f8fafc",
-  surface:         "#f1f5f9",
-  surfaceElevated: "#e2e8f0",
-  surfaceInput:    "#e8edf2",
+  // ─── Fondos y superficies (tonos cálidos tipo papel/estudio) ──────────────
+  background:      "#f8f6f2",
+  surface:         "#f0ece4",
+  surfaceElevated: "#e8e2d8",
+  surfaceInput:    "#e1dbd0",
 
-  // ─── Bordes ────────────────────────────────────────────────────────────────
-  border:          "rgba(0,0,0,0.08)",
-  borderSubtle:    "rgba(0,0,0,0.05)",
+  // ─── Bordes cálidos ────────────────────────────────────────────────────────
+  border:          "rgba(100,78,42,0.14)",
+  borderSubtle:    "rgba(100,78,42,0.08)",
 
-  // ─── Texto ────────────────────────────────────────────────────────────────
-  textPrimary:     "#0f172a",
-  textSecondary:   "#475569",
-  textMuted:       "#94a3b8",
+  // ─── Texto cálido ─────────────────────────────────────────────────────────
+  textPrimary:     "#1a1208",
+  textSecondary:   "#5a4a35",
+  textMuted:       "#8a7b6e",
 
   // ─── Categorías de cursos ─────────────────────────────────────────────────
   categoryBlender: "#ea580c",
@@ -90,7 +90,7 @@ export const LIGHT_COLORS = {
   // ─── Estados de reserva ───────────────────────────────────────────────────
   statusPendiente:  "#b45309",
   statusConfirmada: "#267F6B",
-  statusEnCurso:    "#0284c7",
-  statusCompletada: "#64748b",
-  statusCancelada:  "#dc2626",
+  statusEnCurso:    "#0369a1",
+  statusCompletada: "#8a7b6e",
+  statusCancelada:  "#b91c1c",
 } as const;

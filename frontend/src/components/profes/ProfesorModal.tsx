@@ -81,14 +81,14 @@ export default function ProfesorModal({ open, profesor, onClose, onSave }: Props
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Overlay */}
       <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        className="absolute inset-0 backdrop-blur-sm bg-(--overlay-bg)"
         onClick={onClose}
       />
 
       {/* Modal box */}
       <div className="relative z-10 w-full max-w-lg overflow-hidden rounded-2xl border border-(--border) bg-surface shadow-[0_32px_80px_rgba(0,0,0,0.7)]">
         {/* Top accent bar */}
-        <div className="h-[3px] w-full bg-linear-to-r from-accent/0 via-accent to-accent/0" />
+        <div className="h-0.75 w-full bg-linear-to-r from-accent/0 via-accent to-accent/0" />
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 pt-5 pb-4">

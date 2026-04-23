@@ -76,7 +76,7 @@ export default function CalendariosAulas() {
         </div>
       </div>
 
-      <div className="flex items-center justify-center gap-4 mb-6 bg-white p-3 rounded-xl shadow-sm border border-gray-100">
+      <div className="flex items-center justify-center gap-4 mb-6 bg-white p-3 rounded-xl  border border-gray-100">
         <button
           type="button"
           onClick={() => moveGlobalMonth(-1)}

@@ -1,82 +1,47 @@
 "use client";
 
 import { useState } from "react";
-import { useTheme } from "@/context/ThemeContext";
+import { createPortal } from "react-dom";
 import CourseCard from "@/components/courses/CourseCard";
 import CapacitacionCard from "@/components/courses/CapacitacionCard";
 import { cursos, capacitaciones } from "@/resources/data";
 
-// ─── Helper class builders ────────────────────────────────────────────────────
+const inputClass =
+  "w-full rounded-xl border border-(--border) bg-surface-input px-4 py-2.5 text-sm text-(--text-primary) placeholder:text-(--text-muted) outline-none transition focus:border-[#267F6B]/60 focus:ring-1 focus:ring-[#267F6B]/30";
 
-function getInputClass(isDark: boolean) {
-  return isDark
-    ? "w-full rounded-xl border border-white/10 bg-[#1a1a1a] px-4 py-2.5 text-sm text-white placeholder-white/20 outline-none transition focus:border-[#267F6B]/60 focus:ring-1 focus:ring-[#267F6B]/30"
-    : "w-full rounded-xl border border-black/[0.08] bg-[#e8edf2] px-4 py-2.5 text-sm text-[#0f172a] placeholder-[#94a3b8] outline-none transition focus:border-[#267F6B]/60 focus:ring-1 focus:ring-[#267F6B]/30";
-}
+const selectClass =
+  "w-full rounded-xl border border-(--border) bg-surface-input px-4 py-2.5 text-sm text-(--text-primary) outline-none transition focus:border-[#267F6B]/60";
 
-function getSelectClass(isDark: boolean) {
-  return isDark
-    ? "w-full rounded-xl border border-white/10 bg-[#141414] px-4 py-2.5 text-sm text-white outline-none transition focus:border-[#267F6B]/60"
-    : "w-full rounded-xl border border-black/[0.08] bg-[#e2e8f0] px-4 py-2.5 text-sm text-[#0f172a] outline-none transition focus:border-[#267F6B]/60";
-}
-
-function getLabelClass(isDark: boolean) {
-  return isDark
-    ? "text-xs font-medium uppercase tracking-wider text-white/40"
-    : "text-xs font-medium uppercase tracking-wider text-[#94a3b8]";
-}
+const labelClass = "text-xs font-medium uppercase tracking-wider text-(--text-muted)";
 
 // ─── Modal wrapper ────────────────────────────────────────────────────────────
 
-function Modal({
-  title,
-  onClose,
-  children,
-}: {
-  title: string;
-  onClose: () => void;
-  children: React.ReactNode;
-}) {
-  const { isDark } = useTheme();
-
-  return (
+function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div
-        className={`absolute inset-0 backdrop-blur-sm ${isDark ? "bg-black/70" : "bg-black/40"}`}
-        onClick={onClose}
-      />
-      <div className={`relative z-10 w-full max-w-lg overflow-hidden rounded-2xl border shadow-[0_32px_80px_rgba(0,0,0,0.7)] ${
-        isDark ? "border-white/10 bg-[#111111]" : "border-black/[0.08] bg-[#ffffff]"
-      }`}>
-        <div className="h-[3px] w-full bg-gradient-to-r from-[#267F6B]/0 via-[#267F6B] to-[#267F6B]/0" />
+      <div className="absolute inset-0 backdrop-blur-sm bg-(--overlay-bg)" onClick={onClose} />
+      <div className="relative z-10 w-full max-w-lg overflow-hidden rounded-2xl border border-(--border) bg-surface shadow-[0_32px_80px_rgba(0,0,0,0.5)]">
+        <div className="h-0.75 w-full bg-linear-to-r from-[#267F6B]/0 via-[#267F6B] to-[#267F6B]/0" />
         <div className="flex items-center justify-between px-6 pt-5 pb-4">
-          <h3 className={`text-base font-semibold ${isDark ? "text-white" : "text-[#0f172a]"}`}>{title}</h3>
+          <h3 className="text-base font-semibold text-(--text-primary)">{title}</h3>
           <button
             onClick={onClose}
-            className={`flex h-7 w-7 items-center justify-center rounded-full border text-xs transition ${
-              isDark
-                ? "border-white/10 bg-white/5 text-white/40 hover:text-white/80"
-                : "border-black/[0.08] bg-black/[0.04] text-[#94a3b8] hover:text-[#0f172a]"
-            }`}
+            className="flex h-7 w-7 items-center justify-center rounded-full border border-(--border) bg-surface-elevated text-xs text-(--text-muted) transition hover:text-(--text-primary)"
           >
             ✕
           </button>
         </div>
-        <div className={`h-px ${isDark ? "bg-white/[0.06]" : "bg-black/[0.05]"}`} />
+        <div className="h-px bg-(--border-subtle)" />
         <div className="px-6 py-5">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
 // ─── Create modals ────────────────────────────────────────────────────────────
 
 function CreateCursoModal({ onClose }: { onClose: () => void }) {
-  const { isDark } = useTheme();
-  const inputClass = getInputClass(isDark);
-  const selectClass = getSelectClass(isDark);
-  const labelClass = getLabelClass(isDark);
-
   return (
     <Modal title="Nuevo curso" onClose={onClose}>
       <div className="flex flex-col gap-4">
@@ -84,12 +49,10 @@ function CreateCursoModal({ onClose }: { onClose: () => void }) {
           <label className={labelClass}>Título</label>
           <input className={inputClass} placeholder="Ej: Creación de Assets para Videojuegos" />
         </div>
-
         <div className="flex flex-col gap-1.5">
           <label className={labelClass}>Descripción</label>
           <textarea rows={3} className={`${inputClass} resize-none`} placeholder="Describe el objetivo y contenido del curso..." />
         </div>
-
         <div className="flex flex-col gap-1.5">
           <label className={labelClass}>Categoría</label>
           <select className={selectClass}>
@@ -98,7 +61,6 @@ function CreateCursoModal({ onClose }: { onClose: () => void }) {
             <option value="Unity">Unity</option>
           </select>
         </div>
-
         <div className="flex flex-col gap-1.5">
           <label className={labelClass}>Capacitaciones incluidas</label>
           <div className="flex flex-col gap-2">
@@ -112,14 +74,8 @@ function CreateCursoModal({ onClose }: { onClose: () => void }) {
             ))}
           </div>
         </div>
-
         <div className="mt-1 flex justify-end gap-2">
-          <button
-            onClick={onClose}
-            className={`rounded-xl border px-4 py-2 text-sm transition ${
-              isDark ? "border-white/10 text-white/50 hover:text-white/80" : "border-black/[0.08] text-[#475569] hover:text-[#0f172a]"
-            }`}
-          >
+          <button onClick={onClose} className="rounded-xl border border-(--border) px-4 py-2 text-sm text-(--text-secondary) transition hover:text-(--text-primary)">
             Cancelar
           </button>
           <button className="rounded-xl bg-[#267F6B] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#2fa58a]">
@@ -132,11 +88,6 @@ function CreateCursoModal({ onClose }: { onClose: () => void }) {
 }
 
 function CreateCapacitacionModal({ onClose }: { onClose: () => void }) {
-  const { isDark } = useTheme();
-  const inputClass = getInputClass(isDark);
-  const selectClass = getSelectClass(isDark);
-  const labelClass = getLabelClass(isDark);
-
   return (
     <Modal title="Nueva capacitación" onClose={onClose}>
       <div className="flex flex-col gap-4">
@@ -144,12 +95,10 @@ function CreateCapacitacionModal({ onClose }: { onClose: () => void }) {
           <label className={labelClass}>Título</label>
           <input className={inputClass} placeholder="Ej: Modelado 3D en Blender" />
         </div>
-
         <div className="flex flex-col gap-1.5">
           <label className={labelClass}>Descripción</label>
           <textarea rows={3} className={`${inputClass} resize-none`} placeholder="Describe el contenido de la capacitación..." />
         </div>
-
         <div className="flex flex-col gap-1.5">
           <label className={labelClass}>Categoría</label>
           <select className={selectClass}>
@@ -158,14 +107,8 @@ function CreateCapacitacionModal({ onClose }: { onClose: () => void }) {
             <option value="Unity">Unity</option>
           </select>
         </div>
-
         <div className="mt-1 flex justify-end gap-2">
-          <button
-            onClick={onClose}
-            className={`rounded-xl border px-4 py-2 text-sm transition ${
-              isDark ? "border-white/10 text-white/50 hover:text-white/80" : "border-black/[0.08] text-[#475569] hover:text-[#0f172a]"
-            }`}
-          >
+          <button onClick={onClose} className="rounded-xl border border-(--border) px-4 py-2 text-sm text-(--text-secondary) transition hover:text-(--text-primary)">
             Cancelar
           </button>
           <button className="rounded-xl bg-[#267F6B] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#2fa58a]">
@@ -179,40 +122,22 @@ function CreateCapacitacionModal({ onClose }: { onClose: () => void }) {
 
 // ─── Section header ───────────────────────────────────────────────────────────
 
-function SectionHeader({
-  title,
-  subtitle,
-  count,
-  onAdd,
-  addLabel,
-}: {
-  title: string;
-  subtitle: string;
-  count: number;
-  onAdd: () => void;
-  addLabel: string;
+function SectionHeader({ title, subtitle, count, onAdd, addLabel }: {
+  title: string; subtitle: string; count: number; onAdd: () => void; addLabel: string;
 }) {
-  const { isDark } = useTheme();
-
   return (
     <div className="flex items-end justify-between gap-4">
       <div>
-        <h2 className={`text-2xl font-bold ${isDark ? "text-white" : "text-[#0f172a]"}`}>{title}</h2>
-        <p className={`mt-1 text-sm ${isDark ? "text-white/45" : "text-[#475569]"}`}>{subtitle}</p>
+        <h2 className="text-2xl font-bold text-(--text-primary)">{title}</h2>
+        <p className="mt-1 text-sm text-(--text-secondary)">{subtitle}</p>
       </div>
       <div className="flex items-center gap-3">
-        <span className={`rounded-full border px-3 py-1 text-xs font-medium ${
-          isDark ? "border-white/10 bg-white/5 text-white/50" : "border-black/[0.08] bg-black/[0.04] text-[#475569]"
-        }`}>
+        <span className="rounded-full border border-(--border) bg-surface-elevated px-3 py-1 text-xs font-medium text-(--text-secondary)">
           {count} items
         </span>
         <button
           onClick={onAdd}
-          className={`flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold transition ${
-            isDark
-              ? "border-[#267F6B]/40 bg-[#267F6B]/15 text-[#2fa58a] hover:bg-[#267F6B]/25 hover:border-[#267F6B]/60"
-              : "border-[#267F6B]/50 bg-[#267F6B]/10 text-[#267F6B] hover:bg-[#267F6B]/20 hover:border-[#267F6B]/70"
-          }`}
+          className="flex items-center gap-2 rounded-xl border border-[#267F6B]/50 bg-[#267F6B]/10 px-4 py-2 text-sm font-semibold text-[#267F6B] transition hover:bg-[#267F6B]/20 hover:border-[#267F6B]/70"
         >
           <span className="text-base leading-none">+</span>
           {addLabel}
@@ -227,34 +152,27 @@ function SectionHeader({
 export default function CursosPage() {
   const [showCursoModal, setShowCursoModal] = useState(false);
   const [showCapModal, setShowCapModal] = useState(false);
-  const { isDark } = useTheme();
 
   return (
     <>
-      <section className={`p-6 ${isDark ? "bg-[#050505]" : "bg-[#f8fafc]"}`}>
+      <section className="p-6 bg-background">
         <div className="mx-auto flex max-w-[1600px] flex-col gap-10">
 
           {/* Page header */}
-          <div className={`relative overflow-hidden rounded-[26px] border p-6 ${
-            isDark
-              ? "border-white/10 bg-[#0d0d0d] shadow-[0_10px_40px_rgba(0,0,0,0.25)]"
-              : "border-black/[0.08] bg-[#f1f5f9] shadow-[0_4px_24px_rgba(15,23,42,0.08)]"
-          }`}>
-            <div className={`pointer-events-none absolute right-0 top-0 h-full w-64 bg-gradient-to-l to-transparent ${
-              isDark ? "from-[#267F6B]/10" : "from-[#267F6B]/[0.08]"
-            }`} />
-            <h1 className={`text-3xl font-bold ${isDark ? "text-white" : "text-[#0f172a]"}`}>Cursos y Capacitaciones</h1>
-            <p className={`mt-1 text-sm ${isDark ? "text-white/55" : "text-[#475569]"}`}>
+          <div className="relative overflow-hidden rounded-[26px] border border-(--border) bg-surface p-6 shadow-sm">
+            <div className="pointer-events-none absolute right-0 top-0 h-full w-64 bg-linear-to-l from-[#267F6B]/10 to-transparent" />
+            <h1 className="text-3xl font-bold text-(--text-primary)">Cursos y Capacitaciones</h1>
+            <p className="mt-1 text-sm text-(--text-secondary)">
               Catálogo completo de formaciones disponibles. Cada curso incluye dos capacitaciones especializadas.
             </p>
             <div className="mt-3 flex items-center gap-4">
               <div className="flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-orange-400/70" />
-                <span className={`text-xs ${isDark ? "text-white/40" : "text-[#94a3b8]"}`}>Blender</span>
+                <span className="text-xs text-(--text-muted)">Blender</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-sky-400/70" />
-                <span className={`text-xs ${isDark ? "text-white/40" : "text-[#94a3b8]"}`}>Unity</span>
+                <span className="text-xs text-(--text-muted)">Unity</span>
               </div>
             </div>
           </div>
@@ -279,7 +197,7 @@ export default function CursosPage() {
             </div>
 
             {/* Vertical divider */}
-            <div className={`hidden lg:block w-px self-stretch ${isDark ? "bg-white/[0.06]" : "bg-black/[0.05]"}`} />
+            <div className="hidden lg:block w-px self-stretch bg-(--border-subtle)" />
 
             {/* Right column — Capacitaciones */}
             <div className="flex flex-col gap-5 flex-1 lg:pl-8">
@@ -298,7 +216,6 @@ export default function CursosPage() {
             </div>
 
           </div>
-
         </div>
       </section>
 
