@@ -1,10 +1,14 @@
-export default function Page() {
+import ClientShell from "@/components/layout/shell/ClientShell";
+import { ThemeProvider } from "@/context/ThemeContext";
+
+export default function Layout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <section className="p-6">
-      <h1 className="text-2xl font-bold">Título de la página</h1>
-      <p className="mt-2 text-sm text-gray-600">
-        Descripción o contenido inicial.
-      </p>
-    </section>
+    <ThemeProvider>
+      <ClientShell>{children}</ClientShell>
+    </ThemeProvider>
   );
 }

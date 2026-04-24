@@ -6,9 +6,11 @@ import type { Capacitacion } from '@/resources/data';
 
 type Props = {
   cap: Capacitacion;
+  onEdit?: () => void;
+  onRemove?: () => void;
 };
 
-export default function CapacitacionCard({ cap }: Props) {
+export default function CapacitacionCard({ cap, onEdit, onRemove }: Props) {
   const { isDark } = useTheme();
 
   return (
@@ -29,7 +31,39 @@ export default function CapacitacionCard({ cap }: Props) {
           <h3 className={`text-base font-semibold ${isDark ? 'text-white' : 'text-[#0f172a]'}`}>{cap.title}</h3>
           <p className={`text-sm leading-relaxed ${isDark ? 'text-white/45' : 'text-[#475569]'}`}>{cap.description}</p>
         </div>
-        <CategoryBadge category={cap.category} />
+        <div className="flex items-center gap-2">
+          <CategoryBadge category={cap.category} />
+          {onEdit && (
+            <button
+              type="button"
+              onClick={onEdit}
+              className={`flex h-7 w-7 items-center justify-center rounded-full border text-xs transition ${
+                isDark
+                  ? 'border-white/10 bg-white/5 text-white/60 hover:text-white'
+                  : 'border-black/[0.08] bg-black/[0.04] text-[#475569] hover:text-[#0f172a]'
+              }`}
+              title="Editar capacitación"
+              aria-label="Editar capacitación"
+            >
+              ✎
+            </button>
+          )}
+          {onRemove && (
+            <button
+              type="button"
+              onClick={onRemove}
+              className={`flex h-7 w-7 items-center justify-center rounded-full border text-xs font-semibold transition ${
+                isDark
+                  ? 'border-rose-300/35 bg-rose-500/20 text-rose-100 hover:bg-rose-500/30'
+                  : 'border-rose-300/50 bg-rose-500/10 text-rose-700 hover:bg-rose-500/20'
+              }`}
+              title="Eliminar de mis capacitaciones"
+              aria-label="Eliminar de mis capacitaciones"
+            >
+              ×
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

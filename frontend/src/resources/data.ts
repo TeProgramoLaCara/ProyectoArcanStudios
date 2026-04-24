@@ -263,7 +263,8 @@ function getMondayFromIsoDate(isoDate: string): string {
 
 export const allEvents: CalendarEvent[] = baseEvents.map((event) => {
   const mondayStart = getMondayFromIsoDate(event.start);
-  const durationDays = event.id === "1" ? 21 : 5;
+  const weeksByCapacitaciones = Math.max(2, event.capacitaciones.length);
+  const durationDays = weeksByCapacitaciones * 7;
   return {
     ...event,
     start: mondayStart,

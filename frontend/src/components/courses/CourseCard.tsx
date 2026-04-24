@@ -10,9 +10,11 @@ export type { Capacitacion, Curso };
 type Props = {
   course: Curso;
   capacitaciones: Capacitacion[];
+  onEdit?: () => void;
+  onRemove?: () => void;
 };
 
-export default function CourseCard({ course, capacitaciones }: Props) {
+export default function CourseCard({ course, capacitaciones, onEdit, onRemove }: Props) {
   const { isDark } = useTheme();
   const caps = course.capacitaciones.map((id) => capacitaciones.find((c) => c.id === id)!);
 
@@ -34,7 +36,39 @@ export default function CourseCard({ course, capacitaciones }: Props) {
           <h3 className={`text-base font-semibold ${isDark ? 'text-white' : 'text-[#0f172a]'}`}>{course.title}</h3>
           <p className={`text-sm leading-relaxed ${isDark ? 'text-white/45' : 'text-[#475569]'}`}>{course.description}</p>
         </div>
-        <CategoryBadge category={course.category} />
+        <div className="flex items-center gap-2">
+          <CategoryBadge category={course.category} />
+          {onEdit && (
+            <button
+              type="button"
+              onClick={onEdit}
+              className={`flex h-7 w-7 items-center justify-center rounded-full border text-xs transition ${
+                isDark
+                  ? 'border-white/10 bg-white/5 text-white/60 hover:text-white'
+                  : 'border-black/[0.08] bg-black/[0.04] text-[#475569] hover:text-[#0f172a]'
+              }`}
+              title="Editar curso"
+              aria-label="Editar curso"
+            >
+              ✎
+            </button>
+          )}
+          {onRemove && (
+            <button
+              type="button"
+              onClick={onRemove}
+              className={`flex h-7 w-7 items-center justify-center rounded-full border text-xs font-semibold transition ${
+                isDark
+                  ? 'border-rose-300/35 bg-rose-500/20 text-rose-100 hover:bg-rose-500/30'
+                  : 'border-rose-300/50 bg-rose-500/10 text-rose-700 hover:bg-rose-500/20'
+              }`}
+              title="Eliminar de mis cursos"
+              aria-label="Eliminar de mis cursos"
+            >
+              ×
+            </button>
+          )}
+        </div>
       </div>
 
       <div className={`h-px ${isDark ? 'bg-white/[0.06]' : 'bg-black/[0.05]'}`} />
