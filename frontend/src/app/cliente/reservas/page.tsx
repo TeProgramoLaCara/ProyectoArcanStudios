@@ -495,7 +495,7 @@ export default function ClienteReservasPage() {
 
       {showModal && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 p-4">
-          <div className={`w-full max-w-6xl min-h-[82vh] rounded-2xl border ${isDark ? "border-white/10 bg-[#111111]" : "border-black/[0.08] bg-white"} p-6`}>
+          <div className={`w-full max-w-4xl rounded-2xl border ${isDark ? "border-white/10 bg-[#111111]" : "border-black/[0.08] bg-white"} p-5`}>
             <div className="mb-4 flex items-center justify-between">
               <h2 className={`text-lg font-semibold ${isDark ? "text-white" : "text-[#0f172a]"}`}>
                 Nueva reserva · Paso {step} de 3
@@ -582,7 +582,7 @@ export default function ClienteReservasPage() {
             )}
 
             {step === 2 && (
-              <div className="flex min-h-[62vh] flex-col gap-5">
+              <div className="grid gap-4">
                 <div className="flex items-center justify-between">
                   <button
                     type="button"
@@ -617,157 +617,144 @@ export default function ClienteReservasPage() {
                   Duración de esta reserva: <strong>{requiredWeeks} semana(s)</strong> (mínimo 2; 1 semana por capacitación del curso).
                 </p>
 
-                <div className="grid flex-1 grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
-                  <div
-                    className="calendar-modern-wrapper overflow-hidden rounded-[22px] border border-white/10 bg-[#121212]"
-                    style={{ height: "100%", minHeight: "500px" }}
-                  >
-                    <FullCalendar
-                      key={`booking-${calendarMonth.getFullYear()}-${calendarMonth.getMonth()}-${selectedDay?.key ?? "none"}`}
-                      ref={bookingCalendarRef}
-                      plugins={[dayGridPlugin, interactionPlugin]}
-                      initialView="dayGridMonth"
-                      headerToolbar={false}
-                      initialDate={calendarMonth}
-                      height="100%"
-                      fixedWeekCount={false}
-                      weekends={false}
-                      editable={false}
-                      eventDisplay="block"
-                      displayEventTime={false}
-                      events={bookingPreviewEvents}
-                      dateClick={(info) => {
-                        const dayInfo = getAvailabilityByDay(info.date);
-                        if (dayInfo.status === "none") return;
-                        const range = getRangeAvailability(info.date, requiredWeeks);
-                        if (range.status === "none") return;
-                        setSelectedDay(dayInfo);
-                        if (range.status === "full") {
-                          setSelectedTurno("manana");
-                        } else {
-                          setSelectedTurno(range.availableTurnos[0] ?? "");
-                        }
-                      }}
-                      dayCellDidMount={(info) => {
-                        const dayInfo = getAvailabilityByDay(info.date);
-                        const range = getRangeAvailability(info.date, requiredWeeks);
-                        const frame = info.el.querySelector(".fc-daygrid-day-frame") as HTMLElement | null;
-                        if (!frame) return;
-                        frame.style.borderRadius = "10px";
-                        frame.style.margin = "2px";
-                        frame.style.position = "relative";
-                        frame.style.overflow = "hidden";
-                        frame.style.transition = "all 120ms ease";
+                <div
+                  className="calendar-modern-wrapper overflow-hidden rounded-[22px] border border-white/10 bg-[#121212]"
+                  style={{ height: "430px" }}
+                >
+                  <FullCalendar
+                    key={`booking-${calendarMonth.getFullYear()}-${calendarMonth.getMonth()}-${selectedDay?.key ?? "none"}`}
+                    ref={bookingCalendarRef}
+                    plugins={[dayGridPlugin, interactionPlugin]}
+                    initialView="dayGridMonth"
+                    headerToolbar={false}
+                    initialDate={calendarMonth}
+                    height="100%"
+                    fixedWeekCount={false}
+                    weekends={false}
+                    editable={false}
+                    eventDisplay="block"
+                    displayEventTime={false}
+                    events={bookingPreviewEvents}
+                    dateClick={(info) => {
+                      const dayInfo = getAvailabilityByDay(info.date);
+                      if (dayInfo.status === "none") return;
+                      const range = getRangeAvailability(info.date, requiredWeeks);
+                      if (range.status === "none") return;
+                      setSelectedDay(dayInfo);
+                      if (range.status === "full") {
+                        setSelectedTurno("manana");
+                      } else {
+                        setSelectedTurno(range.availableTurnos[0] ?? "");
+                      }
+                    }}
+                    dayCellDidMount={(info) => {
+                      const dayInfo = getAvailabilityByDay(info.date);
+                      const range = getRangeAvailability(info.date, requiredWeeks);
+                      const frame = info.el.querySelector(".fc-daygrid-day-frame") as HTMLElement | null;
+                      if (!frame) return;
+                      frame.style.borderRadius = "10px";
+                      frame.style.margin = "2px";
+                      frame.style.position = "relative";
+                      frame.style.overflow = "hidden";
+                      frame.style.transition = "all 120ms ease";
 
-                        const previousChip = frame.querySelector(".availability-status-chip");
-                        if (previousChip) previousChip.remove();
-                        const previousShade = frame.querySelector(".availability-top-shade");
-                        if (previousShade) previousShade.remove();
+                      const previousChip = frame.querySelector(".availability-status-chip");
+                      if (previousChip) previousChip.remove();
+                      const previousShade = frame.querySelector(".availability-top-shade");
+                      if (previousShade) previousShade.remove();
 
-                        if (range.status === "full") {
-                          frame.style.background =
-                            "linear-gradient(180deg, rgba(22,163,74,0.30) 0%, rgba(22,163,74,0.20) 100%)";
-                          frame.style.border = "1px solid rgba(74, 222, 128, 0.55)";
-                        } else if (range.status === "partial") {
-                          frame.style.background =
-                            "linear-gradient(180deg, rgba(245,158,11,0.30) 0%, rgba(245,158,11,0.20) 100%)";
-                          frame.style.border = "1px solid rgba(251, 191, 36, 0.55)";
-                        } else {
-                          frame.style.background =
-                            "linear-gradient(180deg, rgba(239,68,68,0.28) 0%, rgba(239,68,68,0.18) 100%)";
-                          frame.style.border = "1px solid rgba(248, 113, 113, 0.5)";
-                        }
+                      if (range.status === "full") {
+                        frame.style.background =
+                          "linear-gradient(180deg, rgba(22,163,74,0.30) 0%, rgba(22,163,74,0.20) 100%)";
+                        frame.style.border = "1px solid rgba(74, 222, 128, 0.55)";
+                      } else if (range.status === "partial") {
+                        frame.style.background =
+                          "linear-gradient(180deg, rgba(245,158,11,0.30) 0%, rgba(245,158,11,0.20) 100%)";
+                        frame.style.border = "1px solid rgba(251, 191, 36, 0.55)";
+                      } else {
+                        frame.style.background =
+                          "linear-gradient(180deg, rgba(239,68,68,0.28) 0%, rgba(239,68,68,0.18) 100%)";
+                        frame.style.border = "1px solid rgba(248, 113, 113, 0.5)";
+                      }
 
-                        if (selectedDay?.key === dayInfo.key) {
-                          frame.style.outline = "2px solid rgba(255,255,255,0.85)";
-                          frame.style.outlineOffset = "-2px";
-                          frame.style.boxShadow = "inset 0 0 0 1px rgba(255,255,255,0.2)";
-                        } else {
-                          frame.style.outline = "none";
-                          frame.style.boxShadow = "none";
-                        }
+                      if (selectedDay?.key === dayInfo.key) {
+                        frame.style.outline = "2px solid rgba(255,255,255,0.85)";
+                        frame.style.outlineOffset = "-2px";
+                        frame.style.boxShadow = "inset 0 0 0 1px rgba(255,255,255,0.2)";
+                      } else {
+                        frame.style.outline = "none";
+                        frame.style.boxShadow = "none";
+                      }
 
-                        if (range.status !== "none" && dayInfo.status !== "none") {
-                          const topShade = document.createElement("div");
-                          topShade.className = "availability-top-shade";
-                          topShade.style.position = "absolute";
-                          topShade.style.left = "0";
-                          topShade.style.right = "0";
-                          topShade.style.top = "0";
-                          topShade.style.height = "15px";
-                          topShade.style.background =
-                            dayInfo.status === "full"
-                              ? "rgba(22,163,74,0.32)"
-                              : "rgba(245,158,11,0.32)";
-                          topShade.style.pointerEvents = "none";
-                          frame.appendChild(topShade);
+                      if (range.status !== "none" && dayInfo.status !== "none") {
+                        const topShade = document.createElement("div");
+                        topShade.className = "availability-top-shade";
+                        topShade.style.position = "absolute";
+                        topShade.style.left = "0";
+                        topShade.style.right = "0";
+                        topShade.style.top = "0";
+                        topShade.style.height = "15px";
+                        topShade.style.background =
+                          dayInfo.status === "full"
+                            ? "rgba(22,163,74,0.32)"
+                            : "rgba(245,158,11,0.32)";
+                        topShade.style.pointerEvents = "none";
+                        frame.appendChild(topShade);
 
-                          const chip = document.createElement("span");
-                          chip.className = "availability-status-chip";
-                          chip.textContent =
-                            range.status === "full" ? "Disponible" : "Parcial";
-                          chip.style.position = "absolute";
-                          chip.style.right = "6px";
-                          chip.style.bottom = "4px";
-                          chip.style.fontSize = "10px";
-                          chip.style.fontWeight = "700";
-                          chip.style.lineHeight = "1";
-                          chip.style.padding = "2px 6px";
-                          chip.style.borderRadius = "999px";
-                          chip.style.color =
-                            range.status === "full" ? "#dcfce7" : "#fef3c7";
-                          chip.style.background =
-                            range.status === "full"
-                              ? "rgba(22,163,74,0.35)"
-                              : "rgba(245,158,11,0.35)";
-                          frame.appendChild(chip);
-                        }
-                      }}
-                    />
-                  </div>
-
-                  <div className="flex h-full min-h-[500px] flex-col justify-between gap-4 rounded-xl border border-white/10 bg-white/[0.03] p-4">
-                    <div className="flex flex-col gap-3">
-                      <h3 className={`text-sm font-semibold ${isDark ? "text-white" : "text-[#0f172a]"}`}>
-                        Disponibilidad por color
-                      </h3>
-                      <div className="flex flex-col gap-2 text-xs">
-                        <span className="rounded-full bg-emerald-500/25 px-2 py-1 text-emerald-100">
-                          Verde: bloque completo disponible
-                        </span>
-                        <span className="rounded-full bg-amber-500/25 px-2 py-1 text-amber-100">
-                          Naranja: bloque parcial (mañana o tarde)
-                        </span>
-                        <span className="rounded-full bg-rose-500/25 px-2 py-1 text-rose-100">
-                          Rojo: bloque no disponible
-                        </span>
-                      </div>
-                    </div>
-
-                    {selectedDay && selectedDay.status !== "none" ? (
-                      <div className="flex flex-col gap-1.5 rounded-xl border border-white/10 bg-[#141414] p-3">
-                        <label className={`text-xs uppercase ${isDark ? "text-white/45" : "text-[#64748b]"}`}>
-                          Turno disponible
-                        </label>
-                        <select
-                          value={selectedTurno}
-                          onChange={(e) => setSelectedTurno(e.target.value as "manana" | "tarde")}
-                          className="rounded-xl border border-white/10 bg-[#141414] px-3 py-2 text-white"
-                        >
-                          {getRangeAvailability(selectedDay.date, requiredWeeks).availableTurnos.map((turno) => (
-                            <option key={turno} value={turno}>
-                              {turno === "manana" ? "Mañana" : "Tarde"}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    ) : (
-                      <div className={`rounded-xl border border-dashed p-3 text-xs ${isDark ? "border-white/15 text-white/55" : "border-black/[0.12] text-[#64748b]"}`}>
-                        Selecciona un día disponible en el calendario para elegir turno.
-                      </div>
-                    )}
-                  </div>
+                        const chip = document.createElement("span");
+                        chip.className = "availability-status-chip";
+                        chip.textContent =
+                          range.status === "full" ? "Disponible" : "Parcial";
+                        chip.style.position = "absolute";
+                        chip.style.right = "6px";
+                        chip.style.bottom = "4px";
+                        chip.style.fontSize = "10px";
+                        chip.style.fontWeight = "700";
+                        chip.style.lineHeight = "1";
+                        chip.style.padding = "2px 6px";
+                        chip.style.borderRadius = "999px";
+                        chip.style.color =
+                          range.status === "full" ? "#dcfce7" : "#fef3c7";
+                        chip.style.background =
+                          range.status === "full"
+                            ? "rgba(22,163,74,0.35)"
+                            : "rgba(245,158,11,0.35)";
+                        frame.appendChild(chip);
+                      }
+                    }}
+                  />
                 </div>
+
+                <div className="flex flex-wrap gap-3 text-xs">
+                  <span className="rounded-full bg-emerald-500/25 px-2 py-1 text-emerald-100">
+                    Verde: bloque completo disponible
+                  </span>
+                  <span className="rounded-full bg-amber-500/25 px-2 py-1 text-amber-100">
+                    Naranja: bloque parcial (mañana o tarde)
+                  </span>
+                  <span className="rounded-full bg-rose-500/25 px-2 py-1 text-rose-100">
+                    Rojo: bloque no disponible
+                  </span>
+                </div>
+
+                {selectedDay && selectedDay.status !== "none" && (
+                  <div className="flex flex-col gap-1.5">
+                    <label className={`text-xs uppercase ${isDark ? "text-white/45" : "text-[#64748b]"}`}>
+                      Turno disponible
+                    </label>
+                    <select
+                      value={selectedTurno}
+                      onChange={(e) => setSelectedTurno(e.target.value as "manana" | "tarde")}
+                      className="rounded-xl border border-white/10 bg-[#141414] px-3 py-2 text-white"
+                    >
+                      {getRangeAvailability(selectedDay.date, requiredWeeks).availableTurnos.map((turno) => (
+                        <option key={turno} value={turno}>
+                          {turno === "manana" ? "Mañana" : "Tarde"}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </div>
             )}
 

@@ -4,6 +4,7 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import styles from "./ClassroomCalendar.module.css";
 import type { CalendarEvent } from "@/app/admin/calendario/page";
 import { PROFESSOR_COLORS } from "@/resources/data";
 import EventDetailCard from "./EventDetailCard";
@@ -337,8 +338,8 @@ export default function ClassroomCalendar({
             }}
             className={`rounded-lg border px-2.5 py-1.5 text-xs font-medium transition ${
               isEditMode
-                ? "border-amber-300/40 bg-amber-500/20 text-amber-100"
-                : "border-white/10 bg-white/5 text-white/80 hover:bg-white/10"
+                ? "border-amber-300/40 bg-amber-500/20 text-black-100"
+                : "border-white/10 bg-white/5 text-black/80 hover:bg-white/10"
             }`}
             aria-label={`Editar anotaciones de ${title}`}
             title="Anotar imprevistos por día"
@@ -365,7 +366,7 @@ export default function ClassroomCalendar({
       </div>
 
       {isEditMode && (
-        <div className="mb-3 rounded-xl border border-amber-300/25 bg-amber-500/10 p-3 text-xs text-amber-50">
+        <div className="mb-3 rounded-xl border border-amber-300/25 bg-amber-500/10 p-3 text-xs text-black-50">
           <p className="mb-2">
             Modo edición activo. Pulsa un día del calendario para crear o editar una
             anotación.
@@ -419,7 +420,7 @@ export default function ClassroomCalendar({
       )}
 
       <div
-        className="calendar-modern-wrapper overflow-hidden rounded-[22px] border border-(--border) bg-background"
+        className={`${styles.wrapper} overflow-hidden rounded-[22px] border border-(--border) bg-background`}
         style={{ height: "600px" }}
       >
         <FullCalendar

@@ -19,8 +19,8 @@ export const STATUS_COLORS = {
     text: '#2fa58a',
   },
   inactive: {
-    dot: 'rgba(255,255,255,0.2)',
-    text: 'rgba(255,255,255,0.3)',
+    dot: 'var(--status-inactive-dot)',
+    text: 'var(--status-inactive-text)',
   },
 } as const;
 
@@ -97,7 +97,7 @@ export const CAP_TOGGLE_STYLES: Record<Capacitacion, PillStyle> = {
 
 /** Estilos de pill togglable en estado no seleccionado (modales). */
 export const INACTIVE_TOGGLE_PILL: PillStyle = {
-  color: 'rgba(255,255,255,0.35)',
-  bg: 'rgba(255,255,255,0.04)',
-  border: 'rgba(255,255,255,0.08)',
+  color: 'var(--inactive-pill-color)',
+  bg: 'var(--inactive-pill-bg)',
+  border: 'var(--inactive-pill-border)',
 };

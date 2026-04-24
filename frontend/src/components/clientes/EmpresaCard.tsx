@@ -1,10 +1,7 @@
 'use client';
 
-import { useTheme } from '@/context/ThemeContext';
 import type { Empresa } from '@/resources/data';
 import UsuarioRow from './UsuarioRow';
-
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 type Props = {
   empresa: Empresa;
@@ -15,8 +12,6 @@ type Props = {
   onRemoveUser: (empresaId: string, userId: string) => void;
 };
 
-// ─── Component ────────────────────────────────────────────────────────────────
-
 export default function EmpresaCard({
   empresa,
   isExpanded,
@@ -25,48 +20,37 @@ export default function EmpresaCard({
   onDelete,
   onRemoveUser,
 }: Props) {
-  const { isDark } = useTheme();
   const isFull = empresa.usuarios.length >= 5;
 
-  const iconBtnClass = `flex h-7 w-7 items-center justify-center rounded-full border text-sm transition ${
-    isDark
-      ? 'border-white/10 bg-white/5 text-white/30'
-      : 'border-black/[0.08] bg-black/[0.04] text-[#94a3b8]'
-  }`;
+  const iconBtnClass =
+    'flex h-7 w-7 items-center justify-center rounded-full border border-(--border) bg-surface-elevated text-sm text-(--text-muted) transition';
 
   return (
-    <div className={`rounded-[18px] border transition-colors duration-200 ${
-      isDark ? 'bg-[#0d0d0d]' : 'bg-[#f1f5f9]'
-    } ${
+    <div className={`rounded-[18px] border bg-surface transition-colors duration-200 ${
       isExpanded
         ? 'border-[#267F6B]/30'
-        : isDark
-          ? 'border-white/[0.08] hover:border-[#267F6B]/20'
-          : 'border-black/[0.08] hover:border-[#267F6B]/30'
+        : 'border-(--border) hover:border-[#267F6B]/25'
     }`}>
+
       {/* ── Fila principal (siempre visible) ── */}
       <div className="flex items-center gap-3 px-5 py-4">
 
         {/* Ícono empresa */}
-        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border text-base ${
-          isDark ? 'border-white/10 bg-white/5' : 'border-black/[0.08] bg-black/[0.04]'
-        }`}>
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-(--border) bg-surface-elevated text-base">
           🏢
         </div>
 
         {/* Nombre + teléfono */}
         <div className="min-w-0 flex-1">
-          <p className={`truncate font-semibold ${isDark ? 'text-white' : 'text-[#0f172a]'}`}>{empresa.name}</p>
-          <p className={`mt-0.5 text-xs ${isDark ? 'text-white/40' : 'text-[#475569]'}`}>{empresa.phone}</p>
+          <p className="truncate font-semibold text-(--text-primary)">{empresa.name}</p>
+          <p className="mt-0.5 text-xs text-(--text-secondary)">{empresa.phone}</p>
         </div>
 
         {/* Badge de usuarios */}
         <span className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold ${
           isFull
             ? 'border-[#267F6B]/40 bg-[#267F6B]/10 text-[#2fa58a]'
-            : isDark
-              ? 'border-white/10 bg-white/5 text-white/40'
-              : 'border-black/[0.08] bg-black/[0.04] text-[#475569]'
+            : 'border-(--border) bg-surface-elevated text-(--text-secondary)'
         }`}>
           {empresa.usuarios.length}/5
         </span>
@@ -92,7 +76,7 @@ export default function EmpresaCard({
         {/* Chevron expand/collapse */}
         <button
           onClick={onToggle}
-          className={`${iconBtnClass} ${isDark ? 'hover:text-white/70' : 'hover:text-[#0f172a]'}`}
+          className={`${iconBtnClass} hover:text-(--text-primary)`}
           aria-label={isExpanded ? 'Colapsar' : 'Expandir'}
         >
           <svg
@@ -115,9 +99,9 @@ export default function EmpresaCard({
           opacity: isExpanded ? 1 : 0,
         }}
       >
-        <div className={`border-t px-5 pb-4 pt-3 ${isDark ? 'border-white/[0.06]' : 'border-black/[0.05]'}`}>
+        <div className="border-t border-(--border-subtle) px-5 pb-4 pt-3">
           {empresa.usuarios.length === 0 ? (
-            <p className={`py-2 text-center text-xs ${isDark ? 'text-white/25' : 'text-[#94a3b8]'}`}>
+            <p className="py-2 text-center text-xs text-(--text-muted)">
               Sin usuarios registrados
             </p>
           ) : (

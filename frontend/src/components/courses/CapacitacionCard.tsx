@@ -1,6 +1,5 @@
 'use client';
 
-import { useTheme } from '@/context/ThemeContext';
 import CategoryBadge from './CategoryBadge';
 import type { Capacitacion } from '@/resources/data';
 
@@ -10,26 +9,23 @@ type Props = {
   onRemove?: () => void;
 };
 
+<<<<<<< HEAD
 export default function CapacitacionCard({ cap, onEdit, onRemove }: Props) {
   const { isDark } = useTheme();
 
+=======
+export default function CapacitacionCard({ cap }: Props) {
+>>>>>>> 091f9e1006d61a297c02083a28a6b8cfdab471ca
   return (
-    <div className={`flex flex-col gap-3 rounded-[24px] border p-5 transition ${
-      isDark
-        ? 'border-white/10 bg-[#0d0d0d] shadow-[0_8px_30px_rgba(0,0,0,0.2)] hover:border-[#267F6B]/30'
-        : 'border-black/[0.08] bg-[#f1f5f9] shadow-[0_4px_24px_rgba(15,23,42,0.08)] hover:border-[#267F6B]/40'
-    }`}>
+    <div className="flex flex-col gap-3 rounded-3xl border border-(--border) bg-surface p-5 shadow-sm transition hover:border-[#267F6B]/30">
 
-      {/* Header row: icon · title + description · badge */}
       <div className="flex items-start gap-3">
-        <div className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border text-lg ${
-          isDark ? 'border-white/10 bg-white/5' : 'border-black/[0.08] bg-black/[0.04]'
-        }`}>
+        <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-(--border) bg-surface-elevated text-lg">
           📦
         </div>
         <div className="flex flex-1 flex-col gap-1.5">
-          <h3 className={`text-base font-semibold ${isDark ? 'text-white' : 'text-[#0f172a]'}`}>{cap.title}</h3>
-          <p className={`text-sm leading-relaxed ${isDark ? 'text-white/45' : 'text-[#475569]'}`}>{cap.description}</p>
+          <h3 className="text-base font-semibold text-(--text-primary)">{cap.title}</h3>
+          <p className="text-sm leading-relaxed text-(--text-secondary)">{cap.description}</p>
         </div>
         <div className="flex items-center gap-2">
           <CategoryBadge category={cap.category} />

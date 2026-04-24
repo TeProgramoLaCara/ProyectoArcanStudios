@@ -1,7 +1,5 @@
 'use client';
 
-import { useTheme } from '@/context/ThemeContext';
-
 type Props = {
   company: string;
   status: string;
@@ -19,13 +17,10 @@ export default function ReservaFilters({
   onStatusChange,
   onReset,
 }: Props) {
-  const { isDark } = useTheme();
+  const selectClass =
+    'rounded-xl border border-(--border) bg-surface-input px-4 py-2.5 text-sm text-(--text-primary) outline-none transition focus:border-[#267F6B]/50 min-w-[180px]';
 
-  const selectClass = isDark
-    ? 'rounded-xl border border-white/10 bg-[#141414] px-4 py-2.5 text-sm text-white outline-none transition focus:border-[#267F6B]/50 min-w-[180px]'
-    : 'rounded-xl border border-black/[0.08] bg-[#e2e8f0] px-4 py-2.5 text-sm text-[#0f172a] outline-none transition focus:border-[#267F6B]/50 min-w-[180px]';
-
-  const labelClass = `text-xs font-medium uppercase tracking-wider ${isDark ? 'text-white/40' : 'text-[#94a3b8]'}`;
+  const labelClass = 'text-xs font-medium uppercase tracking-wider text-(--text-muted)';
 
   return (
     <div className="flex flex-wrap items-end gap-3">
@@ -51,9 +46,7 @@ export default function ReservaFilters({
 
       <button
         onClick={onReset}
-        className={`rounded-xl border px-4 py-2.5 text-sm font-semibold transition hover:opacity-90 ${
-          isDark ? 'border-white/10 bg-white text-black' : 'border-black/10 bg-[#0f172a] text-white'
-        }`}
+        className="rounded-xl border border-(--border) bg-(--text-primary) px-4 py-2.5 text-sm font-semibold text-background transition hover:opacity-80"
       >
         Reset
       </button>

@@ -1,27 +1,30 @@
 'use client';
 
-import { useTheme } from '@/context/ThemeContext';
-
-const DARK_STYLES: Record<string, string> = {
-  Blender: 'border-orange-500/30 bg-orange-500/10 text-orange-400',
-  Unity:   'border-sky-500/30 bg-sky-500/10 text-sky-400',
+const CATEGORY_VARS: Record<string, { color: string; bg: string; border: string }> = {
+  Blender: {
+    color:  'var(--category-blender-color)',
+    bg:     'var(--category-blender-bg)',
+    border: 'var(--category-blender-border)',
+  },
+  Unity: {
+    color:  'var(--category-unity-color)',
+    bg:     'var(--category-unity-bg)',
+    border: 'var(--category-unity-border)',
+  },
 };
 
-const LIGHT_STYLES: Record<string, string> = {
-  Blender: 'border-[#ea580c]/30 bg-[#ea580c]/10 text-[#ea580c]',
-  Unity:   'border-[#0284c7]/30 bg-[#0284c7]/10 text-[#0284c7]',
+const FALLBACK = {
+  color:  'var(--text-secondary)',
+  bg:     'var(--border-subtle)',
+  border: 'var(--border)',
 };
 
 export default function CategoryBadge({ category }: { category: string }) {
-  const { isDark } = useTheme();
-  const styles = isDark ? DARK_STYLES : LIGHT_STYLES;
-
+  const s = CATEGORY_VARS[category] ?? FALLBACK;
   return (
     <span
-      className={`rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
-        styles[category] ??
-        (isDark ? 'border-white bg-white/5 text-white' : 'border-black/[0.08] bg-black/[0.04] text-[#475569]')
-      }`}
+      className="rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
+      style={{ color: s.color, backgroundColor: s.bg, borderColor: s.border }}
     >
       {category}
     </span>
