@@ -1,5 +1,6 @@
 'use client';
 
+import { useTheme } from '@/context/ThemeContext';
 import CategoryBadge from './CategoryBadge';
 import type { Capacitacion } from '@/resources/data';
 
@@ -9,13 +10,9 @@ type Props = {
   onRemove?: () => void;
 };
 
-<<<<<<< HEAD
 export default function CapacitacionCard({ cap, onEdit, onRemove }: Props) {
   const { isDark } = useTheme();
 
-=======
-export default function CapacitacionCard({ cap }: Props) {
->>>>>>> 091f9e1006d61a297c02083a28a6b8cfdab471ca
   return (
     <div className="flex flex-col gap-3 rounded-3xl border border-(--border) bg-surface p-5 shadow-sm transition hover:border-[#267F6B]/30">
 

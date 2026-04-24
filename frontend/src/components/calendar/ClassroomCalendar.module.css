@@ -40,37 +40,58 @@
 
 .wrapper :global(.fc-theme-standard td),
 .wrapper :global(.fc-theme-standard th) {
-  border-color: var(--border) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
+/* ── Column headers ── */
 .wrapper :global(.fc-col-header-cell) {
-  background: var(--surface);
-  padding: 0.5rem 0;
+  padding: 8px 0 !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  color: rgba(255, 255, 255, 0.45) !important;
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
 .wrapper :global(.fc-col-header-cell-cushion) {
-  color: var(--text-secondary);
-  font-size: 0.78rem;
-  font-weight: 600;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   text-decoration: none !important;
 }
 
+/* ── Day number ── */
 .wrapper :global(.fc-daygrid-day-number) {
-  color: var(--text-secondary);
-  font-size: 0.82rem;
-  padding: 0.55rem;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: rgba(255, 255, 255, 0.75) !important;
+  padding: 6px 8px !important;
   text-decoration: none !important;
 }
 
+/* ── Today highlight ── */
 .wrapper :global(.fc-day-today) {
-  background: var(--border-subtle) !important;
+  background-color: rgba(38, 127, 107, 0.08) !important;
 }
 
+/* ── Events ── */
 .wrapper :global(.fc-event) {
   border: none !important;
-  border-radius: 4px !important;
+  border-radius: 8px !important;
   padding: 0 !important;
-  margin: 0 !important;
+  margin: 1px 3px !important;
+}
+
+.wrapper :global(.fc-daygrid-event) {
+  border-radius: 8px !important;
+  padding: 2px 6px !important;
+  margin: 1px 3px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
 }
 
 .wrapper :global(.fc-event-main) {
@@ -83,6 +104,7 @@
   color: var(--text-secondary) !important;
 }
 
+/* ── Scrollbar ── */
 .wrapper :global(.fc-scroller) {
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
@@ -104,25 +126,16 @@
 
 /* ── Cell height ── */
 .wrapper :global(.fc-daygrid-day) {
-  height: 100px !important;
-  min-height: 86px !important;
+  min-height: 110px !important;
 }
 
 .wrapper :global(.fc-daygrid-day-frame) {
-  min-height: 86px !important;
+  min-height: 100px !important;
   position: relative;
   overflow: visible;
   margin: 2px;
   border-radius: 10px;
-  border: 1px solid var(--calendar-cell-border);
-  background:
-    linear-gradient(
-      to bottom,
-      var(--border-subtle) 0%,
-      var(--border-subtle) 49.5%,
-      transparent 49.5%,
-      transparent 100%
-    );
+
 }
 
 .wrapper :global(.fc-daygrid-day-frame::before) {
@@ -176,4 +189,56 @@
 .wrapper :global(.fc-event-resizer-end::before) {
   content: none !important;
   display: none !important;
+}
+
+/* ── Editing pulse ── */
+:global(.fc-day-editing-pulse) {
+  animation: pulseEditCell 1.2s ease-in-out infinite;
+  outline: 2px solid rgba(245, 158, 11, 0.6);
+  outline-offset: -2px;
+  border-radius: 4px;
+  z-index: 1;
+}
+
+@keyframes pulseEditCell {
+  0%, 100% { background-color: rgba(245, 158, 11, 0.06); }
+  50%       { background-color: rgba(245, 158, 11, 0.14); }
+}
+
+/* ── Day note dot + label ── */
+:global(.fc-day-note-wrapper) {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  margin: 2px 4px 3px;
+  cursor: pointer;
+  line-height: 1.3;
+}
+
+:global(.fc-day-note-dot) {
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  margin-top: 3px;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+}
+
+:global(.fc-day-note-label) {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 80px;
+}
+
+:global(.fc-day-note-preview) {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.55);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
 }

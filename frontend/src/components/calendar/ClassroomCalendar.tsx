@@ -8,6 +8,7 @@ import styles from "./ClassroomCalendar.module.css";
 import type { CalendarEvent } from "@/app/admin/calendario/page";
 import { PROFESSOR_COLORS } from "@/resources/data";
 import EventDetailCard from "./EventDetailCard";
+import DayNotes, { type DayNote } from "./DayNotes";
 
 type ClassroomCalendarProps = {
   title: string;
@@ -16,12 +17,6 @@ type ClassroomCalendarProps = {
   currentDate: Date;
   onDeleteEvent: (eventId: string) => void;
   onUpdateEvent: (event: CalendarEvent) => void;
-};
-
-type DayNote = {
-  title: string;
-  message: string;
-  color: string;
 };
 
 export default function ClassroomCalendar({
@@ -35,11 +30,8 @@ export default function ClassroomCalendar({
   const calendarRef = useRef<FullCalendar>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [dayNotes, setDayNotes] = useState<Record<string, DayNote>>({});
   const [editingDateKey, setEditingDateKey] = useState<string | null>(null);
-  const [noteTitle, setNoteTitle] = useState("");
-  const [noteMessage, setNoteMessage] = useState("");
-  const [noteColor, setNoteColor] = useState("#f59e0b");
+  const [dayNotes, setDayNotes] = useState<Record<string, DayNote>>({});
   const [openedNote, setOpenedNote] = useState<(DayNote & { dateKey: string }) | null>(
     null,
   );
@@ -49,6 +41,7 @@ export default function ClassroomCalendar({
     y: 0,
     openUpward: false,
   });
+
   const monthLabel = useMemo(
     () =>
       currentDate.toLocaleDateString("es-ES", {
@@ -57,6 +50,7 @@ export default function ClassroomCalendar({
       }),
     [currentDate],
   );
+
   const calendarRenderKey = useMemo(() => {
     const monthKey = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}`;
     const notesKey = Object.entries(dayNotes)
@@ -72,6 +66,15 @@ export default function ClassroomCalendar({
       api.gotoDate(currentDate);
     }
   }, [currentDate]);
+
+  useEffect(() => {
+    if (!editingDateKey) return;
+    const selector = `[data-date="${editingDateKey}"]`;
+    const cell = document.querySelector(selector);
+    if (!cell) return;
+    cell.classList.add("fc-day-editing-pulse");
+    return () => cell.classList.remove("fc-day-editing-pulse");
+  }, [editingDateKey]);
 
   const fcEvents = useMemo(
     () => {
@@ -261,48 +264,6 @@ export default function ClassroomCalendar({
     [events, currentDate],
   );
 
-  const handlePrevMonth = () => {
-    calendarRef.current?.getApi().prev();
-  };
-
-  const handleNextMonth = () => {
-    calendarRef.current?.getApi().next();
-  };
-
-  const openDayNoteEditor = (dateKey: string) => {
-    const note = dayNotes[dateKey];
-    setEditingDateKey(dateKey);
-    setNoteTitle(note?.title ?? "");
-    setNoteMessage(note?.message ?? "");
-    setNoteColor(note?.color ?? "#f59e0b");
-  };
-
-  const saveDayNote = () => {
-    if (!editingDateKey) return;
-    const title = noteTitle.trim();
-    const message = noteMessage.trim();
-    if (!title || !message) return;
-    setDayNotes((prev) => ({
-      ...prev,
-      [editingDateKey]: {
-        title,
-        message,
-        color: noteColor,
-      },
-    }));
-    setEditingDateKey(null);
-  };
-
-  const deleteDayNote = () => {
-    if (!editingDateKey) return;
-    setDayNotes((prev) => {
-      const next = { ...prev };
-      delete next[editingDateKey];
-      return next;
-    });
-    setEditingDateKey(null);
-  };
-
   const handleDeleteSelectedEvent = () => {
     if (!selectedEvent) return;
     onDeleteEvent(selectedEvent.id);
@@ -346,82 +307,22 @@ export default function ClassroomCalendar({
           >
             ✎
           </button>
-          <button
-            type="button"
-            onClick={handlePrevMonth}
-            className="rounded-lg border border-(--border) bg-surface-elevated px-2.5 py-1.5 text-xs font-medium text-(--text-secondary) transition hover:bg-(--border)"
-            aria-label={`Mes anterior en ${title}`}
-          >
-            ←
-          </button>
-          <button
-            type="button"
-            onClick={handleNextMonth}
-            className="rounded-lg border border-(--border) bg-surface-elevated px-2.5 py-1.5 text-xs font-medium text-(--text-secondary) transition hover:bg-(--border)"
-            aria-label={`Mes siguiente en ${title}`}
-          >
-            →
-          </button>
         </div>
       </div>
 
-      {isEditMode && (
-        <div className="mb-3 rounded-xl border border-amber-300/25 bg-amber-500/10 p-3 text-xs text-black-50">
-          <p className="mb-2">
-            Modo edición activo. Pulsa un día del calendario para crear o editar una
-            anotación.
-          </p>
-          {editingDateKey && (
-            <div className="grid gap-2">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-amber-100/90">
-                {editingDateKey}
-              </p>
-              <input
-                value={noteTitle}
-                onChange={(e) => setNoteTitle(e.target.value)}
-                placeholder="Título de la anotación"
-                className="rounded-md border border-white/20 bg-black/30 px-2 py-1.5 text-xs text-white outline-none placeholder:text-white/45 focus:border-amber-200/60"
-              />
-              <textarea
-                value={noteMessage}
-                onChange={(e) => setNoteMessage(e.target.value)}
-                placeholder="Escribe una anotación para este día..."
-                className="min-h-[72px] rounded-md border border-white/20 bg-black/30 px-2 py-1.5 text-xs text-white outline-none placeholder:text-white/45 focus:border-amber-200/60"
-              />
-              <div className="flex items-center gap-2">
-                <label className="text-[11px] text-white/80" htmlFor={`${aulaId}-note-color`}>
-                  Color
-                </label>
-                <input
-                  id={`${aulaId}-note-color`}
-                  type="color"
-                  value={noteColor}
-                  onChange={(e) => setNoteColor(e.target.value)}
-                  className="h-7 w-10 cursor-pointer rounded border border-white/20 bg-transparent p-0"
-                />
-                <button
-                  type="button"
-                  onClick={saveDayNote}
-                  className="rounded-md border border-emerald-300/40 bg-emerald-500/20 px-2.5 py-1 text-[11px] font-semibold text-emerald-100 transition hover:bg-emerald-500/30"
-                >
-                  Guardar
-                </button>
-                <button
-                  type="button"
-                  onClick={deleteDayNote}
-                  className="rounded-md border border-rose-300/40 bg-rose-500/20 px-2.5 py-1 text-[11px] font-semibold text-rose-100 transition hover:bg-rose-500/30"
-                >
-                  Borrar
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+      <DayNotes
+        aulaId={aulaId}
+        isEditMode={isEditMode}
+        onNotesChange={setDayNotes}
+        editingDateKey={editingDateKey}
+        onEditingDateChange={setEditingDateKey}
+        openedNote={openedNote}
+        onCloseNote={() => setOpenedNote(null)}
+      />
 
       <div
         className={`${styles.wrapper} overflow-hidden rounded-[22px] border border-(--border) bg-background`}
-        style={{ height: "600px" }}
+        style={{ height: "700px" }}
       >
         <FullCalendar
           key={calendarRenderKey}
@@ -432,7 +333,7 @@ export default function ClassroomCalendar({
           initialDate={currentDate}
           height="100%"
           fixedWeekCount={false}
-          dayMaxEventRows={2}
+          dayMaxEventRows={3}
           weekends={false}
           editable={false}
           eventStartEditable={false}
@@ -461,9 +362,7 @@ export default function ClassroomCalendar({
             }
           }}
           eventContent={(arg) => {
-            const professorColor = arg.event.extendedProps.professorColor as string;
             const turno = arg.event.extendedProps.turno as CalendarEvent["turno"];
-            const isAvailable = Boolean(arg.event.extendedProps.isAvailable);
             const turnoIcon = turno === "manana" ? "☀" : "☾";
             const titleText = arg.event.title;
             const showLabel = arg.isStart;
@@ -473,9 +372,9 @@ export default function ClassroomCalendar({
                 style={{
                   padding: "3px 8px",
                   fontSize: "12px",
-                  fontWeight: 600,
-                  lineHeight: 1.2,
-                  minHeight: "22px",
+                  fontWeight: 500,
+                  lineHeight: 1.0,
+                  minHeight: "18px",
                   color: "#ffffff",
                   whiteSpace: "nowrap",
                   overflow: "hidden",
@@ -497,19 +396,6 @@ export default function ClassroomCalendar({
                 >
                   {showLabel ? turnoIcon : ""}
                 </span>
-                {!isAvailable && showLabel && (
-                  <span
-                    style={{
-                      width: "8px",
-                      height: "8px",
-                      borderRadius: "9999px",
-                      backgroundColor: professorColor,
-                      flexShrink: 0,
-                      boxShadow: "0 0 0 1px rgba(0,0,0,0.22)",
-                    }}
-                    aria-hidden
-                  />
-                )}
                 <span>{showLabel ? titleText : ""}</span>
               </div>
             );
@@ -551,7 +437,7 @@ export default function ClassroomCalendar({
           }}
           dateClick={(info) => {
             if (!isEditMode) return;
-            openDayNoteEditor(info.dateStr);
+            setEditingDateKey(info.dateStr);
           }}
           dayCellDidMount={(info) => {
             const y = info.date.getFullYear();
@@ -561,25 +447,39 @@ export default function ClassroomCalendar({
             const note = dayNotes[dateKey];
 
             info.el.classList.remove("has-day-note");
-            const existing = info.el.querySelector(".fc-day-note-chip");
+            const existing = info.el.querySelector(".fc-day-note-wrapper");
             if (existing) {
               existing.remove();
             }
             if (!note) return;
 
             info.el.classList.add("has-day-note");
-            const chip = document.createElement("button");
-            chip.type = "button";
-            chip.className = "fc-day-note-chip";
-            chip.style.background = note.color;
-            chip.textContent = note.title;
-            chip.title = `${note.title}: ${note.message}`;
-            chip.addEventListener("click", (ev) => {
+            const wrapper = document.createElement("div");
+            wrapper.className = "fc-day-note-wrapper";
+            wrapper.title = `${note.title}: ${note.message}`;
+            wrapper.addEventListener("click", (ev) => {
               ev.stopPropagation();
               setOpenedNote({ ...note, dateKey });
             });
-            const frame = info.el.querySelector(".fc-daygrid-day-frame");
-            frame?.appendChild(chip);
+
+            const dot = document.createElement("span");
+            dot.className = "fc-day-note-dot";
+            dot.style.background = note.color;
+
+            const label = document.createElement("span");
+            label.className = "fc-day-note-label";
+            label.textContent = note.title;
+
+            const preview = document.createElement("span");
+            preview.className = "fc-day-note-preview";
+            preview.textContent = note.message;
+
+            wrapper.appendChild(dot);
+            wrapper.appendChild(label);
+            wrapper.appendChild(preview);
+
+            const topArea = info.el.querySelector(".fc-daygrid-day-top");
+            topArea?.insertAdjacentElement("afterend", wrapper);
           }}
         />
       </div>
@@ -676,33 +576,6 @@ export default function ClassroomCalendar({
               </button>
             </div>
           </form>
-        </div>
-      )}
-      {openedNote && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/45 p-4">
-          <div className="w-full max-w-md rounded-2xl border border-white/15 bg-[#121212] p-4 shadow-2xl">
-            <div className="mb-2 flex items-start justify-between gap-3">
-              <div>
-                <p className="text-[11px] uppercase tracking-wide text-white/50">
-                  {openedNote.dateKey}
-                </p>
-                <h3 className="text-sm font-semibold text-white">{openedNote.title}</h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setOpenedNote(null)}
-                className="rounded-md border border-white/15 bg-white/5 px-2 py-1 text-xs text-white/80 hover:bg-white/10"
-              >
-                Cerrar
-              </button>
-            </div>
-            <div
-              className="rounded-lg p-3 text-sm text-white"
-              style={{ background: openedNote.color }}
-            >
-              {openedNote.message}
-            </div>
-          </div>
         </div>
       )}
     </div>

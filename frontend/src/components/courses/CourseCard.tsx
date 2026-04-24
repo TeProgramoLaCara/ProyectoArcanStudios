@@ -1,5 +1,6 @@
 'use client';
 
+import { useTheme } from '@/context/ThemeContext';
 import CategoryBadge from './CategoryBadge';
 import type { Capacitacion, Curso } from '@/resources/data';
 
@@ -12,12 +13,8 @@ type Props = {
   onRemove?: () => void;
 };
 
-<<<<<<< HEAD
 export default function CourseCard({ course, capacitaciones, onEdit, onRemove }: Props) {
   const { isDark } = useTheme();
-=======
-export default function CourseCard({ course, capacitaciones }: Props) {
->>>>>>> 091f9e1006d61a297c02083a28a6b8cfdab471ca
   const caps = course.capacitaciones.map((id) => capacitaciones.find((c) => c.id === id)!);
 
   return (
