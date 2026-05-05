@@ -5,8 +5,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import styles from "./ClassroomCalendar.module.css";
-import type { CalendarEvent } from "@/app/admin/calendario/page";
-import { PROFESSOR_COLORS } from "@/resources/data";
+import type { CalendarEvent } from "./types";
 import EventDetailCard from "./EventDetailCard";
 import DayNotes, { type DayNote } from "./DayNotes";
 
@@ -28,14 +27,16 @@ export default function ClassroomCalendar({
   onUpdateEvent,
 }: ClassroomCalendarProps) {
   const calendarRef = useRef<FullCalendar>(null);
+
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingDateKey, setEditingDateKey] = useState<string | null>(null);
   const [dayNotes, setDayNotes] = useState<Record<string, DayNote>>({});
-  const [openedNote, setOpenedNote] = useState<(DayNote & { dateKey: string }) | null>(
-    null,
-  );
+  const [openedNote, setOpenedNote] = useState<
+    (DayNote & { dateKey: string }) | null
+  >(null);
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
+
   const [cardPosition, setCardPosition] = useState({
     x: 0,
     y: 0,
@@ -48,20 +49,28 @@ export default function ClassroomCalendar({
         month: "long",
         year: "numeric",
       }),
-    [currentDate],
+    [currentDate]
   );
 
   const calendarRenderKey = useMemo(() => {
-    const monthKey = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}`;
+    const monthKey = `${currentDate.getFullYear()}-${String(
+      currentDate.getMonth() + 1
+    ).padStart(2, "0")}`;
+
     const notesKey = Object.entries(dayNotes)
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([dateKey, note]) => `${dateKey}:${note.title}:${note.color}:${note.message}`)
+      .map(
+        ([dateKey, note]) =>
+          `${dateKey}:${note.title}:${note.color}:${note.message}`
+      )
       .join("|");
+
     return `${monthKey}__${notesKey}`;
   }, [currentDate, dayNotes]);
 
   useEffect(() => {
     const api = calendarRef.current?.getApi();
+
     if (api) {
       api.gotoDate(currentDate);
     }
@@ -69,183 +78,222 @@ export default function ClassroomCalendar({
 
   useEffect(() => {
     if (!editingDateKey) return;
+
     const selector = `[data-date="${editingDateKey}"]`;
     const cell = document.querySelector(selector);
+
     if (!cell) return;
+
     cell.classList.add("fc-day-editing-pulse");
-    return () => cell.classList.remove("fc-day-editing-pulse");
+
+    return () => {
+      cell.classList.remove("fc-day-editing-pulse");
+    };
   }, [editingDateKey]);
 
-  const fcEvents = useMemo(
-    () => {
-      const toLocalKey = (date: Date) => {
-        const y = date.getFullYear();
-        const m = String(date.getMonth() + 1).padStart(2, "0");
-        const d = String(date.getDate()).padStart(2, "0");
-        return `${y}-${m}-${d}`;
-      };
+  const fcEvents = useMemo(() => {
+    const toLocalKey = (date: Date) => {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      const d = String(date.getDate()).padStart(2, "0");
 
-      const addDays = (date: Date, days: number) => {
-        const d = new Date(date);
-        d.setDate(d.getDate() + days);
-        return d;
-      };
+      return `${y}-${m}-${d}`;
+    };
 
-      const splitRangeByWeeks = (startStr: string, endStr: string) => {
-        const segments: Array<{ start: string; end: string }> = [];
-        const start = new Date(`${startStr}T00:00:00`);
-        const endExclusive = new Date(`${endStr}T00:00:00`);
-        let segmentStart: Date | null = null;
-        let previousDate: Date | null = null;
+    const addDays = (date: Date, days: number) => {
+      const d = new Date(date);
+      d.setDate(d.getDate() + days);
 
-        for (
-          const cursor = new Date(start);
-          cursor < endExclusive;
-          cursor.setDate(cursor.getDate() + 1)
-        ) {
-          const key = toLocalKey(cursor);
-          const startsNewWeek = cursor.getDay() === 1;
+      return d;
+    };
 
-          if (!segmentStart) {
-            segmentStart = new Date(cursor);
-          } else if (startsNewWeek && previousDate) {
-            segments.push({
-              start: toLocalKey(segmentStart),
-              end: toLocalKey(addDays(previousDate, 1)),
-            });
-            segmentStart = new Date(cursor);
-          } else if (previousDate && toLocalKey(addDays(previousDate, 1)) !== key) {
-            segments.push({
-              start: toLocalKey(segmentStart),
-              end: toLocalKey(addDays(previousDate, 1)),
-            });
-            segmentStart = new Date(cursor);
-          }
+    const splitRangeByWeeks = (startStr: string, endStr: string) => {
+      const segments: Array<{ start: string; end: string }> = [];
 
-          previousDate = new Date(cursor);
-        }
+      const start = new Date(`${startStr}T00:00:00`);
+      const endExclusive = new Date(`${endStr}T00:00:00`);
 
-        if (segmentStart && previousDate) {
+      let segmentStart: Date | null = null;
+      let previousDate: Date | null = null;
+
+      for (
+        const cursor = new Date(start);
+        cursor < endExclusive;
+        cursor.setDate(cursor.getDate() + 1)
+      ) {
+        const key = toLocalKey(cursor);
+        const startsNewWeek = cursor.getDay() === 1;
+
+        if (!segmentStart) {
+          segmentStart = new Date(cursor);
+        } else if (startsNewWeek && previousDate) {
           segments.push({
             start: toLocalKey(segmentStart),
             end: toLocalKey(addDays(previousDate, 1)),
           });
-        }
 
-        return segments;
-      };
-
-      const busyEvents = events.flatMap((e) =>
-        splitRangeByWeeks(e.start, e.end).map((segment, idx) => ({
-          id: `${e.id}-seg-${idx}`,
-          title: e.title,
-          start: segment.start,
-          end: segment.end,
-          allDay: true,
-          order: e.turno === "manana" ? 0 : 1,
-          backgroundColor: e.color,
-          borderColor: e.color,
-          textColor: "#ffffff",
-          extendedProps: {
-            isAvailable: false,
-            color: e.color,
-            turno: e.turno,
-            sortOrder: e.turno === "manana" ? 0 : 1,
-            professorId: e.professorId,
-            professorName: e.professorName,
-            professorColor: PROFESSOR_COLORS[e.professorId] ?? "#9ca3af",
-            companyId: e.companyId,
-            companyName: e.companyName,
-            capacitaciones: e.capacitaciones,
-          },
-        })),
-      );
-
-      const isWeekday = (date: Date) => {
-        const day = date.getDay();
-        return day >= 1 && day <= 5;
-      };
-
-      const occupied = {
-        manana: new Set<string>(),
-        tarde: new Set<string>(),
-      };
-
-      for (const event of events) {
-        const start = new Date(`${event.start}T00:00:00`);
-        const endExclusive = new Date(`${event.end}T00:00:00`);
-        for (
-          const cursor = new Date(start);
-          cursor < endExclusive;
-          cursor.setDate(cursor.getDate() + 1)
+          segmentStart = new Date(cursor);
+        } else if (
+          previousDate &&
+          toLocalKey(addDays(previousDate, 1)) !== key
         ) {
-          if (!isWeekday(cursor)) continue;
-          occupied[event.turno].add(toLocalKey(cursor));
+          segments.push({
+            start: toLocalKey(segmentStart),
+            end: toLocalKey(addDays(previousDate, 1)),
+          });
+
+          segmentStart = new Date(cursor);
         }
+
+        previousDate = new Date(cursor);
       }
 
-      const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-      const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+      if (segmentStart && previousDate) {
+        segments.push({
+          start: toLocalKey(segmentStart),
+          end: toLocalKey(addDays(previousDate, 1)),
+        });
+      }
 
-      const createAvailabilityRanges = (turno: CalendarEvent["turno"]) => {
-        const ranges: Array<{ start: string; end: string }> = [];
-        let rangeStart: Date | null = null;
-        let previousDate: Date | null = null;
-        const otherTurno: CalendarEvent["turno"] =
-          turno === "manana" ? "tarde" : "manana";
+      return segments;
+    };
 
-        for (
-          const cursor = new Date(monthStart);
-          cursor <= monthEnd;
-          cursor.setDate(cursor.getDate() + 1)
-        ) {
-          if (!isWeekday(cursor)) continue;
-          const key = toLocalKey(cursor);
-          const thisTurnoIsFree = !occupied[turno].has(key);
-          const otherTurnoIsOccupied = occupied[otherTurno].has(key);
-          const isPartiallyReserved = thisTurnoIsFree && otherTurnoIsOccupied;
+    const busyEvents = events.flatMap((event) =>
+      splitRangeByWeeks(event.start, event.end).map((segment, index) => ({
+        id: `${event.id}-seg-${index}`,
+        title: event.title,
+        start: segment.start,
+        end: segment.end,
+        allDay: true,
+        order: event.turno === "mañana" ? 0 : 1,
+        backgroundColor: event.color,
+        borderColor: event.color,
+        textColor: "#ffffff",
+        extendedProps: {
+          baseId: event.id,
+          originalStart: event.start,
+          originalEnd: event.end,
+          isAvailable: false,
+          color: event.color,
+          turno: event.turno,
+          sortOrder: event.turno === "mañana" ? 0 : 1,
+          professorId: event.professorId,
+          professorName: event.professorName,
+          professorColor: event.professorColor ?? event.color,
+          companyId: event.companyId,
+          companyName: event.companyName,
+          capacitaciones: event.capacitaciones,
+        },
+      }))
+    );
 
-          if (isPartiallyReserved) {
-            if (!rangeStart) {
-              rangeStart = new Date(cursor);
-            } else if (previousDate && toLocalKey(addDays(previousDate, 1)) !== key) {
-              ranges.push({
-                start: toLocalKey(rangeStart),
-                end: toLocalKey(addDays(previousDate, 1)),
-              });
-              rangeStart = new Date(cursor);
-            }
-            previousDate = new Date(cursor);
-          } else if (rangeStart && previousDate) {
+    const isWeekday = (date: Date) => {
+      const day = date.getDay();
+      return day >= 1 && day <= 5;
+    };
+
+    const occupied = {
+      mañana: new Set<string>(),
+      tarde: new Set<string>(),
+    };
+
+    for (const event of events) {
+      const start = new Date(`${event.start}T00:00:00`);
+      const endExclusive = new Date(`${event.end}T00:00:00`);
+
+      for (
+        const cursor = new Date(start);
+        cursor < endExclusive;
+        cursor.setDate(cursor.getDate() + 1)
+      ) {
+        if (!isWeekday(cursor)) continue;
+
+        occupied[event.turno].add(toLocalKey(cursor));
+      }
+    }
+
+    const monthStart = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      1
+    );
+
+    const monthEnd = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() + 1,
+      0
+    );
+
+    const createAvailabilityRanges = (turno: CalendarEvent["turno"]) => {
+      const ranges: Array<{ start: string; end: string }> = [];
+
+      let rangeStart: Date | null = null;
+      let previousDate: Date | null = null;
+
+      const otherTurno: CalendarEvent["turno"] =
+        turno === "mañana" ? "tarde" : "mañana";
+
+      for (
+        const cursor = new Date(monthStart);
+        cursor <= monthEnd;
+        cursor.setDate(cursor.getDate() + 1)
+      ) {
+        if (!isWeekday(cursor)) continue;
+
+        const key = toLocalKey(cursor);
+
+        const thisTurnoIsFree = !occupied[turno].has(key);
+        const otherTurnoIsOccupied = occupied[otherTurno].has(key);
+        const isPartiallyReserved = thisTurnoIsFree && otherTurnoIsOccupied;
+
+        if (isPartiallyReserved) {
+          if (!rangeStart) {
+            rangeStart = new Date(cursor);
+          } else if (
+            previousDate &&
+            toLocalKey(addDays(previousDate, 1)) !== key
+          ) {
             ranges.push({
               start: toLocalKey(rangeStart),
               end: toLocalKey(addDays(previousDate, 1)),
             });
-            rangeStart = null;
-            previousDate = null;
-          }
-        }
 
-        if (rangeStart && previousDate) {
+            rangeStart = new Date(cursor);
+          }
+
+          previousDate = new Date(cursor);
+        } else if (rangeStart && previousDate) {
           ranges.push({
             start: toLocalKey(rangeStart),
             end: toLocalKey(addDays(previousDate, 1)),
           });
+
+          rangeStart = null;
+          previousDate = null;
         }
+      }
 
-        return ranges;
-      };
+      if (rangeStart && previousDate) {
+        ranges.push({
+          start: toLocalKey(rangeStart),
+          end: toLocalKey(addDays(previousDate, 1)),
+        });
+      }
 
-      const availabilityColor = "rgba(34, 197, 94, 0.33)";
+      return ranges;
+    };
 
-      const availabilityEvents = (["manana", "tarde"] as const).flatMap((turno) =>
-        createAvailabilityRanges(turno).map((range, idx) => ({
-          id: `available-${turno}-${range.start}-${idx}`,
+    const availabilityColor = "rgba(34, 197, 94, 0.33)";
+
+    const availabilityEvents = (["mañana", "tarde"] as const).flatMap(
+      (turno) =>
+        createAvailabilityRanges(turno).map((range, index) => ({
+          id: `available-${turno}-${range.start}-${index}`,
           title: "Disponible",
           start: range.start,
           end: range.end,
           allDay: true,
-          order: turno === "manana" ? 0 : 1,
+          order: turno === "mañana" ? 0 : 1,
           backgroundColor: availabilityColor,
           borderColor: "transparent",
           textColor: "#dcfce7",
@@ -253,43 +301,50 @@ export default function ClassroomCalendar({
             isAvailable: true,
             color: availabilityColor,
             turno,
-            sortOrder: turno === "manana" ? 0 : 1,
+            sortOrder: turno === "mañana" ? 0 : 1,
             professorColor: "transparent",
           },
-        })),
-      );
+        }))
+    );
 
-      return [...busyEvents, ...availabilityEvents];
-    },
-    [events, currentDate],
-  );
+    return [...busyEvents, ...availabilityEvents];
+  }, [events, currentDate]);
 
-  const handleDeleteSelectedEvent = () => {
+  function handleDeleteSelectedEvent() {
     if (!selectedEvent) return;
+
     onDeleteEvent(selectedEvent.id);
     setSelectedEvent(null);
-  };
+  }
 
-  const handleStartEditSelectedEvent = () => {
+  function handleStartEditSelectedEvent() {
     if (!selectedEvent) return;
+
     setEditingEvent(selectedEvent);
     setSelectedEvent(null);
-  };
+  }
 
-  const handleSaveEditedEvent = (event: FormEvent<HTMLFormElement>) => {
+  function handleSaveEditedEvent(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
     if (!editingEvent) return;
+
     onUpdateEvent(editingEvent);
     setEditingEvent(null);
-  };
+  }
 
   return (
-    <div className="flex flex-col rounded-[28px] border border-(--border) bg-surface p-5 shadow-[0_8px_30px_rgba(0,0,0,0.22)]">
+    <div className="flex flex-col rounded-[28px] border border-(--border) bg-surface p-5">
       <div className="mb-4 flex items-start justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-semibold text-(--text-primary)">{title}</h2>
-          <p className="mt-1 text-xs capitalize text-(--text-muted)">{monthLabel}</p>
+          <h2 className="text-2xl font-semibold text-(--text-primary)">
+            {title}
+          </h2>
+          <p className="mt-1 text-xs capitalize text-(--text-muted)">
+            {monthLabel}
+          </p>
         </div>
+
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -299,8 +354,8 @@ export default function ClassroomCalendar({
             }}
             className={`rounded-lg border px-2.5 py-1.5 text-xs font-medium transition ${
               isEditMode
-                ? "border-amber-300/40 bg-amber-500/20 text-black-100"
-                : "border-white/10 bg-white/5 text-black/80 hover:bg-white/10"
+                ? "border-amber-300/40 bg-amber-500/20 text-amber-100"
+                : "border-white/10 bg-white/5 text-white/70 hover:bg-white/10"
             }`}
             aria-label={`Editar anotaciones de ${title}`}
             title="Anotar imprevistos por día"
@@ -345,25 +400,34 @@ export default function ClassroomCalendar({
           eventOrder="order,title"
           eventOrderStrict={true}
           eventDidMount={(info) => {
-            const turno = info.event.extendedProps.turno as CalendarEvent["turno"];
+            const turno = info.event.extendedProps
+              .turno as CalendarEvent["turno"];
+
             const isAvailable = Boolean(info.event.extendedProps.isAvailable);
+
             const harness = info.el.closest(".fc-daygrid-event-harness");
+
             if (!harness) return;
+
             harness.classList.remove(
-              "turno-manana-slot",
+              "turno-mañana-slot",
               "turno-tarde-slot",
-              "availability-slot",
+              "availability-slot"
             );
+
             harness.classList.add(
-              turno === "manana" ? "turno-manana-slot" : "turno-tarde-slot",
+              turno === "mañana" ? "turno-mañana-slot" : "turno-tarde-slot"
             );
+
             if (isAvailable) {
               harness.classList.add("availability-slot");
             }
           }}
           eventContent={(arg) => {
-            const turno = arg.event.extendedProps.turno as CalendarEvent["turno"];
-            const turnoIcon = turno === "manana" ? "☀" : "☾";
+            const turno = arg.event.extendedProps
+              .turno as CalendarEvent["turno"];
+
+            const turnoIcon = turno === "mañana" ? "☀" : "☾";
             const titleText = arg.event.title;
             const showLabel = arg.isStart;
 
@@ -373,7 +437,7 @@ export default function ClassroomCalendar({
                   padding: "3px 8px",
                   fontSize: "12px",
                   fontWeight: 500,
-                  lineHeight: 1.0,
+                  lineHeight: 1,
                   minHeight: "18px",
                   color: "#ffffff",
                   whiteSpace: "nowrap",
@@ -396,29 +460,34 @@ export default function ClassroomCalendar({
                 >
                   {showLabel ? turnoIcon : ""}
                 </span>
+
                 <span>{showLabel ? titleText : ""}</span>
               </div>
             );
           }}
           eventClick={(info) => {
             const ep = info.event.extendedProps;
+
             if (ep.isAvailable) return;
+
             const reconstructed: CalendarEvent = {
-              id: info.event.id,
+              id: ep.baseId as string,
               title: info.event.title,
-              start: info.event.startStr,
-              end: info.event.endStr,
+              start: ep.originalStart as string,
+              end: ep.originalEnd as string,
               aula: aulaId as CalendarEvent["aula"],
               turno: ep.turno as CalendarEvent["turno"],
               color: ep.color as string,
               professorId: ep.professorId as string,
               professorName: ep.professorName as string,
+              professorColor: ep.professorColor as string,
               companyId: ep.companyId as string,
               companyName: ep.companyName as string,
               capacitaciones: ep.capacitaciones as string[],
             };
 
             const rect = info.el.getBoundingClientRect();
+
             const cardHeight = 320;
             const spaceBelow = window.innerHeight - rect.bottom;
             const spaceAbove = rect.top;
@@ -433,10 +502,12 @@ export default function ClassroomCalendar({
               y,
               openUpward: spaceBelow < cardHeight && spaceAbove > spaceBelow,
             });
+
             setSelectedEvent(reconstructed);
           }}
           dateClick={(info) => {
             if (!isEditMode) return;
+
             setEditingDateKey(info.dateStr);
           }}
           dayCellDidMount={(info) => {
@@ -444,21 +515,26 @@ export default function ClassroomCalendar({
             const m = String(info.date.getMonth() + 1).padStart(2, "0");
             const d = String(info.date.getDate()).padStart(2, "0");
             const dateKey = `${y}-${m}-${d}`;
+
             const note = dayNotes[dateKey];
 
             info.el.classList.remove("has-day-note");
+
             const existing = info.el.querySelector(".fc-day-note-wrapper");
+
             if (existing) {
               existing.remove();
             }
+
             if (!note) return;
 
             info.el.classList.add("has-day-note");
+
             const wrapper = document.createElement("div");
             wrapper.className = "fc-day-note-wrapper";
             wrapper.title = `${note.title}: ${note.message}`;
-            wrapper.addEventListener("click", (ev) => {
-              ev.stopPropagation();
+            wrapper.addEventListener("click", (event) => {
+              event.stopPropagation();
               setOpenedNote({ ...note, dateKey });
             });
 
@@ -493,6 +569,7 @@ export default function ClassroomCalendar({
           onDelete={handleDeleteSelectedEvent}
         />
       )}
+
       {editingEvent && (
         <div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/45 p-4">
           <form
@@ -500,7 +577,10 @@ export default function ClassroomCalendar({
             className="w-full max-w-lg rounded-2xl border border-white/15 bg-[#121212] p-4 shadow-2xl"
           >
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-white">Editar evento</h3>
+              <h3 className="text-sm font-semibold text-white">
+                Editar evento
+              </h3>
+
               <button
                 type="button"
                 onClick={() => setEditingEvent(null)}
@@ -509,57 +589,63 @@ export default function ClassroomCalendar({
                 Cerrar
               </button>
             </div>
+
             <div className="grid gap-2">
               <input
                 value={editingEvent.title}
-                onChange={(e) =>
+                onChange={(event) =>
                   setEditingEvent((prev) =>
-                    prev ? { ...prev, title: e.target.value } : prev,
+                    prev ? { ...prev, title: event.target.value } : prev
                   )
                 }
                 placeholder="Título"
                 className="rounded-md border border-white/20 bg-black/30 px-3 py-2 text-sm text-white outline-none"
               />
+
               <div className="grid grid-cols-2 gap-2">
                 <input
                   type="date"
                   value={editingEvent.start}
-                  onChange={(e) =>
+                  onChange={(event) =>
                     setEditingEvent((prev) =>
-                      prev ? { ...prev, start: e.target.value } : prev,
+                      prev ? { ...prev, start: event.target.value } : prev
                     )
                   }
                   className="rounded-md border border-white/20 bg-black/30 px-3 py-2 text-sm text-white outline-none"
                 />
+
                 <input
                   type="date"
                   value={editingEvent.end}
-                  onChange={(e) =>
+                  onChange={(event) =>
                     setEditingEvent((prev) =>
-                      prev ? { ...prev, end: e.target.value } : prev,
+                      prev ? { ...prev, end: event.target.value } : prev
                     )
                   }
                   className="rounded-md border border-white/20 bg-black/30 px-3 py-2 text-sm text-white outline-none"
                 />
               </div>
+
               <select
                 value={editingEvent.turno}
-                onChange={(e) =>
+                onChange={(event) =>
                   setEditingEvent((prev) =>
                     prev
                       ? {
                           ...prev,
-                          turno: e.target.value as CalendarEvent["turno"],
+                          turno: event.target
+                            .value as CalendarEvent["turno"],
                         }
-                      : prev,
+                      : prev
                   )
                 }
                 className="rounded-md border border-white/20 bg-black/30 px-3 py-2 text-sm text-white outline-none"
               >
-                <option value="manana">Mañana</option>
+                <option value="mañana">Mañana</option>
                 <option value="tarde">Tarde</option>
               </select>
             </div>
+
             <div className="mt-3 flex justify-end gap-2">
               <button
                 type="button"
@@ -568,6 +654,7 @@ export default function ClassroomCalendar({
               >
                 Cancelar
               </button>
+
               <button
                 type="submit"
                 className="rounded-md border border-emerald-300/40 bg-emerald-500/20 px-3 py-1.5 text-xs font-semibold text-emerald-100"

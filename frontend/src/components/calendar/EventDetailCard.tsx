@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import type { CalendarEvent } from "@/app/admin/calendario/page";
+import type { CalendarEvent } from "./types";
 
 type Props = {
   event: CalendarEvent;
@@ -67,7 +67,7 @@ export default function EventDetailCard({
       <div className="flex items-start justify-between gap-3 px-5 pt-4 pb-3">
         <div className="flex flex-col gap-1">
           <span className="text-[10px] font-semibold uppercase tracking-widest text-(--text-muted)">
-            {AULA_LABELS[event.aula]} · {event.turno === "manana" ? "Mañana" : "Tarde"}
+            {AULA_LABELS[event.aula]} · {event.turno === "mañana" ? "Mañana" : "Tarde"}
           </span>
           <div className="flex items-center gap-2">
             <span
@@ -144,7 +144,7 @@ export default function EventDetailCard({
               Turno
             </span>
             <span className="text-sm font-medium text-(--text-primary)">
-              {event.turno === "manana" ? "Mañana" : "Tarde"}
+              {event.turno === "mañana" ? "Mañana" : "Tarde"}
             </span>
           </div>
         </div>

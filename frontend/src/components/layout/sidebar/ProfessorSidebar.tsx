@@ -11,7 +11,6 @@ import {
   HiOutlineChevronRight,
 } from "react-icons/hi2";
 const items = [
-  { href: "/profesor/dashboard", label: "Dashboard", icon: HiOutlineSquares2X2 },
   { href: "/profesor/calendario", label: "Calendario", icon: HiOutlineCalendarDays },
   { href: "/profesor/cursos", label: "Cursos", icon: HiOutlineBookOpen },
   { href: "/profesor/ajustes", label: "Ajustes", icon: HiOutlineCog6Tooth },

@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import type { Profesor } from './types';
-import { AVATAR_COLORS, CAP_PILL_STYLES, STATUS_COLORS } from './colors';
+import type { Profesor } from "./types";
+import { AVATAR_COLORS, CAP_PILL_STYLES, STATUS_COLORS } from "./colors";
 
 type Props = {
   profesor: Profesor;
@@ -11,11 +11,23 @@ type Props = {
 
 export default function ProfesorCard({ profesor, onEdit, onDelete }: Props) {
   const avatarColor = AVATAR_COLORS[profesor.id % AVATAR_COLORS.length];
-  const initials = `${profesor.nombre[0]}${profesor.apellidos[0]}`.toUpperCase();
+  function getInitials(nombre: string, apellidos?: string) {
+    const fullName = `${nombre ?? ""} ${apellidos ?? ""}`.trim();
+
+    if (!fullName) return "?";
+
+    const parts = fullName.split(" ").filter(Boolean);
+
+    const firstInitial = parts[0]?.[0] ?? "";
+    const secondInitial = parts[1]?.[0] ?? "";
+
+    return `${firstInitial}${secondInitial}`.toUpperCase();
+  }
+
+  const initials = getInitials(profesor.nombre, profesor.apellidos);
 
   return (
     <div className="relative flex flex-col gap-4 rounded-[18px] border border-(--border) bg-surface p-5 transition hover:bg-surface-elevated">
-
       {/* Edit shortcut — top-right corner */}
       <button
         onClick={onEdit}
@@ -43,13 +55,13 @@ export default function ProfesorCard({ profesor, onEdit, onDelete }: Props) {
 
         <div className="min-w-0">
           <p className="truncate font-semibold text-(--text-primary)">
-            {profesor.nombre} {profesor.apellidos}
+            {`${profesor.nombre} ${profesor.apellidos ?? ""}`.trim()}
           </p>
           <p
             className="text-xs font-medium"
             style={{ color: STATUS_COLORS[profesor.status].text }}
           >
-            {profesor.status === 'active' ? 'Activo' : 'Inactivo'}
+            {profesor.status === "active" ? "Activo" : "Inactivo"}
           </p>
         </div>
       </div>
