@@ -120,19 +120,23 @@ function addDays(base: Date, days: number) {
   return next;
 }
 
-function getRangeAvailability(
-  startDate: Date,
-  durationWeeks: number,
-): {
+function getRangeAvailabilityByDates(startDate: Date, endDateInclusive: Date): {
   status: "none" | "partial" | "full";
   availableTurnos: Array<"manana" | "tarde">;
 } {
-  const durationDays = durationWeeks * 7;
+  const normalizedStart = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+  const normalizedEnd = new Date(
+    endDateInclusive.getFullYear(),
+    endDateInclusive.getMonth(),
+    endDateInclusive.getDate(),
+  );
+
+  if (normalizedEnd < normalizedStart) return { status: "none", availableTurnos: [] };
+
   const availableTurnos: Array<"manana" | "tarde"> = [];
 
   const isTurnoAvailableForWholeRange = (turno: "manana" | "tarde") => {
-    for (let i = 0; i < durationDays; i += 1) {
-      const day = addDays(startDate, i);
+    for (let day = new Date(normalizedStart); day <= normalizedEnd; day = addDays(day, 1)) {
       const dayOfWeek = day.getDay();
       if (dayOfWeek === 0 || dayOfWeek === 6) continue;
       const dayAvailability = getAvailabilityByDay(day);
@@ -168,7 +172,8 @@ export default function ClienteReservasPage() {
   const [selectedCurso, setSelectedCurso] = useState(cursos[0]?.id ?? "");
   const [selectedCap, setSelectedCap] = useState(capacitaciones[0]?.id ?? "");
   const [customRequest, setCustomRequest] = useState("");
-  const [selectedDay, setSelectedDay] = useState<DayAvailability | null>(null);
+  const [selectedStartDate, setSelectedStartDate] = useState<DayAvailability | null>(null);
+  const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null);
   const [selectedTurno, setSelectedTurno] = useState<"manana" | "tarde" | "">("");
 
   const reservasActivas = useMemo(
@@ -181,16 +186,12 @@ export default function ClienteReservasPage() {
     [reservasState],
   );
 
-  const requiredWeeks = useMemo(() => {
-    if (requestType === "curso") {
-      const selected = cursos.find((c) => c.id === selectedCurso);
-      return Math.max(2, selected?.capacitaciones.length ?? 2);
+  const selectedRangeAvailability = useMemo(() => {
+    if (!selectedStartDate || !selectedEndDate) {
+      return { status: "none" as const, availableTurnos: [] as Array<"manana" | "tarde"> };
     }
-    if (requestType === "capacitacion") {
-      return 2;
-    }
-    return 2;
-  }, [requestType, selectedCurso]);
+    return getRangeAvailabilityByDates(selectedStartDate.date, selectedEndDate);
+  }, [selectedStartDate, selectedEndDate]);
 
   const activeReservationEvents = useMemo<EventInput[]>(
     () =>
@@ -215,9 +216,9 @@ export default function ClienteReservasPage() {
   );
 
   const bookingPreviewEvents = useMemo<EventInput[]>(() => {
-    if (!selectedDay || !selectedTurno) return [];
-    const start = toIsoDate(selectedDay.date);
-    const endExclusive = toIsoDate(addDays(selectedDay.date, requiredWeeks * 7));
+    if (!selectedStartDate || !selectedEndDate || !selectedTurno) return [];
+    const start = toIsoDate(selectedStartDate.date);
+    const endExclusive = toIsoDate(addDays(selectedEndDate, 1));
     const turnoLabel = selectedTurno === "manana" ? "Mañana" : "Tarde";
     return [
       {
@@ -231,7 +232,7 @@ export default function ClienteReservasPage() {
         textColor: "#dbeafe",
       },
     ];
-  }, [selectedDay, selectedTurno, requiredWeeks]);
+  }, [selectedStartDate, selectedEndDate, selectedTurno]);
 
   useEffect(() => {
     const api = reservationsCalendarRef.current?.getApi();
@@ -254,7 +255,8 @@ export default function ClienteReservasPage() {
     setSelectedCurso(cursos[0]?.id ?? "");
     setSelectedCap(capacitaciones[0]?.id ?? "");
     setCustomRequest("");
-    setSelectedDay(null);
+    setSelectedStartDate(null);
+    setSelectedEndDate(null);
     setSelectedTurno("");
     setCalendarMonth(new Date());
   };
@@ -267,7 +269,9 @@ export default function ClienteReservasPage() {
         ? Boolean(selectedCap)
         : customRequest.trim().length > 4);
 
-  const canSubmit = Boolean(selectedDay && selectedTurno);
+  const canSubmit = Boolean(
+    selectedStartDate && selectedEndDate && selectedTurno && selectedRangeAvailability.status !== "none",
+  );
 
   const selectedRequestLabel =
     requestType === "curso"
@@ -275,12 +279,8 @@ export default function ClienteReservasPage() {
       : requestType === "capacitacion"
         ? capacitaciones.find((c) => c.id === selectedCap)?.title ?? "Capacitación"
         : `Personalizado: ${customRequest}`;
-  const selectedEndDate = selectedDay
-    ? addDays(selectedDay.date, requiredWeeks * 7 - 1)
-    : null;
-
   const submitReservation = () => {
-    if (!selectedDay || !selectedTurno) return;
+    if (!selectedStartDate || !selectedEndDate || !selectedTurno) return;
     const newReserva: Reserva = {
       id: `r-${Date.now()}`,
       clientName: CURRENT_CLIENT,
@@ -297,7 +297,7 @@ export default function ClienteReservasPage() {
             ? [capacitaciones.find((cap) => cap.id === selectedCap)?.title ?? "Capacitación"]
             : ["Solicitud personalizada"],
       status: "Pendiente",
-      fecha: `${formatHumanDate(selectedDay.date)} - ${formatHumanDate(addDays(selectedDay.date, requiredWeeks * 7 - 1))}`,
+      fecha: `${formatHumanDate(selectedStartDate.date)} - ${formatHumanDate(selectedEndDate)}`,
     };
     setReservasState((prev) => [newReserva, ...prev]);
     setShowModal(false);
@@ -495,7 +495,7 @@ export default function ClienteReservasPage() {
 
       {showModal && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 p-4">
-          <div className={`w-full max-w-4xl rounded-2xl border ${isDark ? "border-white/10 bg-[#111111]" : "border-black/[0.08] bg-white"} p-5`}>
+          <div className={`flex min-h-[500px] w-full min-w-[500px] max-w-4xl flex-col rounded-2xl border ${isDark ? "border-white/10 bg-[#111111]" : "border-black/[0.08] bg-white"} p-5`}>
             <div className="mb-4 flex items-center justify-between">
               <h2 className={`text-lg font-semibold ${isDark ? "text-white" : "text-[#0f172a]"}`}>
                 Nueva reserva · Paso {step} de 3
@@ -512,8 +512,9 @@ export default function ClienteReservasPage() {
               </button>
             </div>
 
+            <div className="flex flex-1 items-center justify-center">
             {step === 1 && (
-              <div className="grid gap-4">
+              <div className="grid w-full max-w-2xl gap-4">
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="flex flex-col gap-1.5">
                     <label className={`text-xs uppercase ${isDark ? "text-white/45" : "text-[#64748b]"}`}>Número de alumnos</label>
@@ -582,7 +583,7 @@ export default function ClienteReservasPage() {
             )}
 
             {step === 2 && (
-              <div className="grid gap-4">
+              <div className="grid w-full max-w-3xl gap-4">
                 <div className="flex items-center justify-between">
                   <button
                     type="button"
@@ -614,15 +615,64 @@ export default function ClienteReservasPage() {
                   </button>
                 </div>
                 <p className={`text-xs ${isDark ? "text-white/60" : "text-[#64748b]"}`}>
-                  Duración de esta reserva: <strong>{requiredWeeks} semana(s)</strong> (mínimo 2; 1 semana por capacitación del curso).
+                  Selecciona fecha de inicio y fin. El turno se habilita solo si hay disponibilidad en todo el rango.
                 </p>
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                  <div className="flex flex-col gap-1.5">
+                    <label className={`text-xs uppercase ${isDark ? "text-white/45" : "text-[#64748b]"}`}>
+                      Fecha inicio
+                    </label>
+                    <input
+                      type="date"
+                      value={selectedStartDate ? toIsoDate(selectedStartDate.date) : ""}
+                      onChange={(e) => {
+                        if (!e.target.value) {
+                          setSelectedStartDate(null);
+                          setSelectedTurno("");
+                          return;
+                        }
+                        const date = parseIso(e.target.value);
+                        const dayInfo = getAvailabilityByDay(date);
+                        if (dayInfo.status === "none") {
+                          setSelectedStartDate(null);
+                          setSelectedTurno("");
+                          return;
+                        }
+                        setSelectedStartDate(dayInfo);
+                        if (!selectedEndDate || selectedEndDate < date) {
+                          setSelectedEndDate(date);
+                        }
+                      }}
+                      className="rounded-xl border border-white/10 bg-[#141414] px-3 py-2 text-white"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className={`text-xs uppercase ${isDark ? "text-white/45" : "text-[#64748b]"}`}>
+                      Fecha fin
+                    </label>
+                    <input
+                      type="date"
+                      value={selectedEndDate ? toIsoDate(selectedEndDate) : ""}
+                      min={selectedStartDate ? toIsoDate(selectedStartDate.date) : undefined}
+                      onChange={(e) => {
+                        if (!e.target.value) {
+                          setSelectedEndDate(null);
+                          setSelectedTurno("");
+                          return;
+                        }
+                        setSelectedEndDate(parseIso(e.target.value));
+                      }}
+                      className="rounded-xl border border-white/10 bg-[#141414] px-3 py-2 text-white"
+                    />
+                  </div>
+                </div>
 
                 <div
                   className="calendar-modern-wrapper overflow-hidden rounded-[22px] border border-white/10 bg-[#121212]"
                   style={{ height: "430px" }}
                 >
                   <FullCalendar
-                    key={`booking-${calendarMonth.getFullYear()}-${calendarMonth.getMonth()}-${selectedDay?.key ?? "none"}`}
+                    key={`booking-${calendarMonth.getFullYear()}-${calendarMonth.getMonth()}-${selectedStartDate?.key ?? "none"}`}
                     ref={bookingCalendarRef}
                     plugins={[dayGridPlugin, interactionPlugin]}
                     initialView="dayGridMonth"
@@ -638,18 +688,14 @@ export default function ClienteReservasPage() {
                     dateClick={(info) => {
                       const dayInfo = getAvailabilityByDay(info.date);
                       if (dayInfo.status === "none") return;
-                      const range = getRangeAvailability(info.date, requiredWeeks);
-                      if (range.status === "none") return;
-                      setSelectedDay(dayInfo);
-                      if (range.status === "full") {
-                        setSelectedTurno("manana");
-                      } else {
-                        setSelectedTurno(range.availableTurnos[0] ?? "");
+                      setSelectedStartDate(dayInfo);
+                      if (!selectedEndDate || selectedEndDate < info.date) {
+                        setSelectedEndDate(info.date);
                       }
                     }}
                     dayCellDidMount={(info) => {
                       const dayInfo = getAvailabilityByDay(info.date);
-                      const range = getRangeAvailability(info.date, requiredWeeks);
+                      const range = getRangeAvailabilityByDates(info.date, selectedEndDate ?? info.date);
                       const frame = info.el.querySelector(".fc-daygrid-day-frame") as HTMLElement | null;
                       if (!frame) return;
                       frame.style.borderRadius = "10px";
@@ -677,7 +723,7 @@ export default function ClienteReservasPage() {
                         frame.style.border = "1px solid rgba(248, 113, 113, 0.5)";
                       }
 
-                      if (selectedDay?.key === dayInfo.key) {
+                      if (selectedStartDate?.key === dayInfo.key) {
                         frame.style.outline = "2px solid rgba(255,255,255,0.85)";
                         frame.style.outlineOffset = "-2px";
                         frame.style.boxShadow = "inset 0 0 0 1px rgba(255,255,255,0.2)";
@@ -737,7 +783,7 @@ export default function ClienteReservasPage() {
                   </span>
                 </div>
 
-                {selectedDay && selectedDay.status !== "none" && (
+                {selectedStartDate && selectedEndDate && selectedRangeAvailability.status !== "none" && (
                   <div className="flex flex-col gap-1.5">
                     <label className={`text-xs uppercase ${isDark ? "text-white/45" : "text-[#64748b]"}`}>
                       Turno disponible
@@ -747,7 +793,7 @@ export default function ClienteReservasPage() {
                       onChange={(e) => setSelectedTurno(e.target.value as "manana" | "tarde")}
                       className="rounded-xl border border-white/10 bg-[#141414] px-3 py-2 text-white"
                     >
-                      {getRangeAvailability(selectedDay.date, requiredWeeks).availableTurnos.map((turno) => (
+                      {selectedRangeAvailability.availableTurnos.map((turno) => (
                         <option key={turno} value={turno}>
                           {turno === "manana" ? "Mañana" : "Tarde"}
                         </option>
@@ -759,17 +805,17 @@ export default function ClienteReservasPage() {
             )}
 
             {step === 3 && (
-              <div className="grid gap-3">
+              <div className="grid w-full max-w-xl gap-3">
                 <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-white/85">
                   <p><strong>Solicitud:</strong> {selectedRequestLabel}</p>
                   <p><strong>Alumnos:</strong> {alumnos}</p>
-                  <p><strong>Inicio:</strong> {selectedDay ? formatHumanDate(selectedDay.date) : "-"}</p>
+                  <p><strong>Inicio:</strong> {selectedStartDate ? formatHumanDate(selectedStartDate.date) : "-"}</p>
                   <p><strong>Fin:</strong> {selectedEndDate ? formatHumanDate(selectedEndDate) : "-"}</p>
-                  <p><strong>Duración:</strong> {requiredWeeks} semana(s)</p>
                   <p><strong>Turno:</strong> {selectedTurno === "manana" ? "Mañana" : "Tarde"}</p>
                 </div>
               </div>
             )}
+            </div>
 
             <div className="mt-5 flex justify-between">
               <button

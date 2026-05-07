@@ -4,7 +4,7 @@
 // Mini calendario lateral — sincronizado con el calendario principal.
 // Usa las variables CSS del design system de Arcan Studios (--border, --surface, etc.)
  
-import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import { HiChevronLeft, HiChevronRight } from 'react-icons/hi2';
 import type { CalendarEvent } from '@/resources/calendarData';
 import { AULA_META } from '@/resources/calendarData';
  
@@ -67,8 +67,8 @@ export function MiniCalendar({ currentMonth, selectedDate, onSelectDate, onMonth
               className="w-6 h-6 rounded-lg flex items-center justify-center border border-(--border) bg-(--border-subtle) hover:bg-(--border) transition-colors"
             >
               {d === -1
-                ? <ChevronLeftIcon  className="w-3 h-3 text-(--text-secondary)" />
-                : <ChevronRightIcon className="w-3 h-3 text-(--text-secondary)" />}
+                ? <HiChevronLeft className="w-3 h-3 text-(--text-secondary)" />
+                : <HiChevronRight className="w-3 h-3 text-(--text-secondary)" />}
             </button>
           ))}
         </div>

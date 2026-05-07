@@ -6,7 +6,7 @@
 // para mantener coherencia visual con el design system del admin.
  
 import { useState, useMemo } from 'react';
-import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import { HiChevronLeft, HiChevronRight } from 'react-icons/hi2';
 import type { CalendarEvent, Aula } from '@/resources/calendarData';
 import { AULA_META } from '@/resources/calendarData';
  
@@ -313,7 +313,7 @@ export function BigCalendar({ events, currentMonth, onMonthChange, selectedDate,
             onClick={() => navigate(-1)}
             className="w-8 h-8 rounded-xl flex items-center justify-center border border-(--border) bg-(--border-subtle) hover:bg-(--border) transition-colors"
           >
-            <ChevronLeftIcon className="w-3.5 h-3.5 text-(--text-secondary)" />
+            <HiChevronLeft className="w-3.5 h-3.5 text-(--text-secondary)" />
           </button>
           <span className="text-sm font-bold text-(--text-primary) capitalize min-w-40 text-center">
             {headerLabel}
@@ -322,7 +322,7 @@ export function BigCalendar({ events, currentMonth, onMonthChange, selectedDate,
             onClick={() => navigate(1)}
             className="w-8 h-8 rounded-xl flex items-center justify-center border border-(--border) bg-(--border-subtle) hover:bg-(--border) transition-colors"
           >
-            <ChevronRightIcon className="w-3.5 h-3.5 text-(--text-secondary)" />
+            <HiChevronRight className="w-3.5 h-3.5 text-(--text-secondary)" />
           </button>
           <button
             onClick={() => { onSelectDate(new Date()); onMonthChange(0); }}

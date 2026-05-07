@@ -57,8 +57,8 @@ function SectionHeader({
   title: string;
   subtitle: string;
   count: number;
-  onAdd: () => void;
-  addLabel: string;
+  onAdd?: () => void;
+  addLabel?: string;
 }) {
   const { isDark } = useTheme();
   return (
@@ -75,17 +75,19 @@ function SectionHeader({
         >
           {count}
         </span>
-        <button
-          type="button"
-          onClick={onAdd}
-          className={`rounded-xl border px-3 py-2 text-sm font-semibold transition ${
-            isDark
-              ? "border-[#267F6B]/40 bg-[#267F6B]/15 text-[#2fa58a] hover:bg-[#267F6B]/25"
-              : "border-[#267F6B]/40 bg-[#267F6B]/10 text-[#267F6B] hover:bg-[#267F6B]/20"
-          }`}
-        >
-          + {addLabel}
-        </button>
+        {onAdd && addLabel ? (
+          <button
+            type="button"
+            onClick={onAdd}
+            className={`rounded-xl border px-3 py-2 text-sm font-semibold transition ${
+              isDark
+                ? "border-[#267F6B]/40 bg-[#267F6B]/15 text-[#2fa58a] hover:bg-[#267F6B]/25"
+                : "border-[#267F6B]/40 bg-[#267F6B]/10 text-[#267F6B] hover:bg-[#267F6B]/20"
+            }`}
+          >
+            + {addLabel}
+          </button>
+        ) : null}
       </div>
     </div>
   );
@@ -131,7 +133,6 @@ export default function ProfesorCursosPage() {
   const [catalogCursos, setCatalogCursos] = useState<Curso[]>(baseCursos);
   const [profiles, setProfiles] = useState<Record<string, ProfesorProfile>>(initialProfiles);
   const [showCapModal, setShowCapModal] = useState(false);
-  const [showCursoModal, setShowCursoModal] = useState(false);
   const [editingCap, setEditingCap] = useState<Capacitacion | null>(null);
   const [editingCourse, setEditingCourse] = useState<Curso | null>(null);
 
@@ -150,18 +151,7 @@ export default function ProfesorCursosPage() {
     [catalogCursos, activeProfile.courseIds],
   );
 
-  const [capMode, setCapMode] = useState<"existing" | "new">("existing");
   const [selectedCapId, setSelectedCapId] = useState("");
-  const [newCapTitle, setNewCapTitle] = useState("");
-  const [newCapDescription, setNewCapDescription] = useState("");
-  const [newCapCategory, setNewCapCategory] = useState("Blender");
-
-  const [courseMode, setCourseMode] = useState<"existing" | "new">("existing");
-  const [selectedCourseId, setSelectedCourseId] = useState("");
-  const [newCourseTitle, setNewCourseTitle] = useState("");
-  const [newCourseDescription, setNewCourseDescription] = useState("");
-  const [newCourseCategory, setNewCourseCategory] = useState("Blender");
-  const [newCourseCapIds, setNewCourseCapIds] = useState<string[]>([]);
 
   const addExistingCap = () => {
     if (!selectedCapId) return;
@@ -174,25 +164,6 @@ export default function ProfesorCursosPage() {
     }));
     setShowCapModal(false);
     setSelectedCapId("");
-  };
-
-  const addNewCap = () => {
-    const title = newCapTitle.trim();
-    const description = newCapDescription.trim();
-    if (!title || !description) return;
-    const id = `cap-prof-${Date.now()}`;
-    const created: Capacitacion = { id, title, description, category: newCapCategory };
-    setCatalogCaps((prev) => [...prev, created]);
-    setProfiles((prev) => ({
-      ...prev,
-      [activeProfessorId]: {
-        ...activeProfile,
-        capIds: Array.from(new Set([...activeProfile.capIds, id])),
-      },
-    }));
-    setShowCapModal(false);
-    setNewCapTitle("");
-    setNewCapDescription("");
   };
 
   const removeAssignedCap = (capId: string) => {
@@ -217,47 +188,6 @@ export default function ProfesorCursosPage() {
 
   const confirmRemoveFromMine = (name: string, type: "cursos" | "capacitaciones") =>
     window.confirm(`Seguro que quieres eliminar "${name}" de tus ${type}?`);
-
-  const addExistingCourse = () => {
-    if (!selectedCourseId) return;
-    const selected = catalogCursos.find((c) => c.id === selectedCourseId);
-    if (!selected) return;
-    setProfiles((prev) => ({
-      ...prev,
-      [activeProfessorId]: {
-        courseIds: Array.from(new Set([...activeProfile.courseIds, selected.id])),
-        capIds: Array.from(new Set([...activeProfile.capIds, ...selected.capacitaciones])),
-      },
-    }));
-    setShowCursoModal(false);
-    setSelectedCourseId("");
-  };
-
-  const addNewCourse = () => {
-    const title = newCourseTitle.trim();
-    const description = newCourseDescription.trim();
-    if (!title || !description || newCourseCapIds.length === 0) return;
-    const id = `curso-prof-${Date.now()}`;
-    const created: Curso = {
-      id,
-      title,
-      description,
-      category: newCourseCategory,
-      capacitaciones: newCourseCapIds,
-    };
-    setCatalogCursos((prev) => [...prev, created]);
-    setProfiles((prev) => ({
-      ...prev,
-      [activeProfessorId]: {
-        courseIds: Array.from(new Set([...activeProfile.courseIds, id])),
-        capIds: Array.from(new Set([...activeProfile.capIds, ...newCourseCapIds])),
-      },
-    }));
-    setShowCursoModal(false);
-    setNewCourseTitle("");
-    setNewCourseDescription("");
-    setNewCourseCapIds([]);
-  };
 
   const saveEditedCap = () => {
     if (!editingCap) return;
@@ -318,8 +248,6 @@ export default function ProfesorCursosPage() {
   };
 
   const unassignedCaps = catalogCaps.filter((c) => !activeProfile.capIds.includes(c.id));
-  const unassignedCourses = catalogCursos.filter((c) => !activeProfile.courseIds.includes(c.id));
-
   return (
     <>
       <section className={`p-6 ${isDark ? "bg-[#050505]" : "bg-[#f8fafc]"}`}>
@@ -364,8 +292,6 @@ export default function ProfesorCursosPage() {
                 title="Mis cursos"
                 subtitle={`Programas asignados a ${activeProfessor?.name ?? "este profesor"}.`}
                 count={myCourses.length}
-                onAdd={() => setShowCursoModal(true)}
-                addLabel="Añadir curso"
               />
               <div className="flex flex-col gap-4">
                 {myCourses.length === 0 ? (
@@ -441,8 +367,6 @@ export default function ProfesorCursosPage() {
                   title="Todos los cursos"
                   subtitle="Cursos disponibles en el catálogo general."
                   count={catalogCursos.length}
-                  onAdd={() => setShowCursoModal(true)}
-                  addLabel="Añadir curso"
                 />
                 <div className="flex flex-col gap-4">
                   {catalogCursos.map((course) => (
@@ -491,155 +415,26 @@ export default function ProfesorCursosPage() {
 
       {showCapModal && (
         <Modal title="Añadir capacitación que puede impartir" onClose={() => setShowCapModal(false)}>
-          <div className="mb-3 flex gap-2">
-            <button
-              type="button"
-              onClick={() => setCapMode("existing")}
-              className={`rounded-lg px-3 py-1.5 text-xs ${capMode === "existing" ? "bg-[#267F6B] text-white" : "bg-white/10 text-white/70"}`}
+          <div className="grid gap-3">
+            <select
+              value={selectedCapId}
+              onChange={(e) => setSelectedCapId(e.target.value)}
+              className="rounded-xl border border-white/10 bg-[#141414] px-3 py-2 text-sm text-white"
             >
-              Existente
-            </button>
-            <button
-              type="button"
-              onClick={() => setCapMode("new")}
-              className={`rounded-lg px-3 py-1.5 text-xs ${capMode === "new" ? "bg-[#267F6B] text-white" : "bg-white/10 text-white/70"}`}
-            >
-              Nueva
+              <option value="">Selecciona una capacitación</option>
+              {unassignedCaps.map((cap) => (
+                <option key={cap.id} value={cap.id}>
+                  {cap.title}
+                </option>
+              ))}
+            </select>
+            <button type="button" onClick={addExistingCap} className="rounded-xl bg-[#267F6B] px-4 py-2 text-sm font-semibold text-white">
+              Añadir capacitación
             </button>
           </div>
-          {capMode === "existing" ? (
-            <div className="grid gap-3">
-              <select
-                value={selectedCapId}
-                onChange={(e) => setSelectedCapId(e.target.value)}
-                className="rounded-xl border border-white/10 bg-[#141414] px-3 py-2 text-sm text-white"
-              >
-                <option value="">Selecciona una capacitación</option>
-                {unassignedCaps.map((cap) => (
-                  <option key={cap.id} value={cap.id}>
-                    {cap.title}
-                  </option>
-                ))}
-              </select>
-              <button type="button" onClick={addExistingCap} className="rounded-xl bg-[#267F6B] px-4 py-2 text-sm font-semibold text-white">
-                Añadir capacitación
-              </button>
-            </div>
-          ) : (
-            <div className="grid gap-3">
-              <input
-                value={newCapTitle}
-                onChange={(e) => setNewCapTitle(e.target.value)}
-                placeholder="Título"
-                className="rounded-xl border border-white/10 bg-[#141414] px-3 py-2 text-sm text-white"
-              />
-              <textarea
-                rows={3}
-                value={newCapDescription}
-                onChange={(e) => setNewCapDescription(e.target.value)}
-                placeholder="Descripción"
-                className="rounded-xl border border-white/10 bg-[#141414] px-3 py-2 text-sm text-white"
-              />
-              <select
-                value={newCapCategory}
-                onChange={(e) => setNewCapCategory(e.target.value)}
-                className="rounded-xl border border-white/10 bg-[#141414] px-3 py-2 text-sm text-white"
-              >
-                <option value="Blender">Blender</option>
-                <option value="Unity">Unity</option>
-              </select>
-              <button type="button" onClick={addNewCap} className="rounded-xl bg-[#267F6B] px-4 py-2 text-sm font-semibold text-white">
-                Crear y asignar
-              </button>
-            </div>
-          )}
         </Modal>
       )}
 
-      {showCursoModal && (
-        <Modal title="Añadir curso que puede impartir" onClose={() => setShowCursoModal(false)}>
-          <div className="mb-3 flex gap-2">
-            <button
-              type="button"
-              onClick={() => setCourseMode("existing")}
-              className={`rounded-lg px-3 py-1.5 text-xs ${courseMode === "existing" ? "bg-[#267F6B] text-white" : "bg-white/10 text-white/70"}`}
-            >
-              Existente
-            </button>
-            <button
-              type="button"
-              onClick={() => setCourseMode("new")}
-              className={`rounded-lg px-3 py-1.5 text-xs ${courseMode === "new" ? "bg-[#267F6B] text-white" : "bg-white/10 text-white/70"}`}
-            >
-              Nuevo
-            </button>
-          </div>
-          {courseMode === "existing" ? (
-            <div className="grid gap-3">
-              <select
-                value={selectedCourseId}
-                onChange={(e) => setSelectedCourseId(e.target.value)}
-                className="rounded-xl border border-white/10 bg-[#141414] px-3 py-2 text-sm text-white"
-              >
-                <option value="">Selecciona un curso</option>
-                {unassignedCourses.map((course) => (
-                  <option key={course.id} value={course.id}>
-                    {course.title}
-                  </option>
-                ))}
-              </select>
-              <button type="button" onClick={addExistingCourse} className="rounded-xl bg-[#267F6B] px-4 py-2 text-sm font-semibold text-white">
-                Añadir curso
-              </button>
-            </div>
-          ) : (
-            <div className="grid gap-3">
-              <input
-                value={newCourseTitle}
-                onChange={(e) => setNewCourseTitle(e.target.value)}
-                placeholder="Título del curso"
-                className="rounded-xl border border-white/10 bg-[#141414] px-3 py-2 text-sm text-white"
-              />
-              <textarea
-                rows={3}
-                value={newCourseDescription}
-                onChange={(e) => setNewCourseDescription(e.target.value)}
-                placeholder="Descripción"
-                className="rounded-xl border border-white/10 bg-[#141414] px-3 py-2 text-sm text-white"
-              />
-              <select
-                value={newCourseCategory}
-                onChange={(e) => setNewCourseCategory(e.target.value)}
-                className="rounded-xl border border-white/10 bg-[#141414] px-3 py-2 text-sm text-white"
-              >
-                <option value="Blender">Blender</option>
-                <option value="Unity">Unity</option>
-              </select>
-              <div className="grid gap-1.5 rounded-xl border border-white/10 p-3">
-                <p className="text-xs text-white/65">Capacitaciones del curso</p>
-                {myCaps.map((cap) => (
-                  <label key={cap.id} className="flex items-center gap-2 text-sm text-white/85">
-                    <input
-                      type="checkbox"
-                      checked={newCourseCapIds.includes(cap.id)}
-                      onChange={(e) => {
-                        const checked = e.target.checked;
-                        setNewCourseCapIds((prev) =>
-                          checked ? [...prev, cap.id] : prev.filter((id) => id !== cap.id),
-                        );
-                      }}
-                    />
-                    {cap.title}
-                  </label>
-                ))}
-              </div>
-              <button type="button" onClick={addNewCourse} className="rounded-xl bg-[#267F6B] px-4 py-2 text-sm font-semibold text-white">
-                Crear y asignar curso
-              </button>
-            </div>
-          )}
-        </Modal>
-      )}
       {editingCap && (
         <Modal title="Editar capacitación" onClose={() => setEditingCap(null)}>
           <div className="grid gap-3">

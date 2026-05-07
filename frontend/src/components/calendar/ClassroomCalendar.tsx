@@ -13,7 +13,7 @@ type ClassroomCalendarProps = {
   title: string;
   aulaId: string;
   events: CalendarEvent[];
-  currentDate: Date;
+  currentDate?: Date;
   onDeleteEvent: (eventId: string) => void;
   onUpdateEvent: (event: CalendarEvent) => void;
 };
@@ -22,11 +22,12 @@ export default function ClassroomCalendar({
   title,
   aulaId,
   events,
-  currentDate,
+  currentDate: globalCurrentDate,
   onDeleteEvent,
   onUpdateEvent,
 }: ClassroomCalendarProps) {
   const calendarRef = useRef<FullCalendar>(null);
+  const [currentDate, setCurrentDate] = useState(globalCurrentDate ?? new Date());
 
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -75,6 +76,11 @@ export default function ClassroomCalendar({
       api.gotoDate(currentDate);
     }
   }, [currentDate]);
+
+  useEffect(() => {
+    if (!globalCurrentDate) return;
+    setCurrentDate(globalCurrentDate);
+  }, [globalCurrentDate]);
 
   useEffect(() => {
     if (!editingDateKey) return;
@@ -340,9 +346,35 @@ export default function ClassroomCalendar({
           <h2 className="text-2xl font-semibold text-(--text-primary)">
             {title}
           </h2>
-          <p className="mt-1 text-xs capitalize text-(--text-muted)">
-            {monthLabel}
-          </p>
+          <div className="mt-1 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() =>
+                setCurrentDate(
+                  (prev) =>
+                    new Date(prev.getFullYear(), prev.getMonth() - 1, 1)
+                )
+              }
+              className="rounded-md border border-white/15 px-2 py-1 text-xs text-white/80"
+              aria-label={`Mes anterior en ${title}`}
+            >
+              ←
+            </button>
+            <p className="text-xs capitalize text-(--text-muted)">{monthLabel}</p>
+            <button
+              type="button"
+              onClick={() =>
+                setCurrentDate(
+                  (prev) =>
+                    new Date(prev.getFullYear(), prev.getMonth() + 1, 1)
+                )
+              }
+              className="rounded-md border border-white/15 px-2 py-1 text-xs text-white/80"
+              aria-label={`Mes siguiente en ${title}`}
+            >
+              →
+            </button>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
