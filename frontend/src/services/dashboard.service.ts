@@ -73,7 +73,7 @@ export async function getDashboardData(): Promise<DashboardApiData> {
     safeGet("/empresa"),
     safeGet("/capacitacion"),
     safeGet("/aula"),
-    safeGetFromEndpoints(["/sesiones", "/sesion"]),
+    safeGet("/sesion"),
     safeGet("/usuario"),
     safeGet("/perfil"),
   ]);
