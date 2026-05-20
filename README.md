@@ -1,227 +1,189 @@
-"# ProyectoArcanStudios" 
-MINI EXPLICACION:
-El proyecto esta dividido en backend y frontend.
-El front se esta trabajando con next.js, y el back con NestJS.
-El front seria toda la parte visual(claramente) y la llamada a la api ; el back seria la creacion de la API, la logica para hacer en crud en la BBDD, 
-la logica de las reservas(crud BD) y creo que ya.
---------------------------------------------------------------------------------------------------------------------------------------------------------------
-COMO EMPEZAR:
--Asegurarse que se tiene node.js
-    -hacer en cmd node -v
--Hacer el clone de este repo
--meterse en la carpeta repo/frontend y hacer npm install
--meterse en la carpeta repo/backend y hacer npm install
--Por si no tienen la BD y quieren trabajar en local, aqui esta el comando para instalarla en el wsl, 
-    -sudo docker run --name LAMP --restart=always -p "80:80" -p "3306:3306" -v /home/usuario/app:/app mattrayner/lamp:latest-1804
--Hay que cambiar la contraseña en app.module.ts para acceder a las BBDD y eso
---------------------------------------------------------------------------------------------------------------------------------------------------------------
-COMANDOS IMPORTANTES:
--npm install                             → En ambas carpetas, mas que todo para actualizar/instalar las dependencias, cuando alguien instale una más.
--npm run dev                             → Solo para frontend, pone en marcha el frontend(lo visual claro, y la llamada a la api).
--npm run start:dev                       → Solo para backend, cuando se esta desarrollando, pone en marcha el backend(la api).
--npm run lint                            → Solo para backend, ESLINT es como un debbuger; formatea, busca bugs etc, antes de un commit por ejm
+# Arcan Studios — Reservations
 
--npm update                              → En ambas carpetas, para actualizar las dependencias, solo se usa cuando quieras la version mas nueva.
--npm run build                           → En ambas carpetas, para hacer la build(para subir a Ionos, casi siempre).
--npm run start                           → Solo para backend, despues de hacer la build usa lo que hay en .next. Pone en marcha el backend(la api).
--npm cache clean --force                 → En ambas carpetas, para limpiar la cache por si hay problemas no se :p.
---------------------------------------------------------------------------------------------------------------------------------------------------------------
-ENDPOINTS DE LA API:
-**IMPORTANTE: Algunos endpoints de DELETE no funcionan ya que la BBDD, tiene el on DELETE CASCADE, tengo que todavia ver como lo arreglaria
+Aplicación web para gestionar una academia de cursos:
 
-1. Aula
-CRUD
-GET /aula                                                       Devuelve una lista con todas las aulas.
-GET /aula/:id                                                   Devuelve un aula específica.
-POST /aula                                                      Crea un aula nueva.
-PUT /aula/:id                                                   Actualiza un aula existente.
-DELETE /aula/:id                                                Elimina un aula.
+- **Cliente / alumno**: crea y consulta sus reservas, ve el estado de cada una.
+- **Profesor**: ve sus sesiones/clases asignadas, recibe notificaciones cuando una reserva pasa a confirmada.
+- **Administrador**: gestiona empresas, usuarios, profesores, cursos, capacitaciones, y aprueba o cancela reservas.
 
-Relaciones
-GET /aula/:id/sesiones                                          Devuelve todas las sesiones que se dictan en un aula.
+Stack:
 
-2. Capacitacion
-CRUD
-GET /capacitacion                                               Devuelve una lista con todas las capacitaciones.
-GET /capacitacion/:id                                           Devuelve una capacitación específica.
-POST /capacitacion                                              Crea una nueva capacitación y devuelve el objeto creado.
-PUT /capacitacion/:id                                           Actualiza una capacitación existente.
-DELETE /capacitacion/:id                                        Elimina una capacitación.
+- **Backend**: NestJS 11 + TypeORM + MariaDB/MySQL + JWT.
+- **Frontend**: Next.js 16 (App Router) + Tailwind 4 + FullCalendar.
 
-Relaciones
-GET /capacitacion/:id/perfiles                                  Devuelve los perfiles asociados a una capacitación.
-GET /capacitacion/:id/sesiones                                  Devuelve el las sesiones asignadas a una capacitación.
-GET /capacitacion/:id/cursos                                    Devuelve los cursos pertenecientes a una capacitación.
-GET /capacitacion/:id/profesores                                Devuelve el profesor asignado a una capacitación.
+---
 
-3. Curso
-CRUD
-GET /curso                                                      Devuelve una lista con todos los cursos.
-GET /curso/:id                                                  Devuelve un curso específico.
-POST /curso                                                     Crea un nuevo curso.
-PUT /curso/:id                                                  Actualiza un curso existente.
-DELETE /curso/:id                                               Elimina un curso.
+## 1. Estructura
 
-Relaciones
-GET /curso/:id/capacitaciones                                   Devuelve la capacitación a la que pertenece un curso.
-GET /curso/:id/reservas                                         Devuelve todas las sesiones asociadas a un curso.
+```
+backend/    NestJS API (entidades, autenticación, notificaciones)
+frontend/   Next.js (UI + proxy a la API)
+BD_ARCAN.sql                                       esquema y datos iniciales
+backend/migrations/001_auth_and_notifications.sql  migración para auth
+backend/scripts/seed.ts                            rehasheo de contraseñas + creación de admin
+```
 
-4. Empresa                                      
-CRUD                                        
-GET /empresa                                                    Devuelve una lista con todas las empresas.
-GET /empresa/:id                                                Devuelve una empresa específica.
-POST /empresa                                                   Crea una nueva empresa.
-PUT /empresa/:id                                                Actualiza una empresa existente.
-DELETE /empresa/:id                                             Elimina una empresa.
+---
 
-Relaciones                                      
-GET /empresa/:id/usuarios                                       Devuelve todos los usuarios pertenecientes a una empresa.
+## 2. Puesta en marcha rápida
 
-5. Perfil
-CRUD
-GET /perfil                                                     Devuelve una lista con todos los perfiles registrados.
-GET /perfil/:id                                                 Devuelve un perfil específico según su ID.
-POST /perfil                                                    Crea un nuevo perfil y devuelve el objeto creado.
-PUT /perfil/:id                                                 Actualiza un perfil existente y devuelve el objeto actualizado.
-DELETE /perfil/:id                                              Elimina un perfil y devuelve el objeto eliminado.
+### 2.1. Base de datos
 
-Relaciones
-GET /perfil/:id/capacitaciones                                  Devuelve todas las capacitaciones asociadas a un perfil.
-POST /perfil/:id/capacitaciones/:capacitacionId                 Asocia una capacitación a un perfil.
-DELETE /perfil/:id/capacitaciones/:capacitacionId               Elimina la asociación entre un perfil y una capacitación.
+1. Crea la base de datos `BD_ARCAN` ejecutando `BD_ARCAN.sql` en tu MariaDB/MySQL.
+2. Aplica la migración de auth y notificaciones:
 
-6. Profesor
-CRUD
-GET /profesor                                                   Devuelve una lista con todos los profesores.
-GET /profesor/:id                                               Devuelve un profesor específico.
-POST /profesor                                                  Crea un nuevo profesor.
-PUT /profesor/:id                                               Actualiza un profesor existente.
-DELETE /profesor/:id                                            Elimina un profesor.
+```bash
+mysql -u <user> -p < backend/migrations/001_auth_and_notifications.sql
+```
 
-Relaciones                      
-GET /profesor/:id/capacitaciones                                Devuelve las capacitaciones impartidas por un profesor.
-GET /profesor/:id/sesiones                                      Devuelve las sesiones asignadas a un profesor.
+### 2.2. Backend
 
-7. Reserva                                      
-CRUD                                        
-GET /reserva                                                    Devuelve una lista con todas las reservas.
-GET /reserva/:id                                                Devuelve una reserva específica.
-POST /reserva                                                   Crea una nueva reserva.
-PUT /reserva/:id                                                Actualiza una reserva existente.
-DELETE /reserva/:id                                             Elimina una reserva.
+```bash
+cd backend
+cp .env.example .env       # rellena DB_*, JWT_SECRET, CORS_ORIGIN
+npm install
+npm run seed               # hashea contraseñas y crea el admin por defecto
+npm run start:dev          # arranca la API en http://localhost:3001
+```
 
-Relaciones                                      
-GET /reserva/:id/sesiones                                       Devuelve la sesión asociada a una reserva.
+**Admin por defecto** (creado por `npm run seed` si no existe ninguno):
 
-8. Sesion
-CRUD
-GET /sesion                                                     Devuelve una lista con todas las sesiones.
-GET /sesion/:id                                                 Devuelve una sesión específica.
-POST /sesion                                                    Crea una nueva sesión.
-PUT /sesion/:id                                                 Actualiza una sesión existente.
-DELETE /sesion/:id                                              Elimina una sesión.
+```
+email:    admin@arcan.local
+password: admin1234
+```
 
-Relaciones                                      
-GET /sesion/:id/cursos                                          Devuelve el curso al que pertenece la sesión.
-GET /sesion/:id/profesores                                      Devuelve el profesor asignado a la sesión.
-GET /sesion/:id/aulas                                           Devuelve el aula donde se dicta la sesión.
-GET /sesion/:id/reservas                                        Devuelve todas las reservas asociadas a una sesión.
+Cámbiala desde Ajustes en cuanto entres por primera vez.
 
-9. Usuario                                      
-CRUD                                        
-GET /usuario                                                    Devuelve una lista con todos los usuarios.
-GET /usuario/:id                                                Devuelve un usuario específico.
-POST /usuario                                                   Crea un nuevo usuario.
-PUT /usuario/:id                                                Actualiza un usuario existente.
-DELETE /usuario/:id                                             Elimina un usuario.
+### 2.3. Frontend
 
-Relaciones                                      
-GET /usuario/:id/empresa                                        Devuelve la empresa a la que pertenece un usuario.
-GET /usuario/:id/reservas                                       Devuelve todas las reservas realizadas por un usuario.
---------------------------------------------------------------------------------------------------------------------------------------------------------------
-ORGANIZACION DE CARPETAS:
-Como una mini explicacion de las carpetas pa que estemos organizados :p
-La explicacion esta, muchas cosas son necesarias pero no se tocan, las cosas importantes las pongo () antes
-    
-    /FRONTEND:                                              () → PUES EL FRONTEND
-    │
-    ├── .next/                                                 → Carpeta generada automáticamente por Next.js (código compilado, NO se toca, NO se sube)
-    ├── node_modules/                                          → Dependencias instaladas, NO se toca, NO se sube a GitHub
-    ├── eslint.config.mjs                                      → Reglas de ESLint para mantener el código limpio
-    ├── next-env.d.ts                                          → Archivo generado por Next.js para TypeScript, no se toca
-    ├── next.config.ts                                         → Configuración avanzada de Next.js (normalmente no se modifica)
-    ├── package-lock.json                                      → Archivo generado por npm, asegura versiones exactas de dependencias
-    ├── tsconfig.json                                          → Configuración de TypeScript (paths, strict mode, etc.)
-    │
-    ├── package.json                                        () → Scripts, dependencias y metadatos del proyecto (archivo clave)
-    ├── postcss.config.mjs                                  () → Configuración de PostCSS (necesario si usas Tailwind)
-    │
-    ├── public/                                             () → Para los archivos estáticos accesibles desde el navegador (imágenes, logos, íconos, fuentes)
-    │
-----------
-    └── src/                                                () → CARPETA IMPORTANTE, es donde esta el proyecto simplemente
-        ├── app/                                               → Aquí viven TODAS las páginas y rutas
-        │   ├── layout.tsx                                     → Layout global (navbar, estilos, providers)
-        │   ├── page.tsx                                       → Página principal "/"
-        │   │
-        │   ├── login/                                         → Ruta "/login"
-        │   │   └── page.tsx                                   → Página de login
-        │   │
-        │   └── dashboard/                                     → Ruta "/dashboard"
-        │       └── page.tsx                                   → Página del dashboard
-        │
-        ├── components/                                        → Componentes reutilizables
-        │   ├── ui/                                            → Botones, tarjetas, inputs bonitos
-        │   ├── forms/                                         → Inputs, selects, formularios
-        │   └── comunes/                                       → Navbar, Footer, Sidebar, etc.
-        │
-        ├── hooks/                                             → Hooks personalizados
-        │   └── useAuth.ts                                     → Manejo de autenticación
-        │
-        ├── lib/                                               → Funciones auxiliares
-        │   ├── api/                                           → Config de fetch, axios, etc.
-        │   └── utils/                                         → Helpers (formatos, validaciones)
-        │
-        ├── services/                                          → Llamadas al backend (NestJS)
-        │   ├── usuarios.service.ts                            → Funciones para consumir /usuarios
-        │   └── cursos.service.ts                              → Funciones para consumir /cursos
-        │
-        ├── styles/                                            → Estilos globales
-        │   └── globals.css                                    → CSS global (si usas Tailwind, aquí se importa)
-        │
-        └── types/                                             → Tipos e interfaces TS
-            ├── Usuario.ts                                     → Tipo Usuario (id, nombre, email…)
-            └── Curso.ts                                       → Tipo Curso
---------------------------------------------------------------------------------------------------------------------------------------------------------------
-    /BACKEND:                                                  → PS EL BACKEND
-    │
-    ├── dist                                                   → DONDE SE CREA EL PROYECTO CUANDO LO COMPILAS
-    ├── ...                                                    → Lo otro realmente no se toca, es como digamos la configuracion
-    │
----------- 
-    └── src/                                                () → CARPETA IMPORTANTE, es donde esta el proyecto simplemente    
-       ├── main.ts                                             → Como se lanza el proyecto
-       ├── app.module.ts                                       → Es como el cerebro donde se guarda
-       │ 
-       ├── config/
-       │   └── database.config.ts                              → Para config de la BD (duhh)
-       │
-       ├── common/                                             → Cosas que se usan en todo lado
-       │   ├── guards/                                         → Autorizacion y Seguridad
-       │   ├── pipes/                                          → Validacion de datos y parsing
-       │   ├── interceptors/                                   → Modifica respuestas
-       │   └── filters/                                        → Manejo de errores
-       │ 
-       └── modules/                                            → ps los modulos
-           ├── usuarios/                                       → Un ejemplo de una tabla
-           │   ├── usuarios.module.ts                          → Es como la logica, el cerebro
-           │   ├── usuarios.controller.ts                      → Se definen los endpoints
-           │   ├── usuarios.service.ts                         → Consulta la BBDD
-           │   ├── dto/                                        → Validacion de tipos para la API
-           │   └── entities/                                   → Entidades de la BBDD
-           │
-           ├── cursos/                                       
-           │   ├── cursos.module.ts
-           │   └── ...
-           └── capacitacion/
-               └── ...
+```bash
+cd frontend
+cp .env.example .env.local    # ajusta API_URL si tu backend no está en :3001
+npm install
+npm run dev                   # arranca el front en http://localhost:3000
+```
+
+Entra a [http://localhost:3000/login](http://localhost:3000/login) e identifícate con el admin.
+
+---
+
+## 3. Flujo end-to-end
+
+1. **Admin** entra a `/admin/clientes` → crea una empresa → añade un usuario (con email y contraseña inicial).
+2. **Cliente** entra a `/login` con esas credenciales y aterriza en `/cliente/dashboard`.
+3. **Cliente** abre `/cliente/reservas`, pulsa "Nueva reserva", elige curso/fechas/turno, confirma.
+4. **Admin** recibe una notificación in-app (campana arriba a la derecha) avisando de la nueva reserva. En `/admin/reservas` puede pulsar "Confirmada" o "Cancelada".
+5. **Cliente** recibe a su vez una notificación con el cambio de estado.
+6. Si el admin asigna sesiones a un profesor y luego confirma la reserva, el profesor recibe otra notificación.
+
+---
+
+## 4. Decisiones de diseño relevantes
+
+### 4.1. Modelo de cuentas
+
+- Las cuentas de **cliente/alumno** viven en la tabla `usuario` (rol = `cliente`).
+- Las cuentas de **profesor** y **admin** viven en la tabla `profesor` (rol = `profesor` | `admin`, también respaldado por `admin_sn`).
+- El login es **único** (`POST /auth/login`): el backend busca el email en ambas tablas y devuelve un JWT con `tipo` (`usuario`/`profesor`) y `rol`.
+- El registro es **siempre por invitación del admin**: no hay endpoint público de signup.
+
+### 4.2. Autenticación / autorización
+
+- JWT firmado con `JWT_SECRET`, expira en `JWT_EXPIRES_IN` (por defecto 8h).
+- El front guarda el token en una cookie `httpOnly` puesta por `/api/auth/login`; el proxy `/api/backend/[...path]` lo reenvía como `Authorization: Bearer …` al backend.
+- Todas las rutas del backend exigen JWT salvo `POST /auth/login` (marcadas con `@Public()`).
+- `@Roles('admin')` (etc.) en los controllers restringe operaciones de escritura.
+- El middleware Next.js (`src/middleware.ts`) decodifica el JWT (sin verificar firma — el backend ya lo hará al llegar la petición) y redirige `/admin/*`, `/profesor/*`, `/cliente/*` según el rol.
+
+### 4.3. Estados de reserva
+
+```
+pendiente  →  confirmada  →  completada
+   │             │
+   ↓             ↓
+ cancelada    cancelada
+```
+
+- Cliente crea siempre en `pendiente`. Puede cancelar mientras siga pendiente.
+- Admin puede pasar a `confirmada`, `completada` o `cancelada` siguiendo las transiciones válidas.
+
+### 4.4. Notificaciones in-app
+
+- Tabla `notificacion` (destinatario_tipo, destinatario_id, tipo, titulo, mensaje, leida, ref_*).
+- Disparadas automáticamente desde `ReservaService`:
+  - `reserva_creada` → a todos los admins, al crear.
+  - `reserva_confirmada` / `_cancelada` / `_completada` → al cliente afectado.
+  - `reserva_confirmada` → a los profesores asignados a sesiones de esa reserva.
+- El frontend tiene un hook `useNotificaciones` con polling cada 30 s y un componente `NotificacionBell` con badge y bandeja en la barra superior.
+
+---
+
+## 5. Comandos útiles
+
+```bash
+# Backend
+npm run start:dev    # NestJS con reload
+npm run build        # compila a /dist
+npm run start:prod   # arranca /dist (producción)
+npm run seed         # hashea contraseñas y crea admin si falta
+npm run lint         # ESLint
+
+# Frontend
+npm run dev          # Next.js con reload
+npm run build        # build de producción
+npm run start        # arranca el build
+npm run lint         # ESLint
+```
+
+---
+
+## 6. Variables de entorno
+
+### Backend (`backend/.env`)
+
+| Variable           | Por defecto              | Notas |
+|--------------------|--------------------------|-------|
+| `PORT`             | `3001`                   | Puerto HTTP del backend. |
+| `DB_HOST`          | `localhost`              | |
+| `DB_PORT`          | `3306`                   | |
+| `DB_USER`          | —                        | Obligatorio. |
+| `DB_PASSWORD`      | —                        | Obligatorio. |
+| `DB_NAME`          | `BD_ARCAN`               | |
+| `JWT_SECRET`       | —                        | Obligatorio; >=32 caracteres. |
+| `JWT_EXPIRES_IN`   | `8h`                     | |
+| `CORS_ORIGIN`      | `http://localhost:3000`  | Separar con coma para múltiples. |
+
+### Frontend (`frontend/.env.local`)
+
+| Variable    | Por defecto                | Notas |
+|-------------|----------------------------|-------|
+| `API_URL`   | `http://localhost:3001`    | URL del backend al que apunta el proxy. |
+
+---
+
+## 7. Limitaciones conocidas / próximas mejoras
+
+- **Disponibilidad de aulas en el modal del cliente**: el calendario de huecos del cliente colorea los días en verde/amarillo/rojo usando aún datos mock (`resources/data.ts`). La reserva sí se persiste contra la API, pero la lógica de "este turno ya está lleno" todavía no consulta el backend. Mejora directa: cambiar `getAvailabilityByDay` en `frontend/src/app/cliente/reservas/page.tsx` para que llame a `/sesion` filtrando por fecha y turno.
+- **Páginas del profesor** (`/profesor/calendario`, `/profesor/cursos`): la maquetación está completa pero algunas vistas siguen mezclando datos mock con datos reales. El profesor sí puede loguearse, recibir notificaciones y ver sus sesiones vía `/sesion`. Reemplazar el resto de mocks es trabajo mecánico siguiendo el patrón usado en `admin/reservas` y `cliente/dashboard`.
+- **CRUD de cursos / profesores en admin**: los endpoints existen (`/curso`, `/capacitacion`, `/profesor`) y `course.service.ts` ya los consume. Algunos botones de la UI de `/admin/cursos` y `/admin/profes` aún quedan por enchufar a esas funciones.
+
+---
+
+## 8. Endpoints más importantes
+
+| Método | Ruta                          | Quién                | Qué hace |
+|--------|-------------------------------|----------------------|----------|
+| POST   | `/auth/login`                 | Público              | Devuelve JWT + datos del usuario. |
+| GET    | `/auth/me`                    | Cualquier autenticado | Datos del usuario actual. |
+| PATCH  | `/auth/password`              | Cualquier autenticado | Cambio de contraseña. |
+| GET    | `/reserva`                    | Filtrado por rol     | Admin ve todas, profesor las suyas, cliente las suyas. |
+| POST   | `/reserva`                    | Cualquier autenticado | Crea reserva en `pendiente` y notifica a admins. |
+| PATCH  | `/reserva/:id/estado`         | Admin (o cliente para cancelar) | Cambia estado y notifica. |
+| GET    | `/notificacion`               | Cualquier autenticado | Notificaciones del usuario actual. |
+| GET    | `/notificacion/unread-count`  | Cualquier autenticado | Contador de no leídas. |
+| PATCH  | `/notificacion/:id/leer`      | Cualquier autenticado | Marca una como leída. |
+| PATCH  | `/notificacion/leer-todas`    | Cualquier autenticado | Marca todas como leídas. |
+| POST   | `/usuario`                    | Solo admin           | Crea un cliente (email + password + empresa). |
+| POST   | `/profesor`                   | Solo admin           | Crea un profesor (email + password). |
+| POST   | `/empresa`                    | Solo admin           | Crea una empresa. |
