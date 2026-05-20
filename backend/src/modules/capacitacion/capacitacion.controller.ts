@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, ParseIntPipe } from '@nestjs/common';
 import { CapacitacionService } from './capacitacion.service';
 import { CreateCapacitacionDto } from './dto/create-capacitacion.dto';
 import { UpdateCapacitacionDto } from './dto/update-capacitacion.dto';
+import { Roles } from 'src/common/decorators/roles.decorator';
 
 @Controller('capacitacion')
 export class CapacitacionController {
@@ -13,23 +14,25 @@ export class CapacitacionController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: number) {
+  findOne(@Param('id', ParseIntPipe) id: number) {
     return this.service.findOne(id);
   }
 
+  @Roles('admin')
   @Post()
   create(@Body() dto: CreateCapacitacionDto) {
     return this.service.create(dto);
   }
 
+  @Roles('admin')
   @Put(':id')
-  update(@Param('id') id: number, @Body() dto: UpdateCapacitacionDto) {
+  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateCapacitacionDto) {
     return this.service.update(id, dto);
-    
   }
 
+  @Roles('admin')
   @Delete(':id')
-  remove(@Param('id') id: number) {
+  remove(@Param('id', ParseIntPipe) id: number) {
     return this.service.remove(id);
   }
 

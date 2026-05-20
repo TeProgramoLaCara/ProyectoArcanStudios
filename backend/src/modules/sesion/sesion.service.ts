@@ -29,7 +29,30 @@ export class SesionService {
   ) {}
 
   findAll() {
-    return this.repo.find();
+    return this.repo.find({
+      relations: ['reserva', 'reserva.curso', 'reserva.usuario', 'profesor', 'aula', 'capacitacion'],
+    });
+  }
+
+  /** Sesiones de un profesor concreto (para su calendario). */
+  findByProfesor(profesorId: number) {
+    return this.repo.find({
+      where: { profesor: { id_profesor: profesorId } },
+      relations: ['reserva', 'reserva.curso', 'reserva.usuario', 'profesor', 'aula', 'capacitacion'],
+    });
+  }
+
+  /** Sesiones asociadas a las reservas de un cliente. */
+  findByCliente(usuarioId: number) {
+    return this.repo
+      .createQueryBuilder('s')
+      .leftJoinAndSelect('s.reserva', 'r')
+      .leftJoinAndSelect('r.curso', 'c')
+      .leftJoinAndSelect('s.profesor', 'p')
+      .leftJoinAndSelect('s.aula', 'a')
+      .leftJoinAndSelect('s.capacitacion', 'k')
+      .where('r.usuario_id = :uid', { uid: usuarioId })
+      .getMany();
   }
 
   async findOne(id: number) {

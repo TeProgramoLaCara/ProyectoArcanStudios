@@ -10,8 +10,14 @@ export class Profesor {
   @Column({ length: 150 })
   nombre: string;
 
-  @Column({ length: 255, nullable: true })
+  @Column({ length: 190, nullable: true })
+  email: string;
+
+  @Column({ length: 255, nullable: true, select: false })
   contraseña: string;
+
+  @Column({ length: 20, default: 'profesor' })
+  rol: string;
 
   @Column({ type: 'text', nullable: true })
   disponibilidad: string;

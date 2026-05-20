@@ -1,9 +1,10 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
-import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, ParseIntPipe } from '@nestjs/common';
 import { CursoService } from './curso.service';
 import { CreateCursoDto } from './dto/create-curso.dto';
 import { UpdateCursoDto } from './dto/update-curso.dto';
+import { Roles } from 'src/common/decorators/roles.decorator';
 
 @Controller('curso')
 export class CursoController {
@@ -15,22 +16,25 @@ export class CursoController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: number) {
+  findOne(@Param('id', ParseIntPipe) id: number) {
     return this.service.findOne(id);
   }
 
+  @Roles('admin')
   @Post()
   create(@Body() dto: CreateCursoDto) {
     return this.service.create(dto);
   }
 
+  @Roles('admin')
   @Put(':id')
-  update(@Param('id') id: number, @Body() dto: UpdateCursoDto) {
+  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateCursoDto) {
     return this.service.update(id, dto);
   }
 
+  @Roles('admin')
   @Delete(':id')
-  remove(@Param('id') id: number) {
+  remove(@Param('id', ParseIntPipe) id: number) {
     return this.service.remove(id);
   }
 

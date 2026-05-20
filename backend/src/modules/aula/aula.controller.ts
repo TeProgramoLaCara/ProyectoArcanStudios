@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, ParseIntPipe } from '@nestjs/common';
 import { AulaService } from './aula.service';
 import { CreateAulaDto } from './dto/create-aula.dto';
 import { UpdateAulaDto } from './dto/update-aula.dto';
+import { Roles } from 'src/common/decorators/roles.decorator';
 
 @Controller('aula')
 export class AulaController {
@@ -13,22 +14,25 @@ export class AulaController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: number) {
+  findOne(@Param('id', ParseIntPipe) id: number) {
     return this.aulaService.findOne(id);
   }
 
+  @Roles('admin')
   @Post()
   create(@Body() dto: CreateAulaDto) {
     return this.aulaService.create(dto);
   }
 
+  @Roles('admin')
   @Put(':id')
-  update(@Param('id') id: number, @Body() dto: UpdateAulaDto) {
+  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateAulaDto) {
     return this.aulaService.update(id, dto);
   }
 
+  @Roles('admin')
   @Delete(':id')
-  remove(@Param('id') id: number) {
+  remove(@Param('id', ParseIntPipe) id: number) {
     return this.aulaService.remove(id);
   }
 

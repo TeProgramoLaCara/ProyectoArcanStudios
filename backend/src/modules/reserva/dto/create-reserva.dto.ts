@@ -2,7 +2,8 @@ import { IsInt, IsOptional, IsString, IsDateString } from 'class-validator';
 
 export class CreateReservaDto {
   @IsInt()
-  usuario_id: number;
+  @IsOptional()
+  usuario_id?: number;
 
   @IsInt()
   curso_id: number;
