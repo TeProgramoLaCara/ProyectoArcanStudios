@@ -80,15 +80,15 @@ export async function getDashboardData(): Promise<DashboardApiData> {
     usuarios,
     perfiles,
   ] = await Promise.all([
-    safeGetFromEndpoints(["/reservas", "/reserva"]),
-    safeGetFromEndpoints(["/cursos", "/curso"]),
-    safeGetFromEndpoints(["/profesores", "/profesor", "/docentes", "/docente"]),
-    safeGetFromEndpoints(["/empresas", "/empresa"]),
-    safeGetFromEndpoints(["/capacitaciones", "/capacitacion"]),
-    safeGetFromEndpoints(["/aulas", "/aula"]),
-    safeGetFromEndpoints(["/sesiones", "/sesion"]),
-    safeGetFromEndpoints(["/usuarios", "/usuario"]),
-    safeGetFromEndpoints(["/perfiles", "/perfil"]),
+    safeGet("/reserva"),
+    safeGet("/curso"),
+    safeGet("/profesor"),
+    safeGet("/empresa"),
+    safeGet("/capacitacion"),
+    safeGet("/aula"),
+    safeGet("/sesion"),
+    safeGet("/usuario"),
+    safeGet("/perfil"),
   ]);
 
   return {

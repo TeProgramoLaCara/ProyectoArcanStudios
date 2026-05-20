@@ -11,6 +11,10 @@ import type {
   CalendarProfessorOption,
   CalendarCompanyOption,
 } from "@/components/calendar/types";
+import {
+  getWorkflowGlobalCalendar,
+  RESERVATION_WORKFLOW_EVENT,
+} from "@/services/reservation-workflow.service";
 
 export default function Page() {
   const [professor, setProfessor] = useState("all");
@@ -34,10 +38,17 @@ export default function Page() {
     getCalendarData()
       .then((data) => {
         const mapped = mapCalendarApiData(data);
+        const workflow = getWorkflowGlobalCalendar();
 
-        setEventsState(mapped.events);
-        setProfessorOptions(mapped.professors);
-        setCompanyOptions(mapped.companies);
+        setEventsState([...mapped.events, ...workflow.events]);
+        setProfessorOptions([
+          ...mapped.professors,
+          ...workflow.professors.filter((professor) => !mapped.professors.some((item) => item.id === professor.id)),
+        ]);
+        setCompanyOptions([
+          ...mapped.companies,
+          ...workflow.companies.filter((company) => !mapped.companies.some((item) => item.id === company.id)),
+        ]);
         setError(null);
       })
       .catch((error) => {
@@ -45,6 +56,32 @@ export default function Page() {
         setError("No se pudieron cargar los datos del calendario.");
       })
       .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    const refreshWorkflow = () => {
+      const workflow = getWorkflowGlobalCalendar();
+      setEventsState((current) => [
+        ...current.filter((event) => !event.id.includes("-assignment-")),
+        ...workflow.events,
+      ]);
+      setProfessorOptions((current) => [
+        ...current.filter((professor) => !workflow.professors.some((item) => item.id === professor.id)),
+        ...workflow.professors,
+      ]);
+      setCompanyOptions((current) => [
+        ...current.filter((company) => !workflow.companies.some((item) => item.id === company.id)),
+        ...workflow.companies,
+      ]);
+    };
+
+    window.addEventListener(RESERVATION_WORKFLOW_EVENT, refreshWorkflow);
+    window.addEventListener("storage", refreshWorkflow);
+
+    return () => {
+      window.removeEventListener(RESERVATION_WORKFLOW_EVENT, refreshWorkflow);
+      window.removeEventListener("storage", refreshWorkflow);
+    };
   }, []);
 
   const filteredEvents = useMemo(() => {

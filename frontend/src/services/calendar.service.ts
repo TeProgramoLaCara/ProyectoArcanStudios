@@ -65,10 +65,10 @@ async function safeGetFromEndpoints(endpoints: string[]): Promise<any[]> {
 
 export async function getCalendarData(): Promise<CalendarApiData> {
   const [sesiones, profesores, empresas, aulas] = await Promise.all([
-    safeGetFromEndpoints(["/sesiones", "/sesion"]),
-    safeGetFromEndpoints(["/profesores", "/profesor", "/docentes", "/docente"]),
-    safeGetFromEndpoints(["/empresas", "/empresa"]),
-    safeGetFromEndpoints(["/aulas", "/aula"]),
+     safeGet("/sesion"),
+    safeGet("/profesor"),
+    safeGet("/empresa"),
+    safeGet("/aula"),
   ]);
 
   return {

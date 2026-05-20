@@ -2,7 +2,7 @@
 
 import { useTheme } from '@/context/ThemeContext';
 import CategoryBadge from './CategoryBadge';
-import type { Capacitacion } from '@/resources/data';
+import type { Capacitacion } from './types';
 
 type Props = {
   cap: Capacitacion;

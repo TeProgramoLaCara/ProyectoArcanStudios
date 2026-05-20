@@ -4,16 +4,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   HiOutlineSquares2X2,
+  HiOutlineBookOpen,
   HiOutlineClipboardDocumentList,
-  HiOutlineUserCircle,
   HiOutlineCog6Tooth,
   HiOutlineChevronRight,
+  HiOutlineArrowRightOnRectangle,
 } from "react-icons/hi2";
 
 const items = [
   { href: "/cliente/dashboard", label: "Dashboard", icon: HiOutlineSquares2X2 },
+  { href: "/cliente/cursos", label: "Cursos", icon: HiOutlineBookOpen },
   { href: "/cliente/reservas", label: "Reservas", icon: HiOutlineClipboardDocumentList },
-  { href: "/cliente/perfil", label: "Perfil", icon: HiOutlineUserCircle },
   { href: "/cliente/ajustes", label: "Ajustes", icon: HiOutlineCog6Tooth },
 ];
 
@@ -62,6 +63,19 @@ export default function ClientSidebar() {
           );
         })}
       </nav>
+
+      <div className="border-t border-[var(--border)] p-3">
+        <Link
+          href="/"
+          className="flex items-center justify-between rounded-xl px-3 py-3 text-sm text-rose-300 transition hover:bg-rose-500/10 hover:text-rose-200"
+        >
+          <div className="flex items-center gap-3">
+            <HiOutlineArrowRightOnRectangle className="text-lg" />
+            <span className="font-medium">Cerrar sesión</span>
+          </div>
+          <HiOutlineChevronRight className="text-sm text-rose-300/60" />
+        </Link>
+      </div>
     </aside>
   );
 }

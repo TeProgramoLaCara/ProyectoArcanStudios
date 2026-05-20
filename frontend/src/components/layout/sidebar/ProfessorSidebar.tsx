@@ -9,6 +9,7 @@ import {
   HiOutlineUserCircle,
   HiOutlineCog6Tooth,
   HiOutlineChevronRight,
+  HiOutlineArrowRightOnRectangle,
 } from "react-icons/hi2";
 const items = [
   { href: "/profesor/calendario", label: "Calendario", icon: HiOutlineCalendarDays },
@@ -61,6 +62,19 @@ export default function ProfessorSidebar() {
           );
         })}
       </nav>
+
+      <div className="border-t border-[var(--border)] p-3">
+        <Link
+          href="/"
+          className="flex items-center justify-between rounded-xl px-3 py-3 text-sm text-rose-300 transition hover:bg-rose-500/10 hover:text-rose-200"
+        >
+          <div className="flex items-center gap-3">
+            <HiOutlineArrowRightOnRectangle className="text-lg" />
+            <span className="font-medium">Cerrar sesión</span>
+          </div>
+          <HiOutlineChevronRight className="text-sm text-rose-300/60" />
+        </Link>
+      </div>
     </aside>
   );
 }

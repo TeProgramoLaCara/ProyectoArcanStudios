@@ -7,16 +7,19 @@ import {
   HiOutlineCalendarDays,
   HiOutlineBookOpen,
   HiOutlineClipboardDocumentList,
+  HiOutlineIdentification,
   HiOutlineUserGroup,
   HiOutlineBuildingOffice2,
   HiOutlineCog6Tooth,
   HiOutlineChevronRight,
+  HiOutlineArrowRightOnRectangle,
 } from "react-icons/hi2";
 
 const items = [
   { href: "/admin/dashboard",  label: "Dashboard",  icon: HiOutlineSquares2X2 },
   { href: "/admin/calendario", label: "Calendario", icon: HiOutlineCalendarDays },
   { href: "/admin/cursos",     label: "Cursos",     icon: HiOutlineBookOpen },
+  { href: "/admin/perfiles-alumnos", label: "Perfiles alumnos", icon: HiOutlineIdentification },
   { href: "/admin/reservas",   label: "Reservas",   icon: HiOutlineClipboardDocumentList },
   { href: "/admin/profes",     label: "Profes",     icon: HiOutlineUserGroup },
   { href: "/admin/clientes",   label: "Clientes",   icon: HiOutlineBuildingOffice2 },
@@ -70,6 +73,19 @@ export default function AdminSidebar() {
           );
         })}
       </nav>
+
+      <div className="border-t border-(--border) p-3">
+        <Link
+          href="/"
+          className="flex items-center justify-between rounded-xl px-3 py-3 text-sm text-rose-300 transition hover:bg-rose-500/10 hover:text-rose-200"
+        >
+          <div className="flex items-center gap-3">
+            <HiOutlineArrowRightOnRectangle className="text-lg" />
+            <span className="font-medium">Cerrar sesión</span>
+          </div>
+          <HiOutlineChevronRight className="text-sm text-rose-300/60" />
+        </Link>
+      </div>
     </aside>
   );
 }
