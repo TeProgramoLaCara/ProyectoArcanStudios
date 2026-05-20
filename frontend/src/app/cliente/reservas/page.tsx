@@ -3,16 +3,30 @@
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTheme } from "@/context/ThemeContext";
+import { useAuth } from "@/context/AuthContext";
+import { apiFetch } from "@/lib/api";
 import {
-  allEvents,
-  allReservas,
-  capacitaciones,
-  cursos,
-  type Reserva,
-} from "@/resources/data";
+  ESTADO_LABEL,
+  createReserva,
+  listReservas,
+  type ApiReserva,
+  type ReservaEstado,
+} from "@/services/reserva.service";
+import { allEvents } from "@/resources/data";
 import type { EventInput } from "@fullcalendar/core";
+
+interface ApiCursoLite {
+  id_curso: number;
+  nombre: string;
+  descripcion?: string | null;
+}
+interface ApiCapacitacionLite {
+  id_capacitacion: number;
+  nombre: string;
+  descripcion?: string | null;
+}
 
 type DayAvailability = {
   key: string;
@@ -22,7 +36,7 @@ type DayAvailability = {
 };
 
 const AULA_CAPACITY_PER_TURNO = 3;
-const CURRENT_CLIENT = "Alejandro Vega";
+const ACTIVE_ESTADOS: ReservaEstado[] = ["pendiente", "confirmada"];
 
 function toIsoDate(date: Date) {
   const year = date.getFullYear();
@@ -43,38 +57,10 @@ function formatHumanDate(date: Date) {
   });
 }
 
-function parseReservaHumanDate(value: string): Date | null {
-  const rangeStart = value.split(" - ")[0]?.trim() ?? value;
-  const months: Record<string, number> = {
-    ene: 0,
-    feb: 1,
-    mar: 2,
-    abr: 3,
-    may: 4,
-    jun: 5,
-    jul: 6,
-    ago: 7,
-    sep: 8,
-    oct: 9,
-    nov: 10,
-    dic: 11,
-  };
-  const normalized = rangeStart.toLowerCase();
-  const parts = normalized.split(" ");
-  if (parts.length !== 3) return null;
-  const day = Number(parts[0]);
-  const month = months[parts[1]];
-  const year = Number(parts[2]);
-  if (!day || month === undefined || !year) return null;
-  return new Date(year, month, day);
-}
-
-function parseReservaDateRange(value: string): { start: Date; endInclusive: Date } | null {
-  const [rawStart, rawEnd] = value.split(" - ").map((part) => part.trim());
-  const start = parseReservaHumanDate(rawStart);
-  if (!start) return null;
-  const endInclusive = rawEnd ? parseReservaHumanDate(rawEnd) ?? start : start;
-  return { start, endInclusive };
+function parseIsoDateTime(value?: string | null): Date | null {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
 function getAvailabilityByDay(date: Date): DayAvailability {
@@ -157,9 +143,15 @@ function getRangeAvailabilityByDates(startDate: Date, endDateInclusive: Date): {
 
 export default function ClienteReservasPage() {
   const { isDark } = useTheme();
+  const { user } = useAuth();
   const reservationsCalendarRef = useRef<FullCalendar>(null);
   const bookingCalendarRef = useRef<FullCalendar>(null);
-  const [reservasState, setReservasState] = useState<Reserva[]>(allReservas);
+  const [reservasState, setReservasState] = useState<ApiReserva[]>([]);
+  const [cursosApi, setCursosApi] = useState<ApiCursoLite[]>([]);
+  const [capacitacionesApi, setCapacitacionesApi] = useState<ApiCapacitacionLite[]>([]);
+  const [loadingData, setLoadingData] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [step, setStep] = useState(1);
   const [calendarMonth, setCalendarMonth] = useState(new Date());
@@ -169,20 +161,42 @@ export default function ClienteReservasPage() {
   const [requestType, setRequestType] = useState<"curso" | "capacitacion" | "personalizado">(
     "curso",
   );
-  const [selectedCurso, setSelectedCurso] = useState(cursos[0]?.id ?? "");
-  const [selectedCap, setSelectedCap] = useState(capacitaciones[0]?.id ?? "");
+  const [selectedCurso, setSelectedCurso] = useState<number | "">("");
+  const [selectedCap, setSelectedCap] = useState<number | "">("");
   const [customRequest, setCustomRequest] = useState("");
   const [selectedStartDate, setSelectedStartDate] = useState<DayAvailability | null>(null);
   const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null);
   const [selectedTurno, setSelectedTurno] = useState<"manana" | "tarde" | "">("");
 
+  const refreshReservas = useCallback(async () => {
+    try {
+      const data = await listReservas();
+      setReservasState(data);
+    } catch {
+      /* ignore: silent retry on next mount */
+    }
+  }, []);
+
+  useEffect(() => {
+    setLoadingData(true);
+    Promise.all([
+      listReservas().catch(() => [] as ApiReserva[]),
+      apiFetch<ApiCursoLite[]>("/curso").catch(() => []),
+      apiFetch<ApiCapacitacionLite[]>("/capacitacion").catch(() => []),
+    ])
+      .then(([r, c, k]) => {
+        setReservasState(r);
+        setCursosApi(c);
+        setCapacitacionesApi(k);
+        if (c.length > 0) setSelectedCurso(c[0].id_curso);
+        if (k.length > 0) setSelectedCap(k[0].id_capacitacion);
+      })
+      .finally(() => setLoadingData(false));
+  }, []);
+
   const reservasActivas = useMemo(
     () =>
-      reservasState.filter(
-        (r) =>
-          r.clientName === CURRENT_CLIENT &&
-          (r.status === "Pendiente" || r.status === "Confirmada" || r.status === "En curso"),
-      ),
+      reservasState.filter((r) => ACTIVE_ESTADOS.includes(r.estado)),
     [reservasState],
   );
 
@@ -196,22 +210,24 @@ export default function ClienteReservasPage() {
   const activeReservationEvents = useMemo<EventInput[]>(
     () =>
       reservasActivas.flatMap((reserva) => {
-          const range = parseReservaDateRange(reserva.fecha);
-          if (!range) return [];
-          const start = toIsoDate(range.start);
-          const endExclusiveDate = addDays(range.endInclusive, 1);
-          const end = toIsoDate(endExclusiveDate);
-          return [{
-            id: `active-reservation-${reserva.id}-${start}`,
-            title: reserva.curso,
+        const ini = parseIsoDateTime(reserva.fecha_ini);
+        const fin = parseIsoDateTime(reserva.fecha_fin) ?? ini;
+        if (!ini) return [];
+        const start = toIsoDate(ini);
+        const end = toIsoDate(addDays(fin ?? ini, 1));
+        return [
+          {
+            id: `active-reservation-${reserva.id_reserva}`,
+            title: reserva.curso?.nombre ?? "Reserva",
             start,
             end,
             allDay: true,
             backgroundColor: "rgba(56, 189, 248, 0.45)",
             borderColor: "rgba(56, 189, 248, 0.85)",
             textColor: "#e0f2fe",
-          }];
-        }),
+          },
+        ];
+      }),
     [reservasActivas],
   );
 
@@ -252,21 +268,22 @@ export default function ClienteReservasPage() {
     setStep(1);
     setAlumnos(10);
     setRequestType("curso");
-    setSelectedCurso(cursos[0]?.id ?? "");
-    setSelectedCap(capacitaciones[0]?.id ?? "");
+    setSelectedCurso(cursosApi[0]?.id_curso ?? "");
+    setSelectedCap(capacitacionesApi[0]?.id_capacitacion ?? "");
     setCustomRequest("");
     setSelectedStartDate(null);
     setSelectedEndDate(null);
     setSelectedTurno("");
+    setSubmitError(null);
     setCalendarMonth(new Date());
   };
 
   const canGoStep2 =
     alumnos > 0 &&
     (requestType === "curso"
-      ? Boolean(selectedCurso)
+      ? typeof selectedCurso === "number"
       : requestType === "capacitacion"
-        ? Boolean(selectedCap)
+        ? typeof selectedCap === "number"
         : customRequest.trim().length > 4);
 
   const canSubmit = Boolean(
@@ -275,33 +292,69 @@ export default function ClienteReservasPage() {
 
   const selectedRequestLabel =
     requestType === "curso"
-      ? cursos.find((c) => c.id === selectedCurso)?.title ?? "Curso"
+      ? cursosApi.find((c) => c.id_curso === selectedCurso)?.nombre ?? "Curso"
       : requestType === "capacitacion"
-        ? capacitaciones.find((c) => c.id === selectedCap)?.title ?? "Capacitación"
+        ? capacitacionesApi.find((c) => c.id_capacitacion === selectedCap)?.nombre ??
+          "Capacitación"
         : `Personalizado: ${customRequest}`;
-  const submitReservation = () => {
+
+  const submitReservation = async () => {
     if (!selectedStartDate || !selectedEndDate || !selectedTurno) return;
-    const newReserva: Reserva = {
-      id: `r-${Date.now()}`,
-      clientName: CURRENT_CLIENT,
-      company: "Nova",
-      curso: selectedRequestLabel,
-      capacitaciones:
-        requestType === "curso"
-          ? cursos
-              .find((c) => c.id === selectedCurso)
-              ?.capacitaciones.map(
-                (capId) => capacitaciones.find((cap) => cap.id === capId)?.title ?? capId,
-              ) ?? []
-          : requestType === "capacitacion"
-            ? [capacitaciones.find((cap) => cap.id === selectedCap)?.title ?? "Capacitación"]
-            : ["Solicitud personalizada"],
-      status: "Pendiente",
-      fecha: `${formatHumanDate(selectedStartDate.date)} - ${formatHumanDate(selectedEndDate)}`,
-    };
-    setReservasState((prev) => [newReserva, ...prev]);
-    setShowModal(false);
-    resetForm();
+    if (submitting) return;
+    setSubmitError(null);
+
+    // El backend asocia la reserva al cliente autenticado y un curso real.
+    // Para "capacitación" o "personalizado" enviamos al curso seleccionado
+    // (o al primero disponible) e incluímos el detalle en `observaciones`.
+    const cursoId =
+      requestType === "curso"
+        ? selectedCurso
+        : (cursosApi[0]?.id_curso ?? undefined);
+    if (!cursoId || typeof cursoId !== "number") {
+      setSubmitError("No hay cursos disponibles para reservar");
+      return;
+    }
+
+    const turnoTexto = selectedTurno === "manana" ? "Mañana" : "Tarde";
+    const observacionesPartes: string[] = [`Turno: ${turnoTexto}`];
+    if (requestType === "capacitacion") {
+      const nombreCap =
+        capacitacionesApi.find((c) => c.id_capacitacion === selectedCap)?.nombre;
+      if (nombreCap) observacionesPartes.push(`Capacitación: ${nombreCap}`);
+    } else if (requestType === "personalizado") {
+      observacionesPartes.push(`Personalizado: ${customRequest}`);
+    }
+
+    // Hora por defecto según turno (09:00 mañana / 15:00 tarde)
+    const ini = new Date(selectedStartDate.date);
+    const fin = new Date(selectedEndDate);
+    if (selectedTurno === "manana") {
+      ini.setHours(9, 0, 0, 0);
+      fin.setHours(13, 0, 0, 0);
+    } else {
+      ini.setHours(15, 0, 0, 0);
+      fin.setHours(19, 0, 0, 0);
+    }
+
+    setSubmitting(true);
+    try {
+      await createReserva({
+        curso_id: cursoId,
+        n_estudiantes: alumnos,
+        fecha_ini: ini.toISOString(),
+        fecha_fin: fin.toISOString(),
+        observaciones: observacionesPartes.join(" · "),
+      });
+      await refreshReservas();
+      setShowModal(false);
+      resetForm();
+    } catch (err) {
+      setSubmitError(
+        err instanceof Error ? err.message : "No se pudo crear la reserva",
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -343,13 +396,13 @@ export default function ClienteReservasPage() {
           <div className={`rounded-2xl border p-4 ${isDark ? "border-white/10 bg-[#0d0d0d]" : "border-black/[0.08] bg-white"}`}>
             <p className={`text-xs uppercase tracking-wide ${isDark ? "text-white/40" : "text-[#64748b]"}`}>Pendientes</p>
             <p className={`mt-1 text-2xl font-bold ${isDark ? "text-amber-300" : "text-amber-600"}`}>
-              {reservasActivas.filter((r) => r.status === "Pendiente").length}
+              {reservasActivas.filter((r) => r.estado === "pendiente").length}
             </p>
           </div>
           <div className={`rounded-2xl border p-4 ${isDark ? "border-white/10 bg-[#0d0d0d]" : "border-black/[0.08] bg-white"}`}>
-            <p className={`text-xs uppercase tracking-wide ${isDark ? "text-white/40" : "text-[#64748b]"}`}>En curso</p>
+            <p className={`text-xs uppercase tracking-wide ${isDark ? "text-white/40" : "text-[#64748b]"}`}>Confirmadas</p>
             <p className={`mt-1 text-2xl font-bold ${isDark ? "text-emerald-300" : "text-emerald-600"}`}>
-              {reservasActivas.filter((r) => r.status === "En curso").length}
+              {reservasActivas.filter((r) => r.estado === "confirmada").length}
             </p>
           </div>
         </div>
@@ -449,40 +502,56 @@ export default function ClienteReservasPage() {
               </h4>
 
               <div className="grid grid-cols-1 gap-2">
-                {reservasActivas.slice(0, 7).map((reserva) => (
-                  <div
-                    key={reserva.id}
-                    className={`rounded-lg border px-3 py-2 ${isDark ? "border-white/10 bg-[#0d0d0d]" : "border-black/[0.08] bg-[#f8fafc]"}`}
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="min-w-0">
-                        <h3 className={`truncate text-xs font-semibold leading-tight ${isDark ? "text-white" : "text-[#0f172a]"}`}>
-                          {reserva.curso}
-                        </h3>
-                        <p className={`truncate text-[11px] leading-tight ${isDark ? "text-white/50" : "text-[#64748b]"}`}>
-                          Fecha: {reserva.fecha} · Empresa: {reserva.company}
-                        </p>
-                      </div>
-                      <span
-                        className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                          reserva.status === "En curso"
-                            ? "bg-emerald-500/20 text-emerald-200"
-                            : reserva.status === "Confirmada"
-                              ? "bg-sky-500/20 text-sky-200"
-                              : "bg-amber-500/20 text-amber-200"
-                        }`}
+                {loadingData && (
+                  <p className={`text-sm ${isDark ? "text-white/50" : "text-[#64748b]"}`}>
+                    Cargando…
+                  </p>
+                )}
+                {!loadingData &&
+                  reservasActivas.slice(0, 7).map((reserva) => {
+                    const ini = parseIsoDateTime(reserva.fecha_ini);
+                    const fin = parseIsoDateTime(reserva.fecha_fin);
+                    const empresa = reserva.usuario?.empresa?.nombre ?? "—";
+                    const fechaTxt = ini
+                      ? `${formatHumanDate(ini)}${fin ? ` - ${formatHumanDate(fin)}` : ""}`
+                      : "Sin fecha";
+                    return (
+                      <div
+                        key={reserva.id_reserva}
+                        className={`rounded-lg border px-3 py-2 ${isDark ? "border-white/10 bg-[#0d0d0d]" : "border-black/[0.08] bg-[#f8fafc]"}`}
                       >
-                        {reserva.status}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-                {reservasActivas.length > 7 && (
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="min-w-0">
+                            <h3
+                              className={`truncate text-xs font-semibold leading-tight ${isDark ? "text-white" : "text-[#0f172a]"}`}
+                            >
+                              {reserva.curso?.nombre ?? "Reserva"}
+                            </h3>
+                            <p
+                              className={`truncate text-[11px] leading-tight ${isDark ? "text-white/50" : "text-[#64748b]"}`}
+                            >
+                              Fecha: {fechaTxt} · Empresa: {empresa}
+                            </p>
+                          </div>
+                          <span
+                            className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                              reserva.estado === "confirmada"
+                                ? "bg-sky-500/20 text-sky-200"
+                                : "bg-amber-500/20 text-amber-200"
+                            }`}
+                          >
+                            {ESTADO_LABEL[reserva.estado]}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                {!loadingData && reservasActivas.length > 7 && (
                   <p className={`rounded-md border px-3 py-1.5 text-xs ${isDark ? "border-white/10 text-white/55" : "border-black/[0.08] text-[#64748b]"}`}>
                     +{reservasActivas.length - 7} reservas más
                   </p>
                 )}
-                {reservasActivas.length === 0 && (
+                {!loadingData && reservasActivas.length === 0 && (
                   <p className={`text-sm ${isDark ? "text-white/50" : "text-[#64748b]"}`}>
                     No tienes reservas activas ahora mismo.
                   </p>
@@ -537,7 +606,9 @@ export default function ClienteReservasPage() {
                     >
                       <option value="curso">Curso</option>
                       <option value="capacitacion">Capacitación</option>
-                      <option value="personalizado">Curso personalizado</option>
+                      <option value="personalizado" disabled>
+                        Curso personalizado · Próximamente
+                      </option>
                     </select>
                   </div>
                 </div>
@@ -545,28 +616,39 @@ export default function ClienteReservasPage() {
                 {requestType === "curso" && (
                   <select
                     value={selectedCurso}
-                    onChange={(e) => setSelectedCurso(e.target.value)}
+                    onChange={(e) => setSelectedCurso(Number(e.target.value))}
                     className="rounded-xl border border-white/10 bg-[#141414] px-3 py-2 text-white"
                   >
-                    {cursos.map((curso) => (
-                      <option key={curso.id} value={curso.id}>
-                        {curso.title}
-                      </option>
-                    ))}
+                    {cursosApi.length === 0 ? (
+                      <option value="">No hay cursos disponibles</option>
+                    ) : (
+                      cursosApi.map((curso) => (
+                        <option key={curso.id_curso} value={curso.id_curso}>
+                          {curso.nombre}
+                        </option>
+                      ))
+                    )}
                   </select>
                 )}
 
                 {requestType === "capacitacion" && (
                   <select
                     value={selectedCap}
-                    onChange={(e) => setSelectedCap(e.target.value)}
+                    onChange={(e) => setSelectedCap(Number(e.target.value))}
                     className="rounded-xl border border-white/10 bg-[#141414] px-3 py-2 text-white"
                   >
-                    {capacitaciones.map((cap) => (
-                      <option key={cap.id} value={cap.id}>
-                        {cap.title}
-                      </option>
-                    ))}
+                    {capacitacionesApi.length === 0 ? (
+                      <option value="">No hay capacitaciones</option>
+                    ) : (
+                      capacitacionesApi.map((cap) => (
+                        <option
+                          key={cap.id_capacitacion}
+                          value={cap.id_capacitacion}
+                        >
+                          {cap.nombre}
+                        </option>
+                      ))
+                    )}
                   </select>
                 )}
 
@@ -812,7 +894,18 @@ export default function ClienteReservasPage() {
                   <p><strong>Inicio:</strong> {selectedStartDate ? formatHumanDate(selectedStartDate.date) : "-"}</p>
                   <p><strong>Fin:</strong> {selectedEndDate ? formatHumanDate(selectedEndDate) : "-"}</p>
                   <p><strong>Turno:</strong> {selectedTurno === "manana" ? "Mañana" : "Tarde"}</p>
+                  {user && (
+                    <p>
+                      <strong>Cliente:</strong> {user.nombre}
+                      {user.empresa ? ` · ${user.empresa.nombre}` : ""}
+                    </p>
+                  )}
                 </div>
+                {submitError && (
+                  <p className="rounded-md border border-red-400/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+                    {submitError}
+                  </p>
+                )}
               </div>
             )}
             </div>
@@ -839,11 +932,11 @@ export default function ClienteReservasPage() {
               ) : (
                 <button
                   type="button"
-                  onClick={submitReservation}
-                  disabled={!canSubmit}
+                  onClick={() => void submitReservation()}
+                  disabled={!canSubmit || submitting}
                   className="rounded-xl bg-[#267F6B] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
                 >
-                  Confirmar reserva
+                  {submitting ? "Enviando…" : "Confirmar reserva"}
                 </button>
               )}
             </div>

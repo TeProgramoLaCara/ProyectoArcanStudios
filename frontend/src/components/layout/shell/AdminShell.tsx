@@ -1,4 +1,5 @@
 import AdminSidebar from "../sidebar/AdminSidebar";
+import Topbar from "../topbar/Topbar";
 
 export default function AdminShell({
   children,
@@ -11,6 +12,7 @@ export default function AdminShell({
         <AdminSidebar />
 
         <div className="flex min-w-0 flex-1 flex-col">
+          <Topbar />
           <main className="flex-1 overflow-y-auto p-6">{children}</main>
         </div>
       </div>
