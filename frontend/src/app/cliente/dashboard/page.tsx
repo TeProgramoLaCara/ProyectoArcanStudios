@@ -1,5 +1,11 @@
-import { useMemo } from "react";
-import { allReservas, empresas, type Reserva } from "@/resources/data";
+import { useEffect, useMemo, useState } from "react";
+import {
+  allReservas as fallbackReservas,
+  empresas as fallbackEmpresas,
+  type Empresa,
+  type Reserva,
+} from "@/resources/data";
+import { getClientApiData } from "@/services/client.service";
 
 const CURRENT_CLIENT = "Alejandro Vega";
 
@@ -48,14 +54,30 @@ function isActiveReservation(reserva: Reserva) {
 }
 
 export default function Page() {
+  const [reservas, setReservas] = useState<Reserva[]>(fallbackReservas);
+  const [empresas, setEmpresas] = useState<Empresa[]>(fallbackEmpresas);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getClientApiData()
+      .then((data) => {
+        if (data.reservas.length > 0) setReservas(data.reservas);
+        if (data.empresas.length > 0) setEmpresas(data.empresas);
+      })
+      .catch((error) => {
+        console.error("Error cargando dashboard cliente:", error);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
   const today = useMemo(() => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), now.getDate());
   }, []);
 
   const myReservations = useMemo(
-    () => allReservas.filter((reserva) => reserva.clientName === CURRENT_CLIENT),
-    [],
+    () => reservas.filter((reserva) => reserva.clientName === CURRENT_CLIENT),
+    [reservas],
   );
 
   const myCompany = useMemo(
@@ -65,7 +87,7 @@ export default function Page() {
 
   const myCompanyData = useMemo(
     () => empresas.find((empresa) => empresa.name === myCompany),
-    [myCompany],
+    [myCompany, empresas],
   );
 
   const reservationsByState = useMemo(() => {
@@ -97,7 +119,7 @@ export default function Page() {
           .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
           .join(" ");
 
-        const activeReservations = allReservas.filter(
+        const activeReservations = reservas.filter(
           (reserva) => reserva.company === myCompany && reserva.clientName === fullName && isActiveReservation(reserva),
         );
 
@@ -108,7 +130,7 @@ export default function Page() {
           activeReservations,
         };
       }),
-    [myCompany, myCompanyData],
+    [myCompany, myCompanyData, reservas],
   );
 
   return (
@@ -119,6 +141,9 @@ export default function Page() {
           <p className="mt-1 text-sm text-[#475569] dark:text-white/60">
             Estado de tus reservas y actividad de tu empresa ({myCompany}).
           </p>
+          {loading && (
+            <p className="mt-1 text-xs text-[#64748b] dark:text-white/40">Sincronizando datos con backend...</p>
+          )}
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">

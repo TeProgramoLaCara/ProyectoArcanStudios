@@ -17,20 +17,54 @@ async function handler(
   const incomingUrl = new URL(request.url);
 
   const targetUrl = `${API_URL}/${path.join("/")}${incomingUrl.search}`;
+  const debugEnabled = process.env.NODE_ENV !== "production";
 
   const method = request.method;
   const hasBody = method !== "GET" && method !== "HEAD";
 
   const body = hasBody ? await request.text() : undefined;
 
-  const response = await fetch(targetUrl, {
-    method,
-    body,
-    headers: {
-      "Content-Type": request.headers.get("Content-Type") ?? "application/json",
-    },
-    cache: "no-store",
-  });
+  const outgoingHeaders = new Headers();
+  const incomingContentType = request.headers.get("Content-Type");
+  const incomingAuthorization = request.headers.get("Authorization");
+  const incomingCookie = request.headers.get("Cookie");
+
+  if (incomingContentType) outgoingHeaders.set("Content-Type", incomingContentType);
+  if (incomingAuthorization) outgoingHeaders.set("Authorization", incomingAuthorization);
+  if (incomingCookie) outgoingHeaders.set("Cookie", incomingCookie);
+
+  let response: Response;
+  try {
+    response = await fetch(targetUrl, {
+      method,
+      body,
+      headers: outgoingHeaders,
+      cache: "no-store",
+    });
+  } catch (error) {
+    if (debugEnabled) {
+      console.error("[API_PROXY] Backend unreachable", {
+        method,
+        path: `/${path.join("/")}`,
+        targetUrl,
+        error: String(error),
+      });
+    }
+    return NextResponse.json(
+      { error: "No se pudo conectar con el backend", detail: String(error) },
+      { status: 502 }
+    );
+  }
+
+  if (debugEnabled && response.status >= 400) {
+    console.error("[API_PROXY] Backend error response", {
+      method,
+      path: `/${path.join("/")}`,
+      targetUrl,
+      status: response.status,
+      statusText: response.statusText,
+    });
+  }
 
   const contentType = response.headers.get("Content-Type");
 

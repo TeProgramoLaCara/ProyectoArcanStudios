@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { apiFetch } from "@/lib/api";
+import { ApiError } from "@/lib/api";
 
 export type DashboardApiData = {
   reservas: any[];
@@ -37,21 +38,33 @@ function normalizeArray<T>(value: unknown): T[] {
   return [];
 }
 
-async function safeGet<T>(endpoint: string): Promise<T[]> {
+async function safeGet<T>(
+  endpoint: string
+): Promise<{ ok: boolean; data: T[]; fatal: boolean }> {
   try {
     const data = await apiFetch<unknown>(endpoint);
-    return normalizeArray<T>(data);
+    return { ok: true, data: normalizeArray<T>(data), fatal: false };
   } catch (error) {
-    console.error(`Error cargando ${endpoint}:`, error);
-    return [];
+    if (error instanceof ApiError && error.status >= 500) {
+      return { ok: false, data: [], fatal: true };
+    }
+    return { ok: false, data: [], fatal: false };
   }
 }
 
 async function safeGetFromEndpoints<T>(endpoints: string[]): Promise<T[]> {
-  for (const endpoint of endpoints) {
-    const data = await safeGet<T>(endpoint);
-    if (data.length > 0) return data;
+  for (let index = 0; index < endpoints.length; index += 1) {
+    const endpoint = endpoints[index];
+    const result = await safeGet<T>(endpoint);
+    if (result.ok) return result.data;
+    if (result.fatal) {
+      console.warn(
+        `Error 5xx en ${endpoint}. Se cancela fallback de aliases para este recurso.`
+      );
+      return [];
+    }
   }
+  console.warn(`No se pudo cargar ninguno de estos endpoints: ${endpoints.join(" | ")}`);
   return [];
 }
 
@@ -67,15 +80,15 @@ export async function getDashboardData(): Promise<DashboardApiData> {
     usuarios,
     perfiles,
   ] = await Promise.all([
-    safeGet("/reserva"),
-    safeGet("/curso"),
-    safeGet("/profesor"),
-    safeGet("/empresa"),
-    safeGet("/capacitacion"),
-    safeGet("/aula"),
+    safeGetFromEndpoints(["/reservas", "/reserva"]),
+    safeGetFromEndpoints(["/cursos", "/curso"]),
+    safeGetFromEndpoints(["/profesores", "/profesor", "/docentes", "/docente"]),
+    safeGetFromEndpoints(["/empresas", "/empresa"]),
+    safeGetFromEndpoints(["/capacitaciones", "/capacitacion"]),
+    safeGetFromEndpoints(["/aulas", "/aula"]),
     safeGetFromEndpoints(["/sesiones", "/sesion"]),
-    safeGet("/usuario"),
-    safeGet("/perfil"),
+    safeGetFromEndpoints(["/usuarios", "/usuario"]),
+    safeGetFromEndpoints(["/perfiles", "/perfil"]),
   ]);
 
   return {

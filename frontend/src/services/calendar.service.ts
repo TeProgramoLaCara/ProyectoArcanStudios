@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { apiFetch } from "@/lib/api";
+import { ApiError } from "@/lib/api";
 
 export type CalendarApiData = {
   sesiones: any[];
@@ -32,30 +33,42 @@ function normalizeArray(value: unknown): any[] {
   return [];
 }
 
-async function safeGet(endpoint: string): Promise<any[]> {
+async function safeGet(
+  endpoint: string
+): Promise<{ ok: boolean; data: any[]; fatal: boolean }> {
   try {
     const data = await apiFetch(endpoint);
-    return normalizeArray(data);
+    return { ok: true, data: normalizeArray(data), fatal: false };
   } catch (error) {
-    console.error(`Error cargando ${endpoint}:`, error);
-    return [];
+    if (error instanceof ApiError && error.status >= 500) {
+      return { ok: false, data: [], fatal: true };
+    }
+    return { ok: false, data: [], fatal: false };
   }
 }
 
 async function safeGetFromEndpoints(endpoints: string[]): Promise<any[]> {
-  for (const endpoint of endpoints) {
-    const data = await safeGet(endpoint);
-    if (data.length > 0) return data;
+  for (let index = 0; index < endpoints.length; index += 1) {
+    const endpoint = endpoints[index];
+    const result = await safeGet(endpoint);
+    if (result.ok) return result.data;
+    if (result.fatal) {
+      console.warn(
+        `Error 5xx en ${endpoint}. Se cancela fallback de aliases para este recurso.`
+      );
+      return [];
+    }
   }
+  console.warn(`No se pudo cargar ninguno de estos endpoints: ${endpoints.join(" | ")}`);
   return [];
 }
 
 export async function getCalendarData(): Promise<CalendarApiData> {
   const [sesiones, profesores, empresas, aulas] = await Promise.all([
     safeGetFromEndpoints(["/sesiones", "/sesion"]),
-    safeGet("/profesor"),
-    safeGet("/empresa"),
-    safeGet("/aula"),
+    safeGetFromEndpoints(["/profesores", "/profesor", "/docentes", "/docente"]),
+    safeGetFromEndpoints(["/empresas", "/empresa"]),
+    safeGetFromEndpoints(["/aulas", "/aula"]),
   ]);
 
   return {

@@ -1,25 +1,39 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTheme } from '@/context/ThemeContext';
-import { allReservas, empresas } from '@/resources/data';
+import { allReservas as fallbackReservas, empresas as fallbackEmpresas, type Empresa, type Reserva } from '@/resources/data';
 import SettingsSection from '@/components/ajustes/SettingsSection';
 import ProfileSettingsForm from '@/components/ajustes/ProfileSettingsForm';
 import ThemeToggle from '@/components/ajustes/ThemeToggle';
+import { getClientApiData } from '@/services/client.service';
 
 const CURRENT_CLIENT = 'Alejandro Vega';
 
 export default function AjustesClientePage() {
   const { isDark } = useTheme();
+  const [reservas, setReservas] = useState<Reserva[]>(fallbackReservas);
+  const [empresas, setEmpresas] = useState<Empresa[]>(fallbackEmpresas);
+
+  useEffect(() => {
+    getClientApiData()
+      .then((data) => {
+        if (data.reservas.length > 0) setReservas(data.reservas);
+        if (data.empresas.length > 0) setEmpresas(data.empresas);
+      })
+      .catch((error) => {
+        console.error('Error cargando ajustes cliente:', error);
+      });
+  }, []);
 
   const currentCompany = useMemo(
-    () => allReservas.find((reserva) => reserva.clientName === CURRENT_CLIENT)?.company ?? 'Nova',
-    [],
+    () => reservas.find((reserva) => reserva.clientName === CURRENT_CLIENT)?.company ?? 'Nova',
+    [reservas],
   );
 
   const companyMembers = useMemo(
     () => empresas.find((empresa) => empresa.name === currentCompany)?.usuarios ?? [],
-    [currentCompany],
+    [currentCompany, empresas],
   );
 
   return (

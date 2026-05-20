@@ -6,13 +6,16 @@ import interactionPlugin from "@fullcalendar/interaction";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTheme } from "@/context/ThemeContext";
 import {
-  allEvents,
-  allReservas,
-  capacitaciones,
-  cursos,
+  allEvents as fallbackEvents,
+  allReservas as fallbackReservas,
+  capacitaciones as fallbackCapacitaciones,
+  cursos as fallbackCursos,
+  type Capacitacion,
+  type Curso,
   type Reserva,
 } from "@/resources/data";
 import type { EventInput } from "@fullcalendar/core";
+import { getClientApiData, type ClientCalendarEvent } from "@/services/client.service";
 
 type DayAvailability = {
   key: string;
@@ -77,7 +80,7 @@ function parseReservaDateRange(value: string): { start: Date; endInclusive: Date
   return { start, endInclusive };
 }
 
-function getAvailabilityByDay(date: Date): DayAvailability {
+function getAvailabilityByDay(date: Date, calendarEvents: ClientCalendarEvent[]): DayAvailability {
   const dayOfWeek = date.getDay();
   const key = toIsoDate(date);
 
@@ -88,7 +91,7 @@ function getAvailabilityByDay(date: Date): DayAvailability {
   let occupiedManana = 0;
   let occupiedTarde = 0;
 
-  for (const event of allEvents) {
+  for (const event of calendarEvents) {
     const start = parseIso(event.start);
     const endExclusive = parseIso(event.end);
     if (date >= start && date < endExclusive) {
@@ -120,7 +123,11 @@ function addDays(base: Date, days: number) {
   return next;
 }
 
-function getRangeAvailabilityByDates(startDate: Date, endDateInclusive: Date): {
+function getRangeAvailabilityByDates(
+  startDate: Date,
+  endDateInclusive: Date,
+  calendarEvents: ClientCalendarEvent[],
+): {
   status: "none" | "partial" | "full";
   availableTurnos: Array<"manana" | "tarde">;
 } {
@@ -139,7 +146,7 @@ function getRangeAvailabilityByDates(startDate: Date, endDateInclusive: Date): {
     for (let day = new Date(normalizedStart); day <= normalizedEnd; day = addDays(day, 1)) {
       const dayOfWeek = day.getDay();
       if (dayOfWeek === 0 || dayOfWeek === 6) continue;
-      const dayAvailability = getAvailabilityByDay(day);
+      const dayAvailability = getAvailabilityByDay(day, calendarEvents);
       if (!dayAvailability.availableTurnos.includes(turno)) {
         return false;
       }
@@ -159,7 +166,11 @@ export default function ClienteReservasPage() {
   const { isDark } = useTheme();
   const reservationsCalendarRef = useRef<FullCalendar>(null);
   const bookingCalendarRef = useRef<FullCalendar>(null);
-  const [reservasState, setReservasState] = useState<Reserva[]>(allReservas);
+  const [reservasState, setReservasState] = useState<Reserva[]>(fallbackReservas);
+  const [calendarEvents, setCalendarEvents] = useState<ClientCalendarEvent[]>(fallbackEvents);
+  const [availableCursos, setAvailableCursos] = useState<Curso[]>(fallbackCursos);
+  const [availableCapacitaciones, setAvailableCapacitaciones] = useState<Capacitacion[]>(fallbackCapacitaciones);
+  const [loadingApiData, setLoadingApiData] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [step, setStep] = useState(1);
   const [calendarMonth, setCalendarMonth] = useState(new Date());
@@ -169,8 +180,8 @@ export default function ClienteReservasPage() {
   const [requestType, setRequestType] = useState<"curso" | "capacitacion" | "personalizado">(
     "curso",
   );
-  const [selectedCurso, setSelectedCurso] = useState(cursos[0]?.id ?? "");
-  const [selectedCap, setSelectedCap] = useState(capacitaciones[0]?.id ?? "");
+  const [selectedCurso, setSelectedCurso] = useState(fallbackCursos[0]?.id ?? "");
+  const [selectedCap, setSelectedCap] = useState(fallbackCapacitaciones[0]?.id ?? "");
   const [customRequest, setCustomRequest] = useState("");
   const [selectedStartDate, setSelectedStartDate] = useState<DayAvailability | null>(null);
   const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null);
@@ -190,8 +201,8 @@ export default function ClienteReservasPage() {
     if (!selectedStartDate || !selectedEndDate) {
       return { status: "none" as const, availableTurnos: [] as Array<"manana" | "tarde"> };
     }
-    return getRangeAvailabilityByDates(selectedStartDate.date, selectedEndDate);
-  }, [selectedStartDate, selectedEndDate]);
+    return getRangeAvailabilityByDates(selectedStartDate.date, selectedEndDate, calendarEvents);
+  }, [selectedStartDate, selectedEndDate, calendarEvents]);
 
   const activeReservationEvents = useMemo<EventInput[]>(
     () =>
@@ -248,12 +259,26 @@ export default function ClienteReservasPage() {
     }
   }, [calendarMonth]);
 
+  useEffect(() => {
+    getClientApiData()
+      .then((data) => {
+        if (data.reservas.length > 0) setReservasState(data.reservas);
+        if (data.calendarEvents.length > 0) setCalendarEvents(data.calendarEvents);
+        if (data.cursos.length > 0) setAvailableCursos(data.cursos);
+        if (data.capacitaciones.length > 0) setAvailableCapacitaciones(data.capacitaciones);
+      })
+      .catch((error) => {
+        console.error("Error cargando reservas cliente:", error);
+      })
+      .finally(() => setLoadingApiData(false));
+  }, []);
+
   const resetForm = () => {
     setStep(1);
     setAlumnos(10);
     setRequestType("curso");
-    setSelectedCurso(cursos[0]?.id ?? "");
-    setSelectedCap(capacitaciones[0]?.id ?? "");
+    setSelectedCurso(availableCursos[0]?.id ?? "");
+    setSelectedCap(availableCapacitaciones[0]?.id ?? "");
     setCustomRequest("");
     setSelectedStartDate(null);
     setSelectedEndDate(null);
@@ -275,9 +300,9 @@ export default function ClienteReservasPage() {
 
   const selectedRequestLabel =
     requestType === "curso"
-      ? cursos.find((c) => c.id === selectedCurso)?.title ?? "Curso"
+      ? availableCursos.find((c) => c.id === selectedCurso)?.title ?? "Curso"
       : requestType === "capacitacion"
-        ? capacitaciones.find((c) => c.id === selectedCap)?.title ?? "Capacitación"
+        ? availableCapacitaciones.find((c) => c.id === selectedCap)?.title ?? "Capacitación"
         : `Personalizado: ${customRequest}`;
   const submitReservation = () => {
     if (!selectedStartDate || !selectedEndDate || !selectedTurno) return;
@@ -288,13 +313,13 @@ export default function ClienteReservasPage() {
       curso: selectedRequestLabel,
       capacitaciones:
         requestType === "curso"
-          ? cursos
+          ? availableCursos
               .find((c) => c.id === selectedCurso)
               ?.capacitaciones.map(
-                (capId) => capacitaciones.find((cap) => cap.id === capId)?.title ?? capId,
+                (capId) => availableCapacitaciones.find((cap) => cap.id === capId)?.title ?? capId,
               ) ?? []
           : requestType === "capacitacion"
-            ? [capacitaciones.find((cap) => cap.id === selectedCap)?.title ?? "Capacitación"]
+            ? [availableCapacitaciones.find((cap) => cap.id === selectedCap)?.title ?? "Capacitación"]
             : ["Solicitud personalizada"],
       status: "Pendiente",
       fecha: `${formatHumanDate(selectedStartDate.date)} - ${formatHumanDate(selectedEndDate)}`,
@@ -322,6 +347,11 @@ export default function ClienteReservasPage() {
               <p className={`mt-1 text-sm ${isDark ? "text-white/55" : "text-[#475569]"}`}>
                 Resumen de reservas activas y solicitud de nuevas plazas.
               </p>
+              {loadingApiData && (
+                <p className={`mt-1 text-xs ${isDark ? "text-white/40" : "text-[#64748b]"}`}>
+                  Sincronizando datos con backend...
+                </p>
+              )}
             </div>
             <button
               type="button"
@@ -548,7 +578,7 @@ export default function ClienteReservasPage() {
                     onChange={(e) => setSelectedCurso(e.target.value)}
                     className="rounded-xl border border-white/10 bg-[#141414] px-3 py-2 text-white"
                   >
-                    {cursos.map((curso) => (
+                    {availableCursos.map((curso) => (
                       <option key={curso.id} value={curso.id}>
                         {curso.title}
                       </option>
@@ -562,7 +592,7 @@ export default function ClienteReservasPage() {
                     onChange={(e) => setSelectedCap(e.target.value)}
                     className="rounded-xl border border-white/10 bg-[#141414] px-3 py-2 text-white"
                   >
-                    {capacitaciones.map((cap) => (
+                    {availableCapacitaciones.map((cap) => (
                       <option key={cap.id} value={cap.id}>
                         {cap.title}
                       </option>
@@ -632,7 +662,7 @@ export default function ClienteReservasPage() {
                           return;
                         }
                         const date = parseIso(e.target.value);
-                        const dayInfo = getAvailabilityByDay(date);
+                        const dayInfo = getAvailabilityByDay(date, calendarEvents);
                         if (dayInfo.status === "none") {
                           setSelectedStartDate(null);
                           setSelectedTurno("");
@@ -686,7 +716,7 @@ export default function ClienteReservasPage() {
                     displayEventTime={false}
                     events={bookingPreviewEvents}
                     dateClick={(info) => {
-                      const dayInfo = getAvailabilityByDay(info.date);
+                      const dayInfo = getAvailabilityByDay(info.date, calendarEvents);
                       if (dayInfo.status === "none") return;
                       setSelectedStartDate(dayInfo);
                       if (!selectedEndDate || selectedEndDate < info.date) {
@@ -694,8 +724,12 @@ export default function ClienteReservasPage() {
                       }
                     }}
                     dayCellDidMount={(info) => {
-                      const dayInfo = getAvailabilityByDay(info.date);
-                      const range = getRangeAvailabilityByDates(info.date, selectedEndDate ?? info.date);
+                      const dayInfo = getAvailabilityByDay(info.date, calendarEvents);
+                      const range = getRangeAvailabilityByDates(
+                        info.date,
+                        selectedEndDate ?? info.date,
+                        calendarEvents,
+                      );
                       const frame = info.el.querySelector(".fc-daygrid-day-frame") as HTMLElement | null;
                       if (!frame) return;
                       frame.style.borderRadius = "10px";

@@ -16,7 +16,7 @@ import type {
   CalendarProfessorOption,
   CalendarCompanyOption,
 } from '@/components/calendar/types';
-import { MOCK_EVENTS } from '@/resources/calendarData';
+import type { CalendarEvent as PersonalCalendarEvent } from '@/resources/calendarData';
 
 const PROFESOR_ACTUAL = 'Carlos Martínez';
 
@@ -90,15 +90,32 @@ export default function CalendarioPage() {
     );
   }
 
+  const personalEvents = useMemo<PersonalCalendarEvent[]>(() => {
+    return eventsState.map((event) => ({
+      id: event.id,
+      title: event.title,
+      empresa: event.companyName,
+      empresaId: event.companyId,
+      profesor: event.professorName,
+      profesorId: event.professorId,
+      start: event.start,
+      end: event.end,
+      aula: event.aula,
+      turno: event.turno,
+      tool: event.capacitaciones[0] ?? 'Curso',
+      color: event.color,
+    }));
+  }, [eventsState]);
+
   const filteredEvents = useMemo(() => {
-    return MOCK_EVENTS.filter((ev) => {
+    return personalEvents.filter((ev) => {
       if (ev.profesor !== PROFESOR_ACTUAL) return false;
       if (!filters.aulas.includes(ev.aula)) return false;
       if (!filters.turnos.includes(ev.turno)) return false;
       if (filters.empresaIds.length > 0 && !filters.empresaIds.includes(ev.empresaId)) return false;
       return true;
     });
-  }, [filters]);
+  }, [filters, personalEvents]);
 
   const globalFilteredEvents = useMemo(() => {
     return eventsState.filter((event) => {
