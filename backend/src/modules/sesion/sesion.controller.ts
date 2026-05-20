@@ -1,8 +1,10 @@
 import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { SesionService } from './sesion.service';
 import { CreateSesionDto } from './dto/create-sesion.dto';
 import { UpdateSesionDto } from './dto/update-sesion.dto';
 
+@ApiTags('Sesiones')
 @Controller('sesion')
 export class SesionController {
   constructor(private service: SesionService) {}

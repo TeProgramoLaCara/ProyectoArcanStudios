@@ -7,10 +7,12 @@ import {
   Param,
   Body,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { PerfilService } from './perfil.service';
 import { CreatePerfilDto } from './dto/create-perfil.dto';
 import { UpdatePerfilDto } from './dto/update-perfil.dto';
 
+@ApiTags('Perfiles')
 @Controller('perfil')
 export class PerfilController {
   constructor(private service: PerfilService) {}
