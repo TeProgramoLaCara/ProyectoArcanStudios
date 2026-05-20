@@ -28,7 +28,7 @@ COMANDOS IMPORTANTES:
 -npm cache clean --force                 → En ambas carpetas, para limpiar la cache por si hay problemas no se :p.
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 ENDPOINTS DE LA API:
-
+En https://reservas.arcanstudios.com/api/docs tambien se tienen todos los endpoints.
 1. Aula
 CRUD
 GET /aula                                                       Devuelve una lista con todas las aulas.
