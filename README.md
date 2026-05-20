@@ -1,4 +1,5 @@
 "# ProyectoArcanStudios" 
+(Se ve muy mal en preview, es mejor abrirlo en modo codigo o en un editor de texto/codigo)
 MINI EXPLICACION:
 El proyecto esta dividido en backend y frontend.
 El front se esta trabajando con next.js, y el back con NestJS.
@@ -27,7 +28,6 @@ COMANDOS IMPORTANTES:
 -npm cache clean --force                 → En ambas carpetas, para limpiar la cache por si hay problemas no se :p.
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 ENDPOINTS DE LA API:
-**IMPORTANTE: Algunos endpoints de DELETE no funcionan ya que la BBDD, tiene el on DELETE CASCADE, tengo que todavia ver como lo arreglaria
 
 1. Aula
 CRUD
@@ -140,26 +140,26 @@ GET /usuario/:id/empresa                                        Devuelve la empr
 GET /usuario/:id/reservas                                       Devuelve todas las reservas realizadas por un usuario.
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 ORGANIZACION DE CARPETAS:
-Como una mini explicacion de las carpetas pa que estemos organizados :p
+Como una mini explicacion de las carpetas pa que estemos organizados 
 La explicacion esta, muchas cosas son necesarias pero no se tocan, las cosas importantes las pongo () antes
     
-    /FRONTEND:                                              () → PUES EL FRONTEND
+   /FRONTEND:                                              
     │
-    ├── .next/                                                 → Carpeta generada automáticamente por Next.js (código compilado, NO se toca, NO se sube)
-    ├── node_modules/                                          → Dependencias instaladas, NO se toca, NO se sube a GitHub
-    ├── eslint.config.mjs                                      → Reglas de ESLint para mantener el código limpio
-    ├── next-env.d.ts                                          → Archivo generado por Next.js para TypeScript, no se toca
-    ├── next.config.ts                                         → Configuración avanzada de Next.js (normalmente no se modifica)
-    ├── package-lock.json                                      → Archivo generado por npm, asegura versiones exactas de dependencias
-    ├── tsconfig.json                                          → Configuración de TypeScript (paths, strict mode, etc.)
-    │
-    ├── package.json                                        () → Scripts, dependencias y metadatos del proyecto (archivo clave)
-    ├── postcss.config.mjs                                  () → Configuración de PostCSS (necesario si usas Tailwind)
-    │
-    ├── public/                                             () → Para los archivos estáticos accesibles desde el navegador (imágenes, logos, íconos, fuentes)
-    │
+   ├── .next/                                                 → Carpeta generada automáticamente por Next.js (código compilado, NO se toca, NO se sube)
+   ├── node_modules/                                          → Dependencias instaladas, NO se toca, NO se sube a GitHub
+   ├── eslint.config.mjs                                      → Reglas de ESLint para mantener el código limpio
+   ├── next-env.d.ts                                          → Archivo generado por Next.js para TypeScript, no se toca
+   ├── next.config.ts                                         → Configuración avanzada de Next.js (normalmente no se modifica)
+   ├── package-lock.json                                      → Archivo generado por npm, asegura versiones exactas de dependencias
+   ├── tsconfig.json                                          → Configuración de TypeScript (paths, strict mode, etc.)
+   │
+   ├── package.json                                        () → Scripts, dependencias y metadatos del proyecto (archivo clave)
+   ├── postcss.config.mjs                                  () → Configuración de PostCSS (necesario si usas Tailwind)
+   │
+   ├── public/                                             () → Para los archivos estáticos accesibles desde el navegador (imágenes, logos, íconos, fuentes)
+   │
 ----------
-    └── src/                                                () → CARPETA IMPORTANTE, es donde esta el proyecto simplemente
+   └── src/                                                () → CARPETA IMPORTANTE, es donde esta el proyecto simplemente
         ├── app/                                               → Aquí viven TODAS las páginas y rutas
         │   ├── layout.tsx                                     → Layout global (navbar, estilos, providers)
         │   ├── page.tsx                                       → Página principal "/"
@@ -193,13 +193,13 @@ La explicacion esta, muchas cosas son necesarias pero no se tocan, las cosas imp
             ├── Usuario.ts                                     → Tipo Usuario (id, nombre, email…)
             └── Curso.ts                                       → Tipo Curso
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
-    /BACKEND:                                                  → PS EL BACKEND
-    │
-    ├── dist                                                   → DONDE SE CREA EL PROYECTO CUANDO LO COMPILAS
-    ├── ...                                                    → Lo otro realmente no se toca, es como digamos la configuracion
-    │
+/BACKEND:                                                  → PS EL BACKEND
+   │
+   ├── dist                                                   → DONDE SE CREA EL PROYECTO CUANDO LO COMPILAS
+   ├── ...                                                    → Lo otro realmente no se toca, es como digamos la configuracion
+   │
 ---------- 
-    └── src/                                                () → CARPETA IMPORTANTE, es donde esta el proyecto simplemente    
+   └── src/                                                () → CARPETA IMPORTANTE, es donde esta el proyecto simplemente    
        ├── main.ts                                             → Como se lanza el proyecto
        ├── app.module.ts                                       → Es como el cerebro donde se guarda
        │ 
@@ -225,3 +225,24 @@ La explicacion esta, muchas cosas son necesarias pero no se tocan, las cosas imp
            │   └── ...
            └── capacitacion/
                └── ...
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+Lo que esta en la VPS
+
+Servicios:
+mariadb – MariaDB 10.11, mantiene la base BD_ARCAN con usuario arcan_user. Persistencia mediante volumen mariadb_data.
+backend – API NestJS (Node / TypeScript). Depende de mariadb.
+frontend – Cliente (probablemente Angular/React) que habla con el backend.
+nginx – Proxy reverso que expone la aplicación al exterior.
+adminer – UI de administración de la base de datos (puerto 8081).
+Puertos expuestos:
+80 / 443 → Nginx (HTTP/HTTPS).
+8081 → Adminer.
+Volúmenes: mariadb_data guarda los datos de la base de forma persistente entre reinicios.
+Red interna: conecta todos los contenedores; solo Nginx y Adminer están accesibles desde fuera.
+Recursos de la VPS (implícitos por Docker):
+
+Configuración de Nginx:
+Proxy a /api → backend.
+Servir archivos estáticos del frontend.
+Certificados TLS montados desde /etc/letsencrypt (HTTPS listo).
