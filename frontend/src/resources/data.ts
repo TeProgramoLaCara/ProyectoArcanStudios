@@ -22,6 +22,16 @@ export type Curso = {
   capacitaciones: string[];
 };
 
+export type PerfilAlumnos = {
+  id: string;
+  title: string;
+  area: string;
+  description: string;
+  recommendedCourseId: string;
+  typicalStudents: number;
+  tags: string[];
+};
+
 export type CalendarEvent = {
   id: string;
   title: string;
@@ -55,10 +65,51 @@ export type Reserva = {
   id: string;
   clientName: string;
   company: string;
+  companyId?: string;
   curso: string;
+  cursoId?: string;
+  alumnos?: number;
   capacitaciones: string[];
   status: ReservaStatus;
   fecha: string;
+  requestedStart?: string;
+  requestedEnd?: string;
+  turno?: "manana" | "tarde";
+  aula?: "aula1" | "aula2" | "aula3";
+  assignments?: ReservationAssignment[];
+  communications?: ReservationCommunication[];
+  reviewNotes?: string;
+  confirmedAt?: string;
+};
+
+export type ProfesorCatalogo = {
+  id: string;
+  name: string;
+  email: string;
+  color: string;
+  capacitaciones: string[];
+};
+
+export type ReservationAssignment = {
+  id: string;
+  capacitacionId?: string;
+  capacitacionTitle: string;
+  professorId: string;
+  professorName: string;
+  professorColor: string;
+  start: string;
+  end: string;
+  turno: "manana" | "tarde";
+  aula: "aula1" | "aula2" | "aula3";
+};
+
+export type ReservationCommunication = {
+  id: string;
+  createdAt: string;
+  author: "admin" | "cliente" | "sistema";
+  channel: "email" | "panel" | "telefono";
+  message: string;
+  visibleToClient: boolean;
 };
 
 // ─── Capacitaciones ───────────────────────────────────────────────────────────
@@ -142,6 +193,80 @@ export const cursos: Curso[] = [
       "Diseña entornos 3D completos con Blender y constrúyelos como niveles jugables en Unity utilizando técnicas profesionales de level design.",
     capacitaciones: ["c2", "c6"],
     category: "Unity",
+  },
+];
+
+export const profesoresCatalogo: ProfesorCatalogo[] = [
+  {
+    id: "p1",
+    name: "Carlos Martínez",
+    email: "carlos@arcanstudios.com",
+    color: "#4fc3f7",
+    capacitaciones: ["c1", "c2"],
+  },
+  {
+    id: "p2",
+    name: "Laura Sánchez",
+    email: "laura@arcanstudios.com",
+    color: "#ffb86b",
+    capacitaciones: ["c3", "c4", "c6"],
+  },
+  {
+    id: "p3",
+    name: "Diego Romero",
+    email: "diego@arcanstudios.com",
+    color: "#a78bfa",
+    capacitaciones: ["c5", "c4"],
+  },
+  {
+    id: "p4",
+    name: "Inés Delgado",
+    email: "ines@arcanstudios.com",
+    color: "#34d399",
+    capacitaciones: ["c2", "c6"],
+  },
+];
+
+export const perfilesAlumnos: PerfilAlumnos[] = [
+  {
+    id: "pa1",
+    title: "Alumnado de jardinería y entornos",
+    area: "Oficios creativos",
+    description:
+      "Grupo orientado a diseño de espacios, composición visual y creación de entornos interactivos.",
+    recommendedCourseId: "k4",
+    typicalStudents: 14,
+    tags: ["Entornos", "Nivel inicial", "Práctico"],
+  },
+  {
+    id: "pa2",
+    title: "Alumnado de arte digital",
+    area: "Arte 3D",
+    description:
+      "Perfil pensado para estudiantes que necesitan crear objetos, materiales y recursos visuales para proyectos.",
+    recommendedCourseId: "k1",
+    typicalStudents: 12,
+    tags: ["Blender", "Assets", "Producción"],
+  },
+  {
+    id: "pa3",
+    title: "Alumnado de programación básica",
+    area: "Desarrollo",
+    description:
+      "Grupo que empieza con lógica de videojuegos y necesita una ruta guiada dentro del motor Unity.",
+    recommendedCourseId: "k2",
+    typicalStudents: 16,
+    tags: ["Unity", "C#", "Primer prototipo"],
+  },
+  {
+    id: "pa4",
+    title: "Alumnado de animación",
+    area: "Personajes",
+    description:
+      "Perfil para grupos centrados en personajes, rigging y preparación de animaciones para Unity.",
+    recommendedCourseId: "k3",
+    typicalStudents: 10,
+    tags: ["Rigging", "Animación", "Personajes"],
   },
 ];
 

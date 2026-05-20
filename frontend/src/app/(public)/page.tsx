@@ -31,7 +31,7 @@ export default function Page() {
       return;
     }
 
-    router.push("/profesor/dashboard");
+    router.push("/profesor/calendario");
   };
 
   function openCompanyLogin() {

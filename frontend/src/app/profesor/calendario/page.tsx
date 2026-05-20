@@ -17,8 +17,14 @@ import type {
   CalendarCompanyOption,
 } from '@/components/calendar/types';
 import { MOCK_EVENTS } from '@/resources/calendarData';
+import {
+  getWorkflowGlobalCalendar,
+  getWorkflowProfessorEvents,
+  RESERVATION_WORKFLOW_EVENT,
+} from '@/services/reservation-workflow.service';
 
 const PROFESOR_ACTUAL = 'Carlos Martínez';
+const PROFESOR_ACTUAL_ID = 'p1';
 
 export default function CalendarioPage() {
   const today = new Date();
@@ -38,14 +44,24 @@ export default function CalendarioPage() {
   const [companyOptions, setCompanyOptions] = useState<CalendarCompanyOption[]>([]);
   const [loadingGlobal, setLoadingGlobal] = useState(true);
   const [globalError, setGlobalError] = useState<string | null>(null);
+  const [workflowProfessorEvents, setWorkflowProfessorEvents] = useState(() =>
+    getWorkflowProfessorEvents(PROFESOR_ACTUAL_ID),
+  );
 
   useEffect(() => {
     getCalendarData()
       .then((data) => {
         const mapped = mapCalendarApiData(data);
-        setEventsState(mapped.events);
-        setProfessorOptions(mapped.professors);
-        setCompanyOptions(mapped.companies);
+        const workflow = getWorkflowGlobalCalendar();
+        setEventsState([...mapped.events, ...workflow.events]);
+        setProfessorOptions([
+          ...mapped.professors,
+          ...workflow.professors.filter((professor) => !mapped.professors.some((item) => item.id === professor.id)),
+        ]);
+        setCompanyOptions([
+          ...mapped.companies,
+          ...workflow.companies.filter((company) => !mapped.companies.some((item) => item.id === company.id)),
+        ]);
         setGlobalError(null);
       })
       .catch((error) => {
@@ -53,6 +69,33 @@ export default function CalendarioPage() {
         setGlobalError('No se pudieron cargar los datos del calendario global.');
       })
       .finally(() => setLoadingGlobal(false));
+  }, []);
+
+  useEffect(() => {
+    const refreshWorkflow = () => {
+      const workflow = getWorkflowGlobalCalendar();
+      setWorkflowProfessorEvents(getWorkflowProfessorEvents(PROFESOR_ACTUAL_ID));
+      setEventsState((current) => [
+        ...current.filter((event) => !event.id.includes("-assignment-")),
+        ...workflow.events,
+      ]);
+      setProfessorOptions((current) => [
+        ...current.filter((professor) => !workflow.professors.some((item) => item.id === professor.id)),
+        ...workflow.professors,
+      ]);
+      setCompanyOptions((current) => [
+        ...current.filter((company) => !workflow.companies.some((item) => item.id === company.id)),
+        ...workflow.companies,
+      ]);
+    };
+
+    window.addEventListener(RESERVATION_WORKFLOW_EVENT, refreshWorkflow);
+    window.addEventListener("storage", refreshWorkflow);
+
+    return () => {
+      window.removeEventListener(RESERVATION_WORKFLOW_EVENT, refreshWorkflow);
+      window.removeEventListener("storage", refreshWorkflow);
+    };
   }, []);
 
   function handleSelectDate(d: Date) {
@@ -91,14 +134,14 @@ export default function CalendarioPage() {
   }
 
   const filteredEvents = useMemo(() => {
-    return MOCK_EVENTS.filter((ev) => {
+    return [...MOCK_EVENTS, ...workflowProfessorEvents].filter((ev) => {
       if (ev.profesor !== PROFESOR_ACTUAL) return false;
       if (!filters.aulas.includes(ev.aula)) return false;
       if (!filters.turnos.includes(ev.turno)) return false;
       if (filters.empresaIds.length > 0 && !filters.empresaIds.includes(ev.empresaId)) return false;
       return true;
     });
-  }, [filters]);
+  }, [filters, workflowProfessorEvents]);
 
   const globalFilteredEvents = useMemo(() => {
     return eventsState.filter((event) => {

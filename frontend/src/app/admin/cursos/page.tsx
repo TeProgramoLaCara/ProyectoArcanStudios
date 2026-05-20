@@ -2,6 +2,7 @@
 
 import {
   useEffect,
+  useMemo,
   useState,
   type FormEvent,
   type ReactNode,
@@ -56,7 +57,7 @@ const EMPTY_CAP_FORM: CapacitacionFormState = {
   category: "",
 };
 
-function buildCursoPayload(form: CursoFormState) {
+function buildCapacitacionPayload(form: CapacitacionFormState) {
   return {
     nombre: form.title,
     descripcion: form.description,
@@ -64,11 +65,12 @@ function buildCursoPayload(form: CursoFormState) {
   };
 }
 
-function buildCapacitacionPayload(form: CapacitacionFormState) {
+function buildCursoPayload(form: CursoFormState) {
   return {
     nombre: form.title,
     descripcion: form.description,
     categoria: form.category,
+    capacitaciones: form.capacitaciones,
   };
 }
 
@@ -426,6 +428,8 @@ export default function CursosPage() {
 
   const [showCursoModal, setShowCursoModal] = useState(false);
   const [showCapModal, setShowCapModal] = useState(false);
+  const [courseSearch, setCourseSearch] = useState("");
+  const [capSearch, setCapSearch] = useState("");
 
   const [editingCurso, setEditingCurso] = useState<Curso | null>(null);
   const [editingCapacitacion, setEditingCapacitacion] =
@@ -453,6 +457,30 @@ export default function CursosPage() {
     loadData();
   }, []);
 
+  const filteredCursos = useMemo(() => {
+    const query = courseSearch.trim().toLowerCase();
+    if (!query) return cursos;
+
+    return cursos.filter((curso) => {
+      const capTitles = curso.capacitaciones
+        .map((id) => capacitaciones.find((cap) => String(cap.id) === String(id))?.title ?? "")
+        .join(" ");
+
+      return `${curso.title} ${curso.description} ${curso.category} ${capTitles}`
+        .toLowerCase()
+        .includes(query);
+    });
+  }, [capacitaciones, courseSearch, cursos]);
+
+  const filteredCapacitaciones = useMemo(() => {
+    const query = capSearch.trim().toLowerCase();
+    if (!query) return capacitaciones;
+
+    return capacitaciones.filter((cap) =>
+      `${cap.title} ${cap.description} ${cap.category}`.toLowerCase().includes(query),
+    );
+  }, [capSearch, capacitaciones]);
+
   async function handleCreateCurso(form: CursoFormState) {
     setSaving(true);
 
@@ -462,7 +490,7 @@ export default function CursosPage() {
       await loadData();
     } catch (error) {
       console.error("Error creando curso:", error);
-      alert("No se pudo crear el curso. Revisa que el backend acepte los campos nombre, descripcion, categoria y capacitaciones.");
+      alert("No se pudo crear el curso.");
     } finally {
       setSaving(false);
     }
@@ -625,18 +653,34 @@ export default function CursosPage() {
               <SectionHeader
                 title="Cursos"
                 subtitle="Programas completos formados por capacitaciones."
-                count={cursos.length}
+                count={filteredCursos.length}
                 onAdd={() => setShowCursoModal(true)}
                 addLabel="Nuevo curso"
               />
 
-              <div className="flex flex-col gap-4">
+              <div className="rounded-2xl border border-(--border) bg-surface p-3">
+                <input
+                  value={courseSearch}
+                  onChange={(event) => setCourseSearch(event.target.value)}
+                  placeholder="Buscar curso, categoria o capacitacion..."
+                  className={inputClass}
+                />
+                <p className="mt-2 px-1 text-xs text-(--text-muted)">
+                  Mostrando {filteredCursos.length} de {cursos.length} cursos
+                </p>
+              </div>
+
+              <div className="hide-scrollbar flex max-h-[620px] flex-col gap-4 overflow-y-auto pr-2">
                 {cursos.length === 0 ? (
                   <div className="rounded-[24px] border border-(--border) bg-surface p-6 text-sm text-(--text-secondary)">
                     No hay cursos registrados todavía.
                   </div>
+                ) : filteredCursos.length === 0 ? (
+                  <div className="rounded-[24px] border border-(--border) bg-surface p-6 text-sm text-(--text-secondary)">
+                    No hay cursos que coincidan con la busqueda.
+                  </div>
                 ) : (
-                  cursos.map((curso) => (
+                  filteredCursos.map((curso) => (
                     <CourseCard
                       key={curso.id}
                       course={curso}
@@ -655,18 +699,34 @@ export default function CursosPage() {
               <SectionHeader
                 title="Capacitaciones"
                 subtitle="Módulos individuales que componen los cursos."
-                count={capacitaciones.length}
+                count={filteredCapacitaciones.length}
                 onAdd={() => setShowCapModal(true)}
                 addLabel="Nueva capacitación"
               />
 
-              <div className="flex flex-col gap-4">
+              <div className="rounded-2xl border border-(--border) bg-surface p-3">
+                <input
+                  value={capSearch}
+                  onChange={(event) => setCapSearch(event.target.value)}
+                  placeholder="Buscar capacitacion, categoria o descripcion..."
+                  className={inputClass}
+                />
+                <p className="mt-2 px-1 text-xs text-(--text-muted)">
+                  Mostrando {filteredCapacitaciones.length} de {capacitaciones.length} capacitaciones
+                </p>
+              </div>
+
+              <div className="hide-scrollbar flex max-h-[620px] flex-col gap-4 overflow-y-auto pr-2">
                 {capacitaciones.length === 0 ? (
                   <div className="rounded-[24px] border border-(--border) bg-surface p-6 text-sm text-(--text-secondary)">
                     No hay capacitaciones registradas todavía.
                   </div>
+                ) : filteredCapacitaciones.length === 0 ? (
+                  <div className="rounded-[24px] border border-(--border) bg-surface p-6 text-sm text-(--text-secondary)">
+                    No hay capacitaciones que coincidan con la busqueda.
+                  </div>
                 ) : (
-                  capacitaciones.map((cap) => (
+                  filteredCapacitaciones.map((cap) => (
                     <CapacitacionCard
                       key={cap.id}
                       cap={cap}

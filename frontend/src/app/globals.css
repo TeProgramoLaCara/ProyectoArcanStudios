@@ -162,3 +162,94 @@ body {
 .hide-scrollbar::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Edge */
 }
+
+.client-calendar-wrapper .fc,
+.booking-calendar-wrapper .fc {
+  --fc-border-color: var(--calendar-cell-border);
+  --fc-page-bg-color: transparent;
+  --fc-neutral-bg-color: transparent;
+  --fc-today-bg-color: rgba(38, 127, 107, 0.14);
+  color: var(--text-primary);
+}
+
+.client-calendar-wrapper .fc-theme-standard td,
+.client-calendar-wrapper .fc-theme-standard th,
+.booking-calendar-wrapper .fc-theme-standard td,
+.booking-calendar-wrapper .fc-theme-standard th {
+  border-color: var(--calendar-cell-border);
+}
+
+.client-calendar-wrapper .fc-col-header-cell,
+.booking-calendar-wrapper .fc-col-header-cell {
+  padding: 10px 0;
+  background: rgba(38, 127, 107, 0.08);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.client-calendar-wrapper .fc-daygrid-day-number,
+.booking-calendar-wrapper .fc-daygrid-day-number {
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.client-calendar-wrapper .fc-daygrid-event,
+.booking-calendar-wrapper .fc-daygrid-event {
+  border-radius: 8px;
+  margin: 2px 4px;
+  overflow: hidden;
+}
+
+.booking-calendar-wrapper .fc-daygrid-day-frame {
+  min-height: 86px;
+  cursor: pointer;
+  transition: background 140ms ease, box-shadow 140ms ease, opacity 140ms ease;
+}
+
+.booking-calendar-wrapper .availability-full .fc-daygrid-day-frame {
+  background: rgba(34, 197, 94, 0.13);
+}
+
+.booking-calendar-wrapper .availability-partial .fc-daygrid-day-frame {
+  background: rgba(245, 158, 11, 0.13);
+}
+
+.booking-calendar-wrapper .availability-none .fc-daygrid-day-frame {
+  cursor: not-allowed;
+  background: rgba(244, 63, 94, 0.12);
+  opacity: 0.72;
+}
+
+.booking-calendar-wrapper .availability-selected-range .fc-daygrid-day-frame {
+  box-shadow: inset 0 0 0 2px rgba(47, 165, 138, 0.65);
+}
+
+.booking-calendar-wrapper .availability-selected-start .fc-daygrid-day-frame,
+.booking-calendar-wrapper .availability-selected-end .fc-daygrid-day-frame {
+  box-shadow: inset 0 0 0 2px #2fa58a, inset 0 0 0 999px rgba(38, 127, 107, 0.10);
+}
+
+.booking-calendar-wrapper .availability-label {
+  align-self: flex-end;
+  background: rgba(255, 255, 255, 0.10);
+  color: var(--text-primary);
+}
+
+.booking-calendar-wrapper .availability-full .availability-label {
+  background: rgba(34, 197, 94, 0.18);
+  color: #22c55e;
+}
+
+.booking-calendar-wrapper .availability-partial .availability-label {
+  background: rgba(245, 158, 11, 0.18);
+  color: #f59e0b;
+}
+
+.booking-calendar-wrapper .availability-none .availability-label {
+  background: rgba(244, 63, 94, 0.18);
+  color: #f43f5e;
+}
