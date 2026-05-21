@@ -1,0 +1,50 @@
+# ============================================
+#   NODE / GENERAL
+# ============================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+.pnpm-store/
+
+# ============================================
+#   BUILD / DIST / OUTPUT
+# ============================================
+dist/
+build/
+out/
+.next/
+.cache/
+coverage/
+
+# ============================================
+#   ENVIRONMENT FILES
+# ============================================
+.qodo/
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# ============================================
+#   EDITOR / OS FILES
+# ============================================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ============================================
+#   NESTJS SPECIFIC
+# ============================================
+*.tsbuildinfo
+
+# ============================================
+#   NEXT.JS SPECIFIC
+# ============================================
+.vercel/

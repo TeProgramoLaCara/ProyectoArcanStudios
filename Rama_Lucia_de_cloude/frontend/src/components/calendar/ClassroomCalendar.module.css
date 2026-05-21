@@ -1,0 +1,247 @@
+.wrapper :global(.fc) {
+  font-family: inherit;
+  color: var(--text-primary);
+  height: 100%;
+}
+
+.wrapper :global(.fc-toolbar) {
+  padding: 1rem 1rem 0.9rem 1rem;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.wrapper :global(.fc-toolbar-title) {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.wrapper :global(.fc-button) {
+  background: var(--surface-input) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-primary) !important;
+  box-shadow: none !important;
+  padding: 0.45rem 0.8rem !important;
+  border-radius: 0.9rem !important;
+  font-size: 0.875rem !important;
+}
+
+.wrapper :global(.fc-button:hover) {
+  background: var(--surface-elevated) !important;
+}
+
+.wrapper :global(.fc-button:focus) {
+  box-shadow: none !important;
+}
+
+.wrapper :global(.fc-scrollgrid) {
+  border: none !important;
+}
+
+.wrapper :global(.fc-theme-standard td),
+.wrapper :global(.fc-theme-standard th) {
+  border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+/* ── Column headers ── */
+.wrapper :global(.fc-col-header-cell) {
+  padding: 8px 0 !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  color: rgba(255, 255, 255, 0.45) !important;
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.wrapper :global(.fc-col-header-cell-cushion) {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none !important;
+}
+
+/* ── Day number ── */
+.wrapper :global(.fc-daygrid-day-number) {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: rgba(255, 255, 255, 0.75) !important;
+  padding: 6px 8px !important;
+  text-decoration: none !important;
+}
+
+/* ── Today highlight ── */
+.wrapper :global(.fc-day-today) {
+  background-color: rgba(38, 127, 107, 0.08) !important;
+}
+
+/* ── Events ── */
+.wrapper :global(.fc-event) {
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 0 !important;
+  margin: 1px 3px !important;
+}
+
+.wrapper :global(.fc-daygrid-event) {
+  border-radius: 8px !important;
+  padding: 2px 6px !important;
+  margin: 1px 3px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+}
+
+.wrapper :global(.fc-event-main) {
+  color: inherit !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.wrapper :global(.fc-daygrid-more-link) {
+  color: var(--text-secondary) !important;
+}
+
+/* ── Scrollbar ── */
+.wrapper :global(.fc-scroller) {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.wrapper :global(.fc-scroller::-webkit-scrollbar) {
+  width: 8px;
+  height: 8px;
+}
+
+.wrapper :global(.fc-scroller::-webkit-scrollbar-thumb) {
+  background: var(--border);
+  border-radius: 999px;
+}
+
+.wrapper :global(.fc-scroller::-webkit-scrollbar-track) {
+  background: transparent;
+}
+
+/* ── Cell height ── */
+.wrapper :global(.fc-daygrid-day) {
+  min-height: 110px !important;
+  padding: 3px !important;
+  background-clip: padding-box;
+}
+
+.wrapper :global(.fc-daygrid-day-frame) {
+  min-height: 100px !important;
+  position: relative;
+  overflow: visible;
+  margin: 4px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.wrapper :global(.fc-daygrid-day-frame::before) {
+  content: "";
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  top: 50%;
+  border-top: 1px solid var(--calendar-divider);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wrapper :global(.fc-daygrid-day-events) {
+  overflow: visible;
+  min-height: 40px;
+  padding-top: 0;
+  padding-bottom: 0;
+  display: grid;
+  grid-template-rows: minmax(5px, auto) minmax(10px, auto);
+  row-gap: 0;
+  align-content: start;
+}
+
+.wrapper :global(.fc-daygrid-event-harness) {
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+.wrapper :global(.fc-daygrid-event-harness.turno-manana-slot) {
+  grid-row: 1;
+  margin-top: 0;
+}
+
+.wrapper :global(.fc-daygrid-event-harness.turno-tarde-slot) {
+  grid-row: 2;
+  margin-top: 0 !important;
+}
+
+.wrapper :global(.fc-event-resizer),
+.wrapper :global(.fc-event-resizer-start),
+.wrapper :global(.fc-event-resizer-end) {
+  display: none !important;
+}
+
+.wrapper :global(.fc-event-resizer::before),
+.wrapper :global(.fc-event-resizer::after),
+.wrapper :global(.fc-event-resizer-start::before),
+.wrapper :global(.fc-event-resizer-end::before) {
+  content: none !important;
+  display: none !important;
+}
+
+/* ── Editing pulse ── */
+:global(.fc-day-editing-pulse) {
+  animation: pulseEditCell 1.2s ease-in-out infinite;
+  outline: 2px solid rgba(245, 158, 11, 0.6);
+  outline-offset: -2px;
+  border-radius: 4px;
+  z-index: 1;
+}
+
+@keyframes pulseEditCell {
+  0%, 100% { background-color: rgba(245, 158, 11, 0.06); }
+  50%       { background-color: rgba(245, 158, 11, 0.14); }
+}
+
+/* ── Day note dot + label ── */
+:global(.fc-day-note-wrapper) {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  margin: 2px 4px 3px;
+  cursor: pointer;
+  line-height: 1.3;
+}
+
+:global(.fc-day-note-dot) {
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  margin-top: 3px;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+}
+
+:global(.fc-day-note-label) {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 80px;
+}
+
+:global(.fc-day-note-preview) {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.55);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
+}

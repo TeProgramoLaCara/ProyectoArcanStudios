@@ -1,0 +1,104 @@
+{
+  "empresas": [
+    {
+      "id": 1,
+      "nombre": "Empresa",
+      "contraseña": "hash_password",
+      "e_mail": "contacto@techcorp.com"
+    }
+  ],
+  "usuarios": [
+    {
+      "id": 1,
+      "nombre": "Ana Gomez",
+      "contraseña": "hash_password",
+      "jefe_sn": true,
+      "empresaId": 1
+    }
+  ],
+  "profesores": [
+    {
+      "id": 1,
+      "nombre": "Carlos Lopez",
+      "contraseña": "hash_password",
+      "disponibilidad": "mañanas",
+      "admin_sn": false
+    }
+  ],
+  "perfiles": [
+    {
+      "id": 1,
+      "nombre": "Electricista",
+      "descripcion": "Perfil de inicio"
+    }
+  ],
+  "cursos": [
+    {
+      "id": 1,
+      "nombre": "Unity",
+      "descripcion": "Curso de iniciación a Unity",
+      "duracion": "40 horas"
+    }
+  ],
+  "capacitaciones": [
+    {
+      "id": 1,
+      "nombre": "Bootcamp Web",
+      "duracion": 120,
+      "descripcion": "Fullstack Bootcamp"
+    }
+  ],
+  "aulas": [
+    {
+      "id": 1,
+      "nombre": "1",
+      "capacidad": 25
+    }
+  ],
+  "reservas": [
+    {
+      "id": 1,
+      "n_estudiantes": 20,
+      "fecha_ini": "2024-06-01",
+      "fecha_fin": "2024-06-30",
+      "factura": "F-2024-001",
+      "observaciones": "Reserva confirmada",
+      "usuarioId": 1,
+      "cursoId": 1
+    }
+  ],
+  "sesiones": [
+    {
+      "id": 1,
+      "duracion": 2,
+      "fecha_ini": "2024-06-01T10:00:00Z",
+      "fecha_fin": "2024-06-01T12:00:00Z",
+      "turno": "Mañana",
+      "reservaId": 1,
+      "aulaId": 1,
+      "profesorId": 1,
+      "capacitacionId": 1
+    }
+  ],
+  "capacitaciones_perfiles": [
+    {
+      "id": 1,
+      "capacitacionId": 1,
+      "perfilId": 1
+    }
+  ],
+  "capacitaciones_cursos": [
+    {
+      "id": 1,
+      "capacitacionId": 1,
+      "cursoId": 1
+    }
+  ],
+  "capacitaciones_profesores": [
+    {
+      "id": 1,
+      "capacitacionId": 1,
+      "profesorId": 1
+    }
+  ]
+}
