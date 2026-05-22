@@ -31,113 +31,117 @@ ENDPOINTS DE LA API:
 En https://reservas.arcanstudios.com/api/docs tambien se tienen todos los endpoints.
 1. Aula
 CRUD
-GET /aula                                                       Devuelve una lista con todas las aulas.
-GET /aula/:id                                                   Devuelve un aula específica.
-POST /aula                                                      Crea un aula nueva.
-PUT /aula/:id                                                   Actualiza un aula existente.
-DELETE /aula/:id                                                Elimina un aula.
+GET /aula  Devuelve una lista con todas las aulas.
+GET /aula/:id  Devuelve un aula específica.
+POST /aula  Crea un aula nueva.
+PUT /aula/:id  Actualiza un aula existente.
+DELETE /aula/:id  Elimina un aula.
 
 Relaciones
-GET /aula/:id/sesiones                                          Devuelve todas las sesiones que se dictan en un aula.
+GET /aula/:id/sesiones  Devuelve todas las sesiones que se dictan en un aula.
 
 2. Capacitacion
 CRUD
-GET /capacitacion                                               Devuelve una lista con todas las capacitaciones.
-GET /capacitacion/:id                                           Devuelve una capacitación específica.
-POST /capacitacion                                              Crea una nueva capacitación y devuelve el objeto creado.
-PUT /capacitacion/:id                                           Actualiza una capacitación existente.
-DELETE /capacitacion/:id                                        Elimina una capacitación.
+GET /capacitacion  Devuelve una lista con todas las capacitaciones.
+GET /capacitacion/:id  Devuelve una capacitación específica.
+POST /capacitacion  Crea una nueva capacitación y devuelve el objeto creado.
+PUT /capacitacion/:id  Actualiza una capacitación existente.
+DELETE /capacitacion/:id  Elimina una capacitación.
 
 Relaciones
-GET /capacitacion/:id/perfiles                                  Devuelve los perfiles asociados a una capacitación.
-GET /capacitacion/:id/sesiones                                  Devuelve el las sesiones asignadas a una capacitación.
-GET /capacitacion/:id/cursos                                    Devuelve los cursos pertenecientes a una capacitación.
-GET /capacitacion/:id/profesores                                Devuelve el profesor asignado a una capacitación.
+GET /capacitacion/:id/perfiles  Devuelve los perfiles asociados a una capacitación.
+GET /capacitacion/:id/sesiones  Devuelve las sesiones asignadas a una capacitación.
+GET /capacitacion/:id/cursos  Devuelve los cursos pertenecientes a una capacitación.
+GET /capacitacion/:id/profesores  Devuelve los profesores asignados a una capacitación.
+
+Relaciones N:M (asociar / desasociar)
+POST /capacitacion/:id/profesores/:profesorId  Asocia un profesor a una capacitación.
+DELETE /capacitacion/:id/profesores/:profesorId  Elimina la asociación entre un profesor y una capacitación.
+POST /capacitacion/:id/cursos/:cursoId  Asocia un curso a una capacitación.
+DELETE /capacitacion/:id/cursos/:cursoId  Elimina la asociación entre un curso y una capacitación.
 
 3. Curso
 CRUD
-GET /curso                                                      Devuelve una lista con todos los cursos.
-GET /curso/:id                                                  Devuelve un curso específico.
-POST /curso                                                     Crea un nuevo curso.
-PUT /curso/:id                                                  Actualiza un curso existente.
-DELETE /curso/:id                                               Elimina un curso.
+GET /curso  Devuelve una lista con todos los cursos.
+GET /curso/:id  Devuelve un curso específico.
+POST /curso  Crea un nuevo curso.
+PUT /curso/:id  Actualiza un curso existente.
+DELETE /curso/:id  Elimina un curso.
 
 Relaciones
-GET /curso/:id/capacitaciones                                   Devuelve la capacitación a la que pertenece un curso.
-GET /curso/:id/reservas                                         Devuelve todas las sesiones asociadas a un curso.
+GET /curso/:id/capacitaciones  Devuelve la capacitación a la que pertenece un curso.
+GET /curso/:id/reservas  Devuelve todas las reservas asociadas a un curso.
 
-4. Empresa                                      
-CRUD                                        
-GET /empresa                                                    Devuelve una lista con todas las empresas.
-GET /empresa/:id                                                Devuelve una empresa específica.
-POST /empresa                                                   Crea una nueva empresa.
-PUT /empresa/:id                                                Actualiza una empresa existente.
-DELETE /empresa/:id                                             Elimina una empresa.
-
-Relaciones                                      
-GET /empresa/:id/usuarios                                       Devuelve todos los usuarios pertenecientes a una empresa.
+4. Empresa
+CRUD
+GET /empresa  Devuelve una lista con todas las empresas.
+GET /empresa/:id  Devuelve una empresa específica.
+POST /empresa  Crea una nueva empresa.
+PUT /empresa/:id  Actualiza una empresa existente.
+DELETE /empresa/:id  Elimina una empresa.
+RelacionesGET /empresa/:id/usuarios  Devuelve todos los usuarios pertenecientes a una empresa.
 
 5. Perfil
 CRUD
-GET /perfil                                                     Devuelve una lista con todos los perfiles registrados.
-GET /perfil/:id                                                 Devuelve un perfil específico según su ID.
-POST /perfil                                                    Crea un nuevo perfil y devuelve el objeto creado.
-PUT /perfil/:id                                                 Actualiza un perfil existente y devuelve el objeto actualizado.
-DELETE /perfil/:id                                              Elimina un perfil y devuelve el objeto eliminado.
+GET /perfil  Devuelve una lista con todos los perfiles registrados.
+GET /perfil/:id  Devuelve un perfil específico.
+POST /perfil  Crea un nuevo perfil.
+PUT /perfil/:id  Actualiza un perfil existente.
+DELETE /perfil/:id  Elimina un perfil.
 
 Relaciones
-GET /perfil/:id/capacitaciones                                  Devuelve todas las capacitaciones asociadas a un perfil.
-POST /perfil/:id/capacitaciones/:capacitacionId                 Asocia una capacitación a un perfil.
-DELETE /perfil/:id/capacitaciones/:capacitacionId               Elimina la asociación entre un perfil y una capacitación.
+GET /perfil/:id/capacitaciones  Devuelve todas las capacitaciones asociadas a un perfil.
+POST /perfil/:id/capacitaciones/:capacitacionId  Asocia una capacitación a un perfil.
+DELETE /perfil/:id/capacitaciones/:capacitacionId  Elimina la asociación entre un perfil y una capacitación.
 
 6. Profesor
 CRUD
-GET /profesor                                                   Devuelve una lista con todos los profesores.
-GET /profesor/:id                                               Devuelve un profesor específico.
-POST /profesor                                                  Crea un nuevo profesor.
-PUT /profesor/:id                                               Actualiza un profesor existente.
-DELETE /profesor/:id                                            Elimina un profesor.
+GET /profesor  Devuelve una lista con todos los profesores.
+GET /profesor/:id  Devuelve un profesor específico.
+POST /profesor  Crea un nuevo profesor.
+PUT /profesor/:id  Actualiza un profesor existente.
+DELETE /profesor/:id  Elimina un profesor.
 
-Relaciones                      
-GET /profesor/:id/capacitaciones                                Devuelve las capacitaciones impartidas por un profesor.
-GET /profesor/:id/sesiones                                      Devuelve las sesiones asignadas a un profesor.
+Relaciones
+GET /profesor/:id/capacitaciones  Devuelve las capacitaciones impartidas por un profesor.
+GET /profesor/:id/sesiones  Devuelve las sesiones asignadas a un profesor.
 
-7. Reserva                                      
-CRUD                                        
-GET /reserva                                                    Devuelve una lista con todas las reservas.
-GET /reserva/:id                                                Devuelve una reserva específica.
-POST /reserva                                                   Crea una nueva reserva.
-PUT /reserva/:id                                                Actualiza una reserva existente.
-DELETE /reserva/:id                                             Elimina una reserva.
+7. Reserva
+CRUD
+GET /reserva  Devuelve una lista con todas las reservas.
+GET /reserva/:id  Devuelve una reserva específica.
+POST /reserva  Crea una nueva reserva.
+PUT /reserva/:id  Actualiza una reserva existente.
+DELETE /reserva/:id  Elimina una reserva.
 
-Relaciones                                      
-GET /reserva/:id/sesiones                                       Devuelve la sesión asociada a una reserva.
+Relaciones
+GET /reserva/:id/sesiones  Devuelve la sesión asociada a una reserva.
 
 8. Sesion
 CRUD
-GET /sesion                                                     Devuelve una lista con todas las sesiones.
-GET /sesion/:id                                                 Devuelve una sesión específica.
-POST /sesion                                                    Crea una nueva sesión.
-PUT /sesion/:id                                                 Actualiza una sesión existente.
-DELETE /sesion/:id                                              Elimina una sesión.
+GET /sesion  Devuelve una lista con todas las sesiones.
+GET /sesion/:id  Devuelve una sesión específica.
+POST /sesion  Crea una nueva sesión.
+PUT /sesion/:id  Actualiza una sesión existente.
+DELETE /sesion/:id  Elimina una sesión.
 
-Relaciones                                      
-GET /sesion/:id/cursos                                          Devuelve el curso al que pertenece la sesión.
-GET /sesion/:id/profesores                                      Devuelve el profesor asignado a la sesión.
-GET /sesion/:id/aulas                                           Devuelve el aula donde se dicta la sesión.
-GET /sesion/:id/reservas                                        Devuelve todas las reservas asociadas a una sesión.
+Relaciones
+GET /sesion/:id/cursos  Devuelve el curso al que pertenece la sesión.
+GET /sesion/:id/profesores  Devuelve el profesor asignado a la sesión.
+GET /sesion/:id/aulas  Devuelve el aula donde se dicta la sesión.
+GET /sesion/:id/reservas  Devuelve todas las reservas asociadas a una sesión.
 
-9. Usuario                                      
-CRUD                                        
-GET /usuario                                                    Devuelve una lista con todos los usuarios.
-GET /usuario/:id                                                Devuelve un usuario específico.
-POST /usuario                                                   Crea un nuevo usuario.
-PUT /usuario/:id                                                Actualiza un usuario existente.
-DELETE /usuario/:id                                             Elimina un usuario.
+9. Usuario
+CRUD
+GET /usuario  Devuelve una lista con todos los usuarios.
+GET /usuario/:id  Devuelve un usuario específico.
+POST /usuario  Crea un nuevo usuario.
+PUT /usuario/:id  Actualiza un usuario existente.
+DELETE /usuario/:id  Elimina un usuario.
 
-Relaciones                                      
-GET /usuario/:id/empresa                                        Devuelve la empresa a la que pertenece un usuario.
-GET /usuario/:id/reservas                                       Devuelve todas las reservas realizadas por un usuario.
+Relaciones
+GET /usuario/:id/empresa  Devuelve la empresa a la que pertenece un usuario.
+GET /usuario/:id/reservas  Devuelve todas las reservas realizadas por un usuario.
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
 ORGANIZACION DE CARPETAS:
 Como una mini explicacion de las carpetas pa que estemos organizados 
