@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { PROFESSOR_COLORS } from '@/resources/data';
 import { useTheme } from '@/context/ThemeContext';
 
 type Props = {
@@ -10,6 +9,7 @@ type Props = {
 };
 
 const STORAGE_KEY = 'arcan-professor-color-overrides';
+const DEFAULT_PROFESSOR_COLOR = '#9ca3af';
 
 function readOverrides(): Record<string, string> {
   try {
@@ -29,12 +29,12 @@ function writeOverrides(overrides: Record<string, string>) {
 export default function ProfessorColorSettings({ professorId, professorName }: Props) {
   const { isDark } = useTheme();
   const [savedOverrideCount, setSavedOverrideCount] = useState(0);
-  const [currentColor, setCurrentColor] = useState(PROFESSOR_COLORS[professorId] ?? '#9ca3af');
+  const [currentColor, setCurrentColor] = useState(DEFAULT_PROFESSOR_COLOR);
 
   useEffect(() => {
     const overrides = readOverrides();
     setSavedOverrideCount(Object.keys(overrides).length);
-    setCurrentColor(overrides[professorId] ?? PROFESSOR_COLORS[professorId] ?? '#9ca3af');
+    setCurrentColor(overrides[professorId] ?? DEFAULT_PROFESSOR_COLOR);
   }, [professorId]);
 
   function handleSaveColor() {
@@ -49,7 +49,7 @@ export default function ProfessorColorSettings({ professorId, professorName }: P
     delete overrides[professorId];
     writeOverrides(overrides);
     setSavedOverrideCount(Object.keys(overrides).length);
-    setCurrentColor(PROFESSOR_COLORS[professorId] ?? '#9ca3af');
+    setCurrentColor(DEFAULT_PROFESSOR_COLOR);
   }
 
   return (

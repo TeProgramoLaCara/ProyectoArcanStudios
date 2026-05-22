@@ -1,4 +1,4 @@
-import { profesoresCatalogo, type ReservationAssignment } from "@/resources/data";
+import { type ReservationAssignment } from "@/resources/data";
 import {
   buildDefaultAssignments,
   getProfessorCandidates,
@@ -61,7 +61,12 @@ export function AssignmentEditor({ reserva, assignments, onChange }: AssignmentE
       <div className="mt-4 grid gap-3">
         {assignments.map((assignment, index) => {
           const candidates = getProfessorCandidates(assignment.capacitacionId ?? assignment.capacitacionTitle);
-          const professorOptions = candidates.length > 0 ? candidates : profesoresCatalogo;
+          const fallbackOption = {
+            id: assignment.professorId || "sin-asignar",
+            name: assignment.professorId || "Sin asignar",
+            color: "#9ca3af",
+          };
+          const professorOptions = candidates.length > 0 ? candidates : [fallbackOption];
           const onlyOne = candidates.length === 1;
 
           return (

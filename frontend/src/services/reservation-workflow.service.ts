@@ -279,7 +279,7 @@ export function getWorkflowProfessorEvents(professorId: string): CalendarEvent[]
         end: addDays(assignment.end, 1),
         aula: assignment.aula,
         turno: assignment.turno === "manana" ? "mañana" : "tarde",
-        tool: capacitaciones.find((cap) => cap.id === assignment.capacitacionId)?.category ?? "Blender",
+        tool: "General",
         color: AULA_META[assignment.aula].color,
       })),
     );
@@ -307,16 +307,23 @@ export function getWorkflowGlobalCalendar() {
       })),
     );
 
-  const professors: CalendarProfessorOption[] = profesoresCatalogo.map((professor) => ({
+  const professors: CalendarProfessorOption[] = getKnownProfessors().map((professor) => ({
     id: professor.id,
     name: professor.name,
     color: professor.color,
   }));
 
-  const companies: CalendarCompanyOption[] = empresas.map((company) => ({
-    id: company.id,
-    name: company.name,
-  }));
+  const companyMap = new Map<string, CalendarCompanyOption>();
+  for (const reserva of reservations) {
+    const companyId = reserva.companyId ?? reserva.company;
+    if (!companyMap.has(companyId)) {
+      companyMap.set(companyId, {
+        id: companyId,
+        name: reserva.company,
+      });
+    }
+  }
+  const companies: CalendarCompanyOption[] = Array.from(companyMap.values());
 
   return { events, professors, companies };
 }
