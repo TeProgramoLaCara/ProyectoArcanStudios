@@ -1,7 +1,7 @@
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import { HiChevronLeft, HiChevronRight } from "react-icons/hi2";
 import type { EventInput } from "@fullcalendar/core";
 import { useEffect, useMemo, useRef } from "react";
 import type { Reserva } from "@/resources/data";
@@ -73,7 +73,7 @@ export function ActiveReservationsCalendar({
             }`}
             aria-label="Mes anterior"
           >
-            <ChevronLeftIcon className="h-4 w-4" />
+            <HiChevronLeft className="h-4 w-4" />
           </button>
           <span className={`min-w-36 text-center text-sm font-semibold capitalize ${isDark ? "text-white" : "text-slate-950"}`}>
             {formatMonth(activeMonth)}
@@ -86,7 +86,7 @@ export function ActiveReservationsCalendar({
             }`}
             aria-label="Mes siguiente"
           >
-            <ChevronRightIcon className="h-4 w-4" />
+            <HiChevronRight className="h-4 w-4" />
           </button>
         </div>
       </div>

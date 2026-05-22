@@ -1,5 +1,5 @@
 export type Turno = "manana" | "tarde";
-export type RequestType = "perfil" | "curso" | "dos_capacitaciones";
+export type RequestType = "curso" | "dos_capacitaciones";
 export type DatePickMode = "start" | "end";
 
 export type DayAvailability = {

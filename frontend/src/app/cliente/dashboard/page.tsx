@@ -1,7 +1,7 @@
+"use client";
+
 import { useEffect, useMemo, useState } from "react";
 import {
-  allReservas as fallbackReservas,
-  empresas as fallbackEmpresas,
   type Empresa,
   type Reserva,
 } from "@/resources/data";
@@ -54,15 +54,15 @@ function isActiveReservation(reserva: Reserva) {
 }
 
 export default function Page() {
-  const [reservas, setReservas] = useState<Reserva[]>(fallbackReservas);
-  const [empresas, setEmpresas] = useState<Empresa[]>(fallbackEmpresas);
+  const [reservas, setReservas] = useState<Reserva[]>([]);
+  const [empresas, setEmpresas] = useState<Empresa[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     getClientApiData()
       .then((data) => {
-        if (data.reservas.length > 0) setReservas(data.reservas);
-        if (data.empresas.length > 0) setEmpresas(data.empresas);
+        setReservas(data.reservas);
+        setEmpresas(data.empresas);
       })
       .catch((error) => {
         console.error("Error cargando dashboard cliente:", error);
@@ -81,7 +81,7 @@ export default function Page() {
   );
 
   const myCompany = useMemo(
-    () => myReservations[0]?.company ?? "Nova",
+    () => myReservations[0]?.company ?? "Sin empresa",
     [myReservations],
   );
 

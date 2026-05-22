@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   HiOutlineAcademicCap,
   HiOutlineAdjustmentsHorizontal,
@@ -14,7 +14,8 @@ import {
   HiOutlineUserGroup,
 } from "react-icons/hi2";
 import { useTheme } from "@/context/ThemeContext";
-import { capacitaciones, cursos, type Capacitacion, type Curso } from "@/resources/data";
+import { type Capacitacion, type Curso } from "@/resources/data";
+import { getClientApiData } from "@/services/client.service";
 
 const COURSE_META: Record<string, { duration: string; level: string; outcome: string }> = {
   k1: {
@@ -63,7 +64,7 @@ const MODULE_ACCENTS = [
   "border-lime-300/25 bg-lime-400/10 text-lime-200",
 ];
 
-function getCourseCaps(course: Curso) {
+function getCourseCaps(course: Curso, capacitaciones: Capacitacion[]) {
   return course.capacitaciones
     .map((id) => capacitaciones.find((cap) => cap.id === id))
     .filter((cap): cap is Capacitacion => Boolean(cap));
@@ -125,8 +126,16 @@ function CatalogMetric({
   );
 }
 
-function CourseInfoCard({ course, isDark }: { course: Curso; isDark: boolean }) {
-  const caps = getCourseCaps(course);
+function CourseInfoCard({
+  capacitaciones,
+  course,
+  isDark,
+}: {
+  capacitaciones: Capacitacion[];
+  course: Curso;
+  isDark: boolean;
+}) {
+  const caps = getCourseCaps(course, capacitaciones);
   const accent = getCourseAccent(course.category);
   const meta = COURSE_META[course.id] ?? {
     duration: "2 semanas",
@@ -255,11 +264,24 @@ function TrainingModuleCard({
 
 export default function ClienteCursosPage() {
   const { isDark } = useTheme();
+  const [cursos, setCursos] = useState<Curso[]>([]);
+  const [capacitaciones, setCapacitaciones] = useState<Capacitacion[]>([]);
   const [activeCategory, setActiveCategory] = useState("Todos");
+
+  useEffect(() => {
+    getClientApiData()
+      .then((data) => {
+        setCursos(data.cursos);
+        setCapacitaciones(data.capacitaciones);
+      })
+      .catch((error) => {
+        console.error("Error cargando cursos cliente:", error);
+      });
+  }, []);
 
   const categories = useMemo(
     () => ["Todos", ...Array.from(new Set(cursos.map((course) => course.category)))],
-    [],
+    [cursos],
   );
 
   const filteredCourses = useMemo(
@@ -276,7 +298,7 @@ export default function ClienteCursosPage() {
         cap,
         courseCount: cursos.filter((course) => course.capacitaciones.includes(cap.id)).length,
       })),
-    [],
+    [capacitaciones, cursos],
   );
 
   return (
@@ -367,7 +389,12 @@ export default function ClienteCursosPage() {
 
           <div className="mt-5 grid grid-cols-1 gap-4 xl:grid-cols-2 2xl:grid-cols-3">
             {filteredCourses.map((course) => (
-              <CourseInfoCard key={course.id} course={course} isDark={isDark} />
+              <CourseInfoCard
+                key={course.id}
+                capacitaciones={capacitaciones}
+                course={course}
+                isDark={isDark}
+              />
             ))}
           </div>
         </section>

@@ -1,10 +1,4 @@
 import {
-  allReservas,
-  capacitaciones,
-  cursos,
-  empresas,
-  profesoresCatalogo,
-  type ProfesorCatalogo,
   type Reserva,
   type ReservationAssignment,
   type ReservationCommunication,
@@ -21,6 +15,12 @@ const STORAGE_KEY = "arcan.reservation-workflow.v1";
 export const RESERVATION_WORKFLOW_EVENT = "arcan:reservation-workflow-updated";
 
 type AssignmentDraft = Omit<ReservationAssignment, "id" | "professorName" | "professorColor">;
+
+type ProfessorOption = {
+  id: string;
+  name: string;
+  color: string;
+};
 
 function isBrowser() {
   return typeof window !== "undefined";
@@ -70,15 +70,13 @@ function parseHumanDate(value: string): string | undefined {
 }
 
 function enrichReservation(reserva: Reserva): Reserva {
-  const company = empresas.find((item) => item.name === reserva.company);
-  const course = cursos.find((item) => item.title === reserva.curso);
   const start = reserva.requestedStart ?? parseHumanDate(reserva.fecha) ?? "2026-05-04";
   const end = reserva.requestedEnd ?? (reserva.fecha.includes("-") ? parseHumanDate(reserva.fecha.split("-").at(-1) ?? "") : undefined) ?? addDays(start, 14);
 
   return {
     ...reserva,
-    companyId: reserva.companyId ?? company?.id ?? "e1",
-    cursoId: reserva.cursoId ?? course?.id,
+    companyId: reserva.companyId ?? "",
+    cursoId: reserva.cursoId ?? "",
     alumnos: reserva.alumnos ?? 12,
     requestedStart: start,
     requestedEnd: end,
@@ -90,7 +88,7 @@ function enrichReservation(reserva: Reserva): Reserva {
 }
 
 function seedReservations() {
-  return allReservas.map(enrichReservation);
+  return [];
 }
 
 function emitWorkflowUpdate() {
@@ -131,18 +129,29 @@ export function createWorkflowReservation(reserva: Reserva) {
   return enriched;
 }
 
-export function getCapacitacionIdFromTitle(title: string) {
-  const normalized = normalizeText(title);
-  return capacitaciones.find((cap) => normalizeText(cap.title) === normalized)?.id;
+function getKnownProfessors(): ProfessorOption[] {
+  const map = new Map<string, ProfessorOption>();
+  for (const reserva of getWorkflowReservations()) {
+    for (const assignment of reserva.assignments ?? []) {
+      if (!map.has(assignment.professorId)) {
+        map.set(assignment.professorId, {
+          id: assignment.professorId,
+          name: assignment.professorName,
+          color: assignment.professorColor,
+        });
+      }
+    }
+  }
+  return Array.from(map.values());
 }
 
-export function getProfessorCandidates(capacitacionTitleOrId: string): ProfesorCatalogo[] {
-  const capId = capacitaciones.some((cap) => cap.id === capacitacionTitleOrId)
-    ? capacitacionTitleOrId
-    : getCapacitacionIdFromTitle(capacitacionTitleOrId);
+export function getCapacitacionIdFromTitle(title: string) {
+  const normalized = normalizeText(title);
+  return normalized || undefined;
+}
 
-  if (!capId) return profesoresCatalogo;
-  return profesoresCatalogo.filter((professor) => professor.capacitaciones.includes(capId));
+export function getProfessorCandidates(_capacitacionTitleOrId: string): ProfessorOption[] {
+  return getKnownProfessors();
 }
 
 export function buildDefaultAssignments(reserva: Reserva): ReservationAssignment[] {
@@ -151,11 +160,20 @@ export function buildDefaultAssignments(reserva: Reserva): ReservationAssignment
   const end = enriched.requestedEnd ?? addDays(start, 14);
   const turno = enriched.turno ?? "manana";
   const aula = enriched.aula ?? "aula1";
+  const knownProfessors = getKnownProfessors();
+  const fallbackProfessor = knownProfessors[0] ?? {
+    id: "sin-asignar",
+    name: "Sin asignar",
+    color: "#9ca3af",
+  };
 
   return enriched.capacitaciones.map((capTitle, index) => {
     const capId = getCapacitacionIdFromTitle(capTitle);
     const candidates = getProfessorCandidates(capId ?? capTitle);
-    const professor = candidates.length === 1 ? candidates[0] : candidates[index % Math.max(1, candidates.length)] ?? profesoresCatalogo[0];
+    const professor =
+      candidates.length === 1
+        ? candidates[0]
+        : candidates[index % Math.max(1, candidates.length)] ?? fallbackProfessor;
 
     return {
       id: `${enriched.id}-assignment-${index}`,
@@ -179,12 +197,17 @@ export function approveWorkflowReservation(
 ) {
   const reservas = getWorkflowReservations();
   const now = new Date().toISOString();
+  const knownProfessors = getKnownProfessors();
 
   const updated = reservas.map((reserva) => {
     if (reserva.id !== reservationId) return reserva;
 
     const assignments = drafts.map((draft, index) => {
-      const professor = profesoresCatalogo.find((item) => item.id === draft.professorId) ?? profesoresCatalogo[0];
+      const professor = knownProfessors.find((item) => item.id === draft.professorId) ?? {
+        id: draft.professorId,
+        name: draft.professorId || "Sin asignar",
+        color: "#9ca3af",
+      };
       return {
         ...draft,
         id: `${reservationId}-assignment-${index}`,

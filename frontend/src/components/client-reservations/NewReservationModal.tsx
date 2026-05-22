@@ -13,11 +13,9 @@ import {
 import type { EventInput } from "@fullcalendar/core";
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import {
-  capacitaciones,
-  cursos,
-  perfilesAlumnos,
+  type CalendarEvent,
   type Capacitacion,
-  type PerfilAlumnos,
+  type Curso,
   type Reserva,
 } from "@/resources/data";
 import { StepIndicator } from "./StepIndicator";
@@ -36,19 +34,24 @@ import {
 } from "./reservationUtils";
 import {
   CURRENT_CLIENT,
-  CURRENT_COMPANY,
   type DatePickMode,
   type RequestType,
   type Turno,
 } from "./types";
 
 type NewReservationModalProps = {
+  availableCalendarEvents: CalendarEvent[];
+  availableCapacitaciones: Capacitacion[];
+  availableCursos: Curso[];
   isDark: boolean;
   onClose: () => void;
   onCreateReservation: (reserva: Reserva) => void;
 };
 
 export function NewReservationModal({
+  availableCalendarEvents,
+  availableCapacitaciones,
+  availableCursos,
   isDark,
   onClose,
   onCreateReservation,
@@ -57,11 +60,10 @@ export function NewReservationModal({
   const [step, setStep] = useState(1);
   const [calendarMonth, setCalendarMonth] = useState(new Date());
   const [alumnos, setAlumnos] = useState(10);
-  const [requestType, setRequestType] = useState<RequestType>("perfil");
-  const [selectedPerfil, setSelectedPerfil] = useState(perfilesAlumnos[0]?.id ?? "");
-  const [selectedCurso, setSelectedCurso] = useState(cursos[0]?.id ?? "");
-  const [selectedCapOne, setSelectedCapOne] = useState(capacitaciones[0]?.id ?? "");
-  const [selectedCapTwo, setSelectedCapTwo] = useState(capacitaciones[1]?.id ?? "");
+  const [requestType, setRequestType] = useState<RequestType>("curso");
+  const [selectedCurso, setSelectedCurso] = useState(availableCursos[0]?.id ?? "");
+  const [selectedCapOne, setSelectedCapOne] = useState(availableCapacitaciones[0]?.id ?? "");
+  const [selectedCapTwo, setSelectedCapTwo] = useState(availableCapacitaciones[1]?.id ?? "");
   const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null);
   const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null);
   const [datePickMode, setDatePickMode] = useState<DatePickMode>("start");
@@ -75,45 +77,51 @@ export function NewReservationModal({
   }`;
 
   const selectedCourse = useMemo(
-    () => cursos.find((curso) => curso.id === selectedCurso),
-    [selectedCurso],
-  );
-
-  const selectedProfile = useMemo(
-    () => perfilesAlumnos.find((profile) => profile.id === selectedPerfil),
-    [selectedPerfil],
+    () => availableCursos.find((curso) => curso.id === selectedCurso),
+    [availableCursos, selectedCurso],
   );
 
   const selectedCaps = useMemo(
     () =>
       [selectedCapOne, selectedCapTwo]
-        .map((id) => capacitaciones.find((cap) => cap.id === id))
+        .map((id) => availableCapacitaciones.find((cap) => cap.id === id))
         .filter((cap): cap is Capacitacion => Boolean(cap)),
-    [selectedCapOne, selectedCapTwo],
+    [availableCapacitaciones, selectedCapOne, selectedCapTwo],
   );
 
   const selectedRangeAvailability = useMemo(
-    () => getRangeAvailability(selectedStartDate, selectedEndDate),
-    [selectedStartDate, selectedEndDate],
+    () => getRangeAvailability(selectedStartDate, selectedEndDate, availableCalendarEvents),
+    [availableCalendarEvents, selectedStartDate, selectedEndDate],
   );
 
   const selectedRequestLabel =
-    requestType === "perfil"
-      ? selectedCourse?.title ?? "Curso recomendado por perfil"
-      : requestType === "curso"
+    requestType === "curso"
       ? selectedCourse?.title ?? "Curso existente"
       : `Curso a medida: ${selectedCaps.map((cap) => cap.title).join(" + ")}`;
 
   const selectedRequestCaps =
-    requestType === "curso" || requestType === "perfil"
-      ? getCursoCapacitaciones(selectedCourse)
+    requestType === "curso"
+      ? getCursoCapacitaciones(selectedCourse, availableCapacitaciones)
       : selectedCaps.map((cap) => cap.title);
+
+  useEffect(() => {
+    if (!availableCursos.some((curso) => curso.id === selectedCurso)) {
+      setSelectedCurso(availableCursos[0]?.id ?? "");
+    }
+  }, [availableCursos, selectedCurso]);
+
+  useEffect(() => {
+    if (!availableCapacitaciones.some((cap) => cap.id === selectedCapOne)) {
+      setSelectedCapOne(availableCapacitaciones[0]?.id ?? "");
+    }
+    if (!availableCapacitaciones.some((cap) => cap.id === selectedCapTwo)) {
+      setSelectedCapTwo(availableCapacitaciones[1]?.id ?? availableCapacitaciones[0]?.id ?? "");
+    }
+  }, [availableCapacitaciones, selectedCapOne, selectedCapTwo]);
 
   const canGoStep2 =
     alumnos > 0 &&
-    (requestType === "perfil"
-      ? Boolean(selectedPerfil) && Boolean(selectedCurso)
-      : requestType === "curso"
+    (requestType === "curso"
       ? Boolean(selectedCurso)
       : Boolean(selectedCapOne) && Boolean(selectedCapTwo) && selectedCapOne !== selectedCapTwo);
 
@@ -153,15 +161,9 @@ export function NewReservationModal({
     }
   }, [selectedRangeAvailability.availableTurnos, selectedTurno]);
 
-  useEffect(() => {
-    if (requestType !== "perfil" || !selectedProfile) return;
-    setSelectedCurso(selectedProfile.recommendedCourseId);
-    setAlumnos(selectedProfile.typicalStudents);
-  }, [requestType, selectedProfile]);
-
   const pickDateFromCalendar = (date: Date) => {
     const normalized = normalizeDate(date);
-    const availability = getAvailabilityByDay(normalized);
+    const availability = getAvailabilityByDay(normalized, availableCalendarEvents);
     if (availability.status === "none") return;
 
     if (datePickMode === "start" || !selectedStartDate) {
@@ -191,7 +193,7 @@ export function NewReservationModal({
       return;
     }
     const date = parseIso(value);
-    if (getAvailabilityByDay(date).status === "none") return;
+    if (getAvailabilityByDay(date, availableCalendarEvents).status === "none") return;
     setSelectedStartDate(date);
     const minimumEndDate = getMinimumEndDate(date);
     setSelectedEndDate((current) => (!current || current < minimumEndDate ? minimumEndDate : current));
@@ -222,8 +224,8 @@ export function NewReservationModal({
     onCreateReservation({
       id: `r-${Date.now()}`,
       clientName: CURRENT_CLIENT,
-      company: CURRENT_COMPANY,
-      companyId: "e1",
+      company: "Sin empresa",
+      companyId: "",
       curso: selectedRequestLabel,
       cursoId: selectedCourse?.id,
       alumnos,
@@ -289,15 +291,14 @@ export function NewReservationModal({
               isDark={isDark}
               mutedText={mutedText}
               requestType={requestType}
+              availableCapacitaciones={availableCapacitaciones}
+              availableCursos={availableCursos}
               selectedCapOne={selectedCapOne}
               selectedCapTwo={selectedCapTwo}
               selectedCurso={selectedCurso}
-              selectedPerfil={selectedPerfil}
-              selectedProfile={selectedProfile}
               selectedRequestCaps={selectedRequestCaps}
               selectedRequestLabel={selectedRequestLabel}
               setAlumnos={setAlumnos}
-              setSelectedPerfil={setSelectedPerfil}
               setRequestType={setRequestType}
               setSelectedCapOne={setSelectedCapOne}
               setSelectedCapTwo={setSelectedCapTwo}
@@ -318,6 +319,7 @@ export function NewReservationModal({
               selectedRangeAvailability={selectedRangeAvailability}
               selectedStartDate={selectedStartDate}
               selectedTurno={selectedTurno}
+              availableCalendarEvents={availableCalendarEvents}
               setCalendarMonth={setCalendarMonth}
               setDatePickMode={setDatePickMode}
               setEndFromInput={setEndFromInput}
@@ -379,6 +381,8 @@ export function NewReservationModal({
 
 type CourseStepProps = {
   alumnos: number;
+  availableCapacitaciones: Capacitacion[];
+  availableCursos: Curso[];
   inputClass: string;
   isDark: boolean;
   mutedText: string;
@@ -386,8 +390,6 @@ type CourseStepProps = {
   selectedCapOne: string;
   selectedCapTwo: string;
   selectedCurso: string;
-  selectedPerfil: string;
-  selectedProfile?: PerfilAlumnos | null;
   selectedRequestCaps: string[];
   selectedRequestLabel: string;
   setAlumnos: (value: number) => void;
@@ -395,11 +397,12 @@ type CourseStepProps = {
   setSelectedCapOne: (value: string) => void;
   setSelectedCapTwo: (value: string) => void;
   setSelectedCurso: (value: string) => void;
-  setSelectedPerfil: (value: string) => void;
 };
 
 function CourseStep({
   alumnos,
+  availableCapacitaciones,
+  availableCursos,
   inputClass,
   isDark,
   mutedText,
@@ -407,8 +410,6 @@ function CourseStep({
   selectedCapOne,
   selectedCapTwo,
   selectedCurso,
-  selectedPerfil,
-  selectedProfile,
   selectedRequestCaps,
   selectedRequestLabel,
   setAlumnos,
@@ -416,7 +417,6 @@ function CourseStep({
   setSelectedCapOne,
   setSelectedCapTwo,
   setSelectedCurso,
-  setSelectedPerfil,
 }: CourseStepProps) {
   return (
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -446,14 +446,6 @@ function CourseStep({
           </p>
           <div className="mt-2 grid gap-3 md:grid-cols-3">
             <CourseTypeButton
-              active={requestType === "perfil"}
-              description="El curso se asigna automaticamente segun el perfil."
-              isDark={isDark}
-              mutedText={mutedText}
-              onClick={() => setRequestType("perfil")}
-              title="Perfil de alumnos"
-            />
-            <CourseTypeButton
               active={requestType === "curso"}
               description="Elige un programa completo del catálogo."
               isDark={isDark}
@@ -472,53 +464,7 @@ function CourseStep({
           </div>
         </div>
 
-        {requestType === "perfil" ? (
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <label className={`text-xs font-semibold uppercase tracking-wide ${isDark ? "text-white/45" : "text-slate-500"}`}>
-                Perfil de alumnos
-              </label>
-              <select
-                value={selectedPerfil}
-                onChange={(event) => setSelectedPerfil(event.target.value)}
-                className={`mt-2 ${inputClass}`}
-              >
-                {perfilesAlumnos.map((profile) => (
-                  <option key={profile.id} value={profile.id}>
-                    {profile.title}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className={`text-xs font-semibold uppercase tracking-wide ${isDark ? "text-white/45" : "text-slate-500"}`}>
-                Curso asignado automaticamente
-              </label>
-              <select value={selectedCurso} disabled className={`mt-2 opacity-80 ${inputClass}`}>
-                {cursos.map((curso) => (
-                  <option key={curso.id} value={curso.id}>
-                    {curso.title}
-                  </option>
-                ))}
-              </select>
-            </div>
-            {selectedProfile && (
-              <div className={`rounded-xl border p-3 text-sm md:col-span-2 ${
-                isDark ? "border-[#267F6B]/30 bg-[#267F6B]/10 text-white/70" : "border-emerald-200 bg-emerald-50 text-slate-700"
-              }`}>
-                <p className={`font-semibold ${isDark ? "text-white" : "text-slate-950"}`}>{selectedProfile.area}</p>
-                <p className="mt-1">{selectedProfile.description}</p>
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {selectedProfile.tags.map((tag) => (
-                    <span key={tag} className={`rounded-full px-2 py-1 text-[11px] font-semibold ${isDark ? "bg-white/10 text-white/70" : "bg-white text-slate-600"}`}>
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        ) : requestType === "curso" ? (
+        {requestType === "curso" ? (
           <div>
             <label className={`text-xs font-semibold uppercase tracking-wide ${isDark ? "text-white/45" : "text-slate-500"}`}>
               Selecciona el curso
@@ -528,7 +474,7 @@ function CourseStep({
               onChange={(event) => setSelectedCurso(event.target.value)}
               className={`mt-2 ${inputClass}`}
             >
-              {cursos.map((curso) => (
+              {availableCursos.map((curso) => (
                 <option key={curso.id} value={curso.id}>
                   {curso.title}
                 </option>
@@ -539,6 +485,7 @@ function CourseStep({
           <div className="grid gap-4 md:grid-cols-2">
             <TrainingSelect
               disabledId={selectedCapTwo}
+              availableCapacitaciones={availableCapacitaciones}
               inputClass={inputClass}
               isDark={isDark}
               label="Primera capacitación"
@@ -547,6 +494,7 @@ function CourseStep({
             />
             <TrainingSelect
               disabledId={selectedCapOne}
+              availableCapacitaciones={availableCapacitaciones}
               inputClass={inputClass}
               isDark={isDark}
               label="Segunda capacitación"
@@ -611,6 +559,7 @@ function CourseTypeButton({ active, description, isDark, mutedText, onClick, tit
 }
 
 type TrainingSelectProps = {
+  availableCapacitaciones: Capacitacion[];
   disabledId: string;
   inputClass: string;
   isDark: boolean;
@@ -619,14 +568,22 @@ type TrainingSelectProps = {
   value: string;
 };
 
-function TrainingSelect({ disabledId, inputClass, isDark, label, onChange, value }: TrainingSelectProps) {
+function TrainingSelect({
+  availableCapacitaciones,
+  disabledId,
+  inputClass,
+  isDark,
+  label,
+  onChange,
+  value,
+}: TrainingSelectProps) {
   return (
     <div>
       <label className={`text-xs font-semibold uppercase tracking-wide ${isDark ? "text-white/45" : "text-slate-500"}`}>
         {label}
       </label>
       <select value={value} onChange={(event) => onChange(event.target.value)} className={`mt-2 ${inputClass}`}>
-        {capacitaciones.map((cap) => (
+        {availableCapacitaciones.map((cap) => (
           <option key={cap.id} value={cap.id} disabled={cap.id === disabledId}>
             {cap.title}
           </option>
@@ -637,6 +594,7 @@ function TrainingSelect({ disabledId, inputClass, isDark, label, onChange, value
 }
 
 type DatesStepProps = {
+  availableCalendarEvents: CalendarEvent[];
   bookingCalendarRef: RefObject<FullCalendar | null>;
   bookingPreviewEvents: EventInput[];
   calendarMonth: Date;
@@ -656,6 +614,7 @@ type DatesStepProps = {
 };
 
 function DatesStep({
+  availableCalendarEvents,
   bookingCalendarRef,
   bookingPreviewEvents,
   calendarMonth,
@@ -738,7 +697,7 @@ function DatesStep({
             events={bookingPreviewEvents}
             dateClick={(info) => onCalendarDateClick(info.date)}
             dayCellClassNames={(info) => {
-              const availability = getAvailabilityByDay(info.date);
+              const availability = getAvailabilityByDay(info.date, availableCalendarEvents);
               const iso = availability.key;
               const startIso = selectedStartDate ? toIsoDate(selectedStartDate) : "";
               const endIso = selectedEndDate ? toIsoDate(selectedEndDate) : "";
@@ -751,7 +710,7 @@ function DatesStep({
               ].filter(Boolean);
             }}
             dayCellContent={(info) => {
-              const availability = getAvailabilityByDay(info.date);
+              const availability = getAvailabilityByDay(info.date, availableCalendarEvents);
               const label =
                 availability.status === "full"
                   ? "Libre"

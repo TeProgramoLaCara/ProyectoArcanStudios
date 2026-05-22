@@ -1,4 +1,9 @@
-import { allEvents, capacitaciones, type Curso, type ReservaStatus } from "@/resources/data";
+import type {
+  CalendarEvent,
+  Capacitacion,
+  Curso,
+  ReservaStatus,
+} from "@/resources/data";
 import {
   AULA_CAPACITY_PER_TURNO,
   type DayAvailability,
@@ -94,9 +99,11 @@ export function parseReservaDateRange(value: string): { start: Date; endInclusiv
   return { start, endInclusive };
 }
 
-export function getAvailabilityByDay(date: Date): DayAvailability {
+export function getAvailabilityByDay(
+  date: Date,
+  calendarEvents: CalendarEvent[],
+): DayAvailability {
   const normalizedDate = normalizeDate(date);
-  const dayOfWeek = normalizedDate.getDay();
   const key = toIsoDate(normalizedDate);
 
   if (isWeekend(normalizedDate)) {
@@ -106,7 +113,7 @@ export function getAvailabilityByDay(date: Date): DayAvailability {
   let occupiedManana = 0;
   let occupiedTarde = 0;
 
-  for (const event of allEvents) {
+  for (const event of calendarEvents) {
     const start = parseIso(event.start);
     const endExclusive = parseIso(event.end);
     if (normalizedDate >= start && normalizedDate < endExclusive) {
@@ -132,7 +139,11 @@ export function getAvailabilityByDay(date: Date): DayAvailability {
   return { key, date: normalizedDate, status: "none", availableTurnos: [] };
 }
 
-export function getRangeAvailability(startDate: Date | null, endDate: Date | null): RangeAvailability {
+export function getRangeAvailability(
+  startDate: Date | null,
+  endDate: Date | null,
+  calendarEvents: CalendarEvent[],
+): RangeAvailability {
   if (!startDate || !endDate) {
     return { status: "none", availableTurnos: [], blockedDays: [] };
   }
@@ -148,7 +159,7 @@ export function getRangeAvailability(startDate: Date | null, endDate: Date | nul
   const isTurnoAvailableForWholeRange = (turno: Turno) => {
     for (let day = new Date(start); day <= end; day = addDays(day, 1)) {
       if (isWeekend(day)) continue;
-      const availability = getAvailabilityByDay(day);
+      const availability = getAvailabilityByDay(day, calendarEvents);
       if (availability.status === "none") blockedDays.push(new Date(day));
       if (!availability.availableTurnos.includes(turno)) return false;
     }
@@ -163,10 +174,13 @@ export function getRangeAvailability(startDate: Date | null, endDate: Date | nul
   return { status: "none", availableTurnos: [], blockedDays };
 }
 
-export function getCursoCapacitaciones(curso: Curso | undefined) {
+export function getCursoCapacitaciones(
+  curso: Curso | undefined,
+  capacitacionesCatalog: Capacitacion[],
+) {
   return (
     curso?.capacitaciones.map(
-      (capId) => capacitaciones.find((cap) => cap.id === capId)?.title ?? capId,
+      (capId) => capacitacionesCatalog.find((cap) => cap.id === capId)?.title ?? capId,
     ) ?? []
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   HiOutlineAcademicCap,
   HiOutlineCheckCircle,
@@ -9,7 +9,8 @@ import {
   HiOutlineTrash,
   HiOutlineUserGroup,
 } from "react-icons/hi2";
-import { cursos, perfilesAlumnos, type Curso, type PerfilAlumnos } from "@/resources/data";
+import { type Curso, type PerfilAlumnos } from "@/resources/data";
+import { getDashboardData } from "@/services/dashboard.service";
 
 type ManagedCourse = Curso & {
   custom?: boolean;
@@ -34,7 +35,7 @@ const emptyForm: ProfileForm = {
   title: "",
   area: "",
   description: "",
-  recommendedCourseId: cursos[0]?.id ?? "",
+  recommendedCourseId: "",
   courseMode: "existing",
   customCourseTitle: "",
   customCourseDescription: "",
@@ -89,6 +90,30 @@ function parseCustomCapacitaciones(text: string) {
     .filter(Boolean);
 }
 
+function normalizeProfiles(rawProfiles: any[]): PerfilAlumnos[] {
+  return rawProfiles.map((profile, index) => {
+    const tagsRaw = profile.tags ?? profile.etiquetas ?? [];
+    const tags = Array.isArray(tagsRaw)
+      ? tagsRaw.map((tag) => String(tag))
+      : String(tagsRaw ?? "")
+          .split(",")
+          .map((tag) => tag.trim())
+          .filter(Boolean);
+
+    return {
+      id: String(profile.id ?? profile.id_perfil ?? `perfil-${index + 1}`),
+      title: String(profile.title ?? profile.titulo ?? profile.nombre ?? `Perfil ${index + 1}`),
+      area: String(profile.area ?? profile.categoria ?? "General"),
+      description: String(profile.description ?? profile.descripcion ?? "Sin descripción"),
+      recommendedCourseId: String(
+        profile.recommendedCourseId ?? profile.cursoId ?? profile.id_curso ?? "",
+      ),
+      typicalStudents: Number(profile.typicalStudents ?? profile.alumnos ?? 12) || 12,
+      tags,
+    };
+  });
+}
+
 function buildCustomCourse(form: ProfileForm, id = `curso-perfil-${Date.now()}`): ManagedCourse {
   const capNames = parseCustomCapacitaciones(form.customCapacitacionesText);
 
@@ -104,10 +129,40 @@ function buildCustomCourse(form: ProfileForm, id = `curso-perfil-${Date.now()}`)
 }
 
 export default function AdminPerfilesAlumnosPage() {
-  const [profiles, setProfiles] = useState<PerfilAlumnos[]>(perfilesAlumnos);
-  const [availableCourses, setAvailableCourses] = useState<ManagedCourse[]>(cursos);
+  const [profiles, setProfiles] = useState<PerfilAlumnos[]>([]);
+  const [availableCourses, setAvailableCourses] = useState<ManagedCourse[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<ProfileForm>(emptyForm);
+
+  useEffect(() => {
+    getDashboardData()
+      .then((data) => {
+        const normalizedCourses = data.cursos.map((course: any, index: number) => ({
+          id: String(course.id ?? course.id_curso ?? `curso-${index + 1}`),
+          title: String(course.title ?? course.titulo ?? course.nombre ?? `Curso ${index + 1}`),
+          description: String(course.description ?? course.descripcion ?? "Sin descripción"),
+          category: String(course.category ?? course.categoria ?? "General"),
+          capacitaciones: Array.isArray(course.capacitaciones)
+            ? course.capacitaciones.map((cap: any, capIndex: number) =>
+                String(cap.id ?? cap.id_capacitacion ?? `cap-${capIndex + 1}`),
+              )
+            : [],
+        }));
+
+        const normalizedProfiles = normalizeProfiles(data.perfiles ?? []);
+
+        setAvailableCourses(normalizedCourses);
+        setProfiles(normalizedProfiles);
+        setForm((current) => ({
+          ...current,
+          recommendedCourseId:
+            current.recommendedCourseId || normalizedCourses[0]?.id || "",
+        }));
+      })
+      .catch((error) => {
+        console.error("Error cargando perfiles/cursos desde API:", error);
+      });
+  }, []);
 
   const editingProfile = useMemo(
     () => profiles.find((profile) => profile.id === editingId) ?? null,
@@ -119,7 +174,10 @@ export default function AdminPerfilesAlumnosPage() {
 
   const resetForm = () => {
     setEditingId(null);
-    setForm(emptyForm);
+    setForm({
+      ...emptyForm,
+      recommendedCourseId: availableCourses[0]?.id ?? "",
+    });
   };
 
   const submitProfile = () => {

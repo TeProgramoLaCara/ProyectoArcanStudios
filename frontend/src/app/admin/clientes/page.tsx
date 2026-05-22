@@ -1,21 +1,32 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import MetricCard from '@/components/reservations/MetriCard';
 import ClientesFilters from '@/components/clientes/ClientesFilters';
 import EmpresaCard from '@/components/clientes/EmpresaCard';
 import EmpresaModal from '@/components/clientes/EmpresaModal';
 import DeleteConfirmModal from '@/components/clientes/DeleteConfirmModal';
-import { empresas as initialEmpresas, type Empresa } from '@/resources/data';
+import { type Empresa } from '@/resources/data';
+import { getClientApiData } from '@/services/client.service';
 
 type ModalState = { mode: 'create' | 'edit'; empresa?: Empresa } | null;
 
 export default function ClientesPage() {
-  const [empresas, setEmpresas] = useState<Empresa[]>(initialEmpresas);
+  const [empresas, setEmpresas] = useState<Empresa[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [modalState, setModalState] = useState<ModalState>(null);
   const [deleteTarget, setDeleteTarget] = useState<Empresa | null>(null);
+
+  useEffect(() => {
+    getClientApiData()
+      .then((data) => {
+        setEmpresas(data.empresas);
+      })
+      .catch((error) => {
+        console.error('Error cargando empresas desde API:', error);
+      });
+  }, []);
 
   const totalEmpresas    = empresas.length;
   const totalUsuarios    = empresas.reduce((sum, e) => sum + e.usuarios.length, 0);

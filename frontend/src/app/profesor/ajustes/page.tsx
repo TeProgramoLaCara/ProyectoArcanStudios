@@ -1,26 +1,32 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTheme } from '@/context/ThemeContext';
-import { allEvents } from '@/resources/data';
 import SettingsSection from '@/components/ajustes/SettingsSection';
 import ProfessorAccountSettingsForm from '@/components/ajustes/ProfessorAccountSettingsForm';
 import ThemeToggle from '@/components/ajustes/ThemeToggle';
 import ProfessorColorSettings from '@/components/ajustes/ProfessorColorSettings';
+import { getCalendarData } from '@/services/calendar.service';
+import { mapCalendarApiData } from '@/components/calendar/calendar.mapper';
 
 export default function AjustesProfesorPage() {
   const { isDark } = useTheme();
+  const [professors, setProfessors] = useState<Array<{ id: string; name: string }>>([]);
+
+  useEffect(() => {
+    getCalendarData()
+      .then((data) => {
+        const mapped = mapCalendarApiData(data);
+        setProfessors(mapped.professors.map((professor) => ({ id: professor.id, name: professor.name })));
+      })
+      .catch((error) => {
+        console.error('Error cargando profesores en ajustes:', error);
+      });
+  }, []);
+
   const currentProfessor = useMemo(
-    () =>
-      Array.from(
-        new Map(
-          allEvents.map((event) => [
-            event.professorId,
-            { id: event.professorId, name: event.professorName },
-          ]),
-        ).values(),
-      )[0] ?? { id: 'p1', name: 'Carlos Martínez' },
-    [],
+    () => professors[0] ?? { id: '', name: 'Profesor no disponible' },
+    [professors],
   );
 
   return (
